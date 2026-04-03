@@ -57,7 +57,7 @@ const CheckStatusPage = () => {
         e.preventDefault();
         setError('');
         try {
-            const response = await axios.post('/api/students/login', {
+            const response = await axios.post(`${import.meta.env.VITE_API_URL}/students/login`, {
                 registration_number: regNumber,
                 nik: nik
             });

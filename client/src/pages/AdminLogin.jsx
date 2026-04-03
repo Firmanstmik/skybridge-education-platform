@@ -26,7 +26,7 @@ const AdminLogin = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const { data } = await axios.post('/api/auth/login', { username, password });
+      const { data } = await axios.post(`${import.meta.env.VITE_API_URL}/auth/login`, { username, password });
       
       // Parse token to get role
       const payload = JSON.parse(atob(data.token.split('.')[1]));

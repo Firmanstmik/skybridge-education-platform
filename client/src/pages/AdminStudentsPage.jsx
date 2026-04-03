@@ -337,7 +337,7 @@ const AdminStudentsPage = () => {
   const downloadStudentPdf = async (studentId, regNumber) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get(`http://localhost:5500/api/students/${studentId}/pdf-form`, {
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/students/${studentId}/pdf-form`, {
         headers: { Authorization: `Bearer ${token}` },
         responseType: 'blob'
       });

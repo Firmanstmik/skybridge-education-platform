@@ -183,7 +183,7 @@ const RegisterPage = () => {
       fileFields.forEach((field) => {
         if (data[field]?.[0] instanceof File) formData.append(field, data[field][0]);
       });
-      const registerUrl = import.meta.env.DEV ? 'http://localhost:5500/api/students' : '/api/students';
+      const registerUrl = `${import.meta.env.VITE_API_URL}/students`;
       const response = await axios.post(registerUrl, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
         timeout: 45000
@@ -287,7 +287,7 @@ const RegisterPage = () => {
       try {
         const nikValue = values.nik;
         if (nikValue && String(nikValue).trim().length === 16) {
-          const response = await axios.get('/api/students/check-nik', { params: { nik: nikValue } });
+          const response = await axios.get(`${import.meta.env.VITE_API_URL}/students/check-nik`, { params: { nik: nikValue } });
           if (response.data?.exists) { setError('nik', { type: 'manual', message: 'NIK sudah terdaftar. NIK tidak boleh sama.' }); showAlert('NIK sudah terdaftar. NIK tidak boleh sama.', 'error', 'NIK Duplikat'); return false; }
         }
       } catch (error) { console.error('Error checking NIK:', error); }

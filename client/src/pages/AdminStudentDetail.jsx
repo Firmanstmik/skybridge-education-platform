@@ -64,7 +64,7 @@ const AdminStudentDetail = () => {
   const fetchStudent = async () => {
     const token = localStorage.getItem('token');
     try {
-      const { data } = await axios.get(`/api/students/${id}`, {
+      const { data } = await axios.get(`${import.meta.env.VITE_API_URL}/students/${id}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setStudent(data);
