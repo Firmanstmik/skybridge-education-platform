@@ -1,0 +1,187 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --color-dory-red: #E31E24;
+  --color-sky-blue: #003B73;
+  --color-sky-blue-light: #005696;
+  --color-dory-white: #FFFFFF;
+  --color-dory-orange: #FF8C42;
+  --color-dory-gray: #F5F5F5;
+  --color-dory-dark: #333333;
+  --background-image-torii-pattern: url('/torii-bg.svg');
+}
+
+/* Custom Styles */
+body {
+  @apply bg-dory-gray text-dory-dark;
+}
+
+html.dark body {
+  @apply bg-slate-950 text-slate-50;
+}
+
+.torii-bg {
+  background-color: #f8f9fa;
+  background-image: radial-gradient(#E31E24 0.5px, transparent 0.5px), radial-gradient(#E31E24 0.5px, #f8f9fa 0.5px);
+  background-size: 20px 20px;
+  background-position: 0 0, 10px 10px;
+  opacity: 0.1;
+}
+
+@layer components {
+    .input-field {
+        @apply w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-dory-red;
+    }
+}
+
+/* Japanese Calendar Theme - Professional & Modern */
+.japanese-calendar {
+  @apply !rounded-xl !overflow-hidden !border-none !font-sans;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
+  animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.japanese-calendar .react-datepicker__header {
+  @apply !bg-white !border-b !border-gray-100 !pt-4 !pb-2;
+}
+
+.japanese-calendar .react-datepicker__current-month,
+.japanese-calendar .react-datepicker-year-header {
+  @apply !text-gray-800 !font-bold !text-lg !mb-2;
+}
+
+.japanese-calendar .react-datepicker__day-name {
+  @apply !text-gray-400 !font-bold !uppercase !text-xs !tracking-wider !w-10;
+}
+
+.japanese-calendar .react-datepicker__day {
+  @apply !w-10 !h-10 !leading-10 !m-0 !rounded-full !transition-all !font-medium !text-gray-600;
+}
+
+.japanese-calendar .react-datepicker__day:hover {
+  @apply !bg-red-50 !text-dory-red !scale-110 !font-bold;
+}
+
+.japanese-calendar .react-datepicker__day--selected,
+.japanese-calendar .react-datepicker__day--keyboard-selected {
+  @apply !bg-dory-red !text-white !shadow-lg !shadow-red-200 hover:!bg-red-600;
+}
+
+.japanese-calendar .react-datepicker__day--today {
+  @apply !font-bold !text-dory-red !bg-red-50;
+}
+
+.japanese-calendar .react-datepicker__day--today.react-datepicker__day--selected {
+  @apply !bg-dory-red !text-white;
+}
+
+.japanese-calendar .react-datepicker__navigation-icon::before {
+  @apply !border-gray-400 !w-2 !h-2 !border-r-2 !border-t-2;
+}
+
+.japanese-calendar .react-datepicker__navigation:hover .react-datepicker__navigation-icon::before {
+  @apply !border-dory-red;
+}
+
+/* Month/Year Dropdown Customization */
+.japanese-calendar .react-datepicker__month-read-view--down-arrow,
+.japanese-calendar .react-datepicker__year-read-view--down-arrow {
+    @apply !border-gray-400 !w-2 !h-2 !top-1;
+}
+
+.japanese-calendar .react-datepicker__year-dropdown,
+.japanese-calendar .react-datepicker__month-dropdown {
+    @apply !bg-white !border !border-gray-100 !shadow-2xl !rounded-xl !overflow-hidden !p-2;
+    max-height: 250px !important;
+    overflow-y: auto !important;
+    width: 140px !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+}
+
+/* Custom Scrollbar for Dropdowns */
+.japanese-calendar .react-datepicker__year-dropdown::-webkit-scrollbar,
+.japanese-calendar .react-datepicker__month-dropdown::-webkit-scrollbar {
+  width: 4px;
+}
+
+.japanese-calendar .react-datepicker__year-dropdown::-webkit-scrollbar-track,
+.japanese-calendar .react-datepicker__month-dropdown::-webkit-scrollbar-track {
+  @apply !bg-transparent;
+}
+
+.japanese-calendar .react-datepicker__year-dropdown::-webkit-scrollbar-thumb,
+.japanese-calendar .react-datepicker__month-dropdown::-webkit-scrollbar-thumb {
+  @apply !bg-gray-200 !rounded-full;
+}
+
+.japanese-calendar .react-datepicker__year-option,
+.japanese-calendar .react-datepicker__month-option {
+    @apply !py-2 !px-4 !rounded-lg !transition-all !text-gray-600 !text-center !cursor-pointer !font-medium !mb-1 !text-sm;
+}
+
+.japanese-calendar .react-datepicker__year-option:hover,
+.japanese-calendar .react-datepicker__month-option:hover {
+    @apply !bg-red-50 !text-dory-red !font-bold;
+}
+
+.japanese-calendar .react-datepicker__year-option--selected_year,
+.japanese-calendar .react-datepicker__month-option--selected_month {
+    @apply !bg-dory-red !text-white !font-bold !shadow-md !shadow-red-200;
+}
+
+.japanese-calendar .react-datepicker__year-option--selected_year:hover,
+.japanese-calendar .react-datepicker__month-option--selected_month:hover {
+    @apply !bg-dory-red !text-white;
+}
+
+/* Header Text Visibility */
+.japanese-calendar .react-datepicker__current-month,
+.japanese-calendar .react-datepicker-year-header,
+.japanese-calendar .react-datepicker__header__dropdown {
+  @apply !text-gray-800 !font-bold !text-lg;
+}
+
+.japanese-calendar .react-datepicker__year-read-view,
+.japanese-calendar .react-datepicker__month-read-view {
+    @apply !text-gray-700 !font-bold hover:!text-dory-red !transition-colors !px-3 !py-1 !rounded-full hover:!bg-red-50 !inline-flex !items-center !gap-2;
+}
+
+/* Fix spacing in header for dropdowns */
+.japanese-calendar .react-datepicker__header__dropdown {
+    @apply !mt-2 !mb-4;
+}
+
+#reader video {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover;
+}
+
+#reader .html5-qrcode-element {
+  font-size: 0 !important;
+  line-height: 0 !important;
+}
+
+@keyframes hand-nudge {
+  0% {
+    transform: translate(0, 0) scale(1);
+  }
+  40% {
+    transform: translate(-6px, 2px) scale(1.06);
+  }
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+}
+
+.hand-nudge {
+  animation: hand-nudge 1.1s ease-in-out infinite;
+}
