@@ -3,6 +3,7 @@ import Navbar from '../components/Navbar';
 import { ArrowRight, CheckCircle, BookOpen, Users, Briefcase, Star, Zap, MapPin, Phone, Mail } from 'lucide-react';
 import HeroImage from '../assets/img/hero-lpk-doryouku.png';
 import HeroBg from '../assets/img/heroskybridge.webp';
+import HeroImg from '../assets/img/hero-lpk-doryouku.png';
 
 const LandingPage = () => {
   return (
@@ -530,7 +531,16 @@ const LandingPage = () => {
 
           {/* Hero Image */}
           <div className="hero-img-col">
-            <img src={HeroImage} alt="Program Pelatihan Kerja dan Magang ke Jepang di SKYBRIDGE" />
+            <picture className="w-100">
+              <source srcSet="/assets/hero.webp" type="image/webp" />
+              <img 
+                src={HeroImg} 
+                alt="Program Pelatihan Kerja dan Magang ke Jepang di SKYBRIDGE" 
+                className="hero-main-img rounded-[40px]" 
+                loading="eager"
+                fetchPriority="high"
+              />
+            </picture>
           </div>
 
           {/* Stats Row */}
