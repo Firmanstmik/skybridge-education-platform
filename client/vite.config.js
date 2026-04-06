@@ -10,22 +10,18 @@ export default defineConfig({
       output: {
         manualChunks(id) {
           if (id.includes('node_modules')) {
-            // Satukan semua core dependencies (React, Router, dll) untuk menghindari circularity
+            // Pisahkan library UI yang mandiri dan sangat besar
             if (
-              id.includes('react') || 
-              id.includes('react-dom') || 
-              id.includes('react-router') ||
-              id.includes('scheduler') ||
-              id.includes('axios')
+              id.includes('framer-motion') || 
+              id.includes('lucide-react') || 
+              id.includes('recharts') ||
+              id.includes('@react-pdf')
             ) {
-              return 'vendor-core';
-            }
-            // Pisahkan library UI yang besar
-            if (id.includes('framer-motion') || id.includes('lucide-react') || id.includes('recharts')) {
               return 'vendor-ui';
             }
-            // Sisanya masuk ke vendor-libs
-            return 'vendor-libs';
+            // Gabungkan semua library inti lainnya (React, Axios, Router, dll) 
+            // menjadi satu chunk 'vendor' untuk menghindari circular dependency
+            return 'vendor';
           }
         },
       },
