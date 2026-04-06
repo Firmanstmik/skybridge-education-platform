@@ -392,7 +392,15 @@ const AdminStudentDetail = () => {
                     <div className="relative z-10 flex flex-col items-center p-6 pb-0">
                         <div className="w-40 h-40 rounded-full p-1.5 bg-white dark:bg-slate-800 shadow-xl mb-4 ring-4 ring-white/50 dark:ring-slate-700/50">
                              {student.photo_path ? (
-                               <img src={`/${student.photo_path.replace(/\\/g, '/')}`} alt="Foto" className="w-full h-full object-cover rounded-full" />
+                               <img 
+                                 src={`${import.meta.env.VITE_API_URL.replace('/api', '')}/${student.photo_path.replace(/\\/g, '/')}`} 
+                                 alt="Foto" 
+                                 className="w-full h-full object-cover rounded-full" 
+                                 onError={(e) => {
+                                   e.target.onerror = null;
+                                   e.target.src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(student.full_name) + '&background=random';
+                                 }}
+                               />
                              ) : (
                                <div className="w-full h-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center rounded-full text-slate-400">
                                    <User size={48} />

@@ -603,9 +603,13 @@ const AdminStudentsPage = () => {
                             <div className="h-10 w-10 rounded-full overflow-hidden border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 shadow-sm group-hover:shadow-md transition-shadow">
                               {student.photo_path ? (
                                 <img
-                                  src={`/${student.photo_path.replace(/\\/g, '/')}`}
+                                  src={`${import.meta.env.VITE_API_URL.replace('/api', '')}/${student.photo_path.replace(/\\/g, '/')}`}
                                   alt="Foto"
                                   className="h-full w-full object-cover"
+                                  onError={(e) => {
+                                    e.target.onerror = null;
+                                    e.target.src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(student.full_name) + '&background=random';
+                                  }}
                                 />
                               ) : (
                                 <div className="h-full w-full flex items-center justify-center text-slate-400">
