@@ -406,9 +406,10 @@ exports.registerStudent = async (req, res) => {
         
         const studentId = studentResult.insertId;
 
-        // 4. Insert Education History
+        // 4. Insert Education History (Bulk Insert for speed)
         if (body.education) {
             const educationData = JSON.parse(body.education);
+            const educationInserts = [];
             for (const edu of educationData) {
                 const isEmpty =
                     (!edu.school_name || edu.school_name.trim() === '') &&
@@ -428,17 +429,20 @@ exports.registerStudent = async (req, res) => {
                         ? null
                         : Number(edu.graduation_year);
 
+                educationInserts.push([
+                    studentId,
+                    edu.level,
+                    edu.school_name && edu.school_name.trim() !== '' ? edu.school_name : null,
+                    edu.entry_month && edu.entry_month.trim() !== '' ? edu.entry_month : null,
+                    entryYear,
+                    edu.graduation_month && edu.graduation_month.trim() !== '' ? edu.graduation_month : null,
+                    graduationYear
+                ]);
+            }
+            if (educationInserts.length > 0) {
                 await connection.query(
-                    'INSERT INTO education_history (student_id, level, school_name, entry_month, entry_year, graduation_month, graduation_year) VALUES (?, ?, ?, ?, ?, ?, ?)',
-                    [
-                        studentId,
-                        edu.level,
-                        edu.school_name && edu.school_name.trim() !== '' ? edu.school_name : null,
-                        edu.entry_month && edu.entry_month.trim() !== '' ? edu.entry_month : null,
-                        entryYear,
-                        edu.graduation_month && edu.graduation_month.trim() !== '' ? edu.graduation_month : null,
-                        graduationYear
-                    ]
+                    'INSERT INTO education_history (student_id, level, school_name, entry_month, entry_year, graduation_month, graduation_year) VALUES ?',
+                    [educationInserts]
                 );
             }
         }

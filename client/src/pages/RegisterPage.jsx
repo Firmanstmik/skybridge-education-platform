@@ -139,55 +139,72 @@ const RegisterPage = () => {
     return missingDocs;
   };
 
+  const compressImage = async (file) => {
+    if (!file || file.type === 'application/pdf') return file;
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = (e) => {
+        const img = new Image();
+        img.src = e.target.result;
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+          const MAX_SIZE = 1200;
+          if (width > height) {
+            if (width > MAX_SIZE) { height *= MAX_SIZE / width; width = MAX_SIZE; }
+          } else {
+            if (height > MAX_SIZE) { width *= MAX_SIZE / height; height = MAX_SIZE; }
+          }
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+          canvas.toBlob((blob) => {
+            resolve(new File([blob], file.name, { type: 'image/jpeg', lastModified: Date.now() }));
+          }, 'image/jpeg', 0.7);
+        };
+      };
+    });
+  };
+
   const onSubmit = async (data) => {
     if (step !== 5) return;
-    clearErrors(['height', 'weight']);
-    const physicalLabels = { height: 'Tinggi Badan', weight: 'Berat Badan' };
-    const physicalMissing = [];
-    Object.entries(physicalLabels).forEach(([name, label]) => {
-      const value = data[name];
-      const isEmpty = value === undefined || value === null || (typeof value === 'string' && value.trim() === '');
-      if (isEmpty) { physicalMissing.push(label); setError(name, { type: 'manual', message: `${label} harus diisi` }); }
-    });
-
-    // Menampilkan pesan informasi namun tidak memblokir pendaftaran (sesuai permintaan user) agar admin bisa memverifikasi manual.
-    const missingDocs = getMissingDocs();
-    if (missingDocs.length > 0 || physicalMissing.length > 0) {
-      // Kita beri info singkat saja bahwa data kurang, tapi tetap izinkan proses simpan.
-      console.log('Data belum lengkap, tapi pendaftaran tetap dikirim untuk verifikasi admin.');
-    }
-    
     setIsSubmitting(true);
     try {
       const formData = new FormData();
       const fileFields = ['photo', 'diploma', 'ktp', 'family_card', 'birth_certificate', 'health_certificate', 'consent_letter'];
-      const toDateString = (value) => {
-        if (value instanceof Date && !Number.isNaN(value.getTime())) {
-          const year = value.getFullYear();
-          const month = String(value.getMonth() + 1).padStart(2, '0');
-          const day = String(value.getDate()).padStart(2, '0');
-          return `${year}-${month}-${day}`;
+      
+      // 1. Process files (Compress images for speed)
+      for (const field of fileFields) {
+        if (data[field]?.[0] instanceof File) {
+          const compressed = await compressImage(data[field][0]);
+          formData.append(field, compressed);
         }
-        return value;
+      }
+
+      // 2. Append Education (JSON)
+      formData.append('education', JSON.stringify(data.education || []));
+
+      // 3. Append other fields
+      const toDateString = (val) => {
+        if (val instanceof Date && !Number.isNaN(val.getTime())) {
+          return `${val.getFullYear()}-${String(val.getMonth() + 1).padStart(2, '0')}-${String(val.getDate()).padStart(2, '0')}`;
+        }
+        return val;
       };
 
       Object.keys(data).forEach((key) => {
         if (key === 'education' || fileFields.includes(key)) return;
         const raw = data[key];
-        if (raw === undefined || raw === null) return;
-        if (typeof raw === 'string' && raw.trim() === '') return;
+        if (raw === undefined || raw === null || (typeof raw === 'string' && raw.trim() === '')) return;
         formData.append(key, key === 'date_of_birth' ? toDateString(raw) : raw);
       });
 
-      formData.append('education', JSON.stringify(data.education || []));
-
-      fileFields.forEach((field) => {
-        if (data[field]?.[0] instanceof File) formData.append(field, data[field][0]);
-      });
-      const registerUrl = `${import.meta.env.VITE_API_URL}/students`;
-      const response = await axios.post(registerUrl, formData, {
+      const response = await axios.post(`${import.meta.env.VITE_API_URL}/students`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
-        timeout: 45000
+        timeout: 60000
       });
       const regNumber = response.data.registration_number;
       setRegistrationNumber(regNumber);
