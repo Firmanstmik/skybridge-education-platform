@@ -497,7 +497,8 @@ const StudentDashboard = () => {
                     position: relative;
                     z-index: 5;
                 }
-                @media (max-width: 1040px) { .db-card { margin-left: 16px; margin-right: 16px; } }
+                @media (max-width: 1040px) { .db-card { margin-left: 12px; margin-right: 12px; border-radius: 24px; } }
+                @media (max-width: 480px) { .db-card { margin-left: 8px; margin-right: 8px; border-radius: 20px; } }
 
                 .tab-bar {
                     display: flex;
@@ -535,7 +536,7 @@ const StudentDashboard = () => {
                 .sec-title { font-family: 'Bebas Neue', sans-serif; font-size: 26px; color: var(--ink); }
                 
                 @media (max-width: 767px) {
-                    .form-area { padding: 20px 16px; }
+                    .form-area { padding: 16px 12px; }
                 }
 
                 /* ─── Card Preview ─── */
