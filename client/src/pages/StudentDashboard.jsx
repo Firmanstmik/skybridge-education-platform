@@ -530,9 +530,13 @@ const StudentDashboard = () => {
                 .tab-btn.active::after { content: ''; position: absolute; bottom: -1px; left: 0; right: 0; height: 3px; background: var(--red); }
 
                 .form-area { padding: 32px; }
-                .sec-hdr { display: flex; align-items: center; gap: 16px; margin-bottom: 28px; padding-bottom: 20px; border-bottom: 1px solid var(--border); }
-                .sec-icon { width: 52px; height: 52px; border-radius: 14px; background: linear-gradient(135deg, var(--red), var(--red-dark)); color: white; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-                .sec-title { font-family: 'Bebas Neue', sans-serif; font-size: 26px; color: var(--ink); }
+                @media (max-width: 767px) {
+                    .form-area { padding: 20px 16px; }
+                    .sec-hdr { margin-bottom: 20px; padding-bottom: 14px; gap: 12px; }
+                    .sec-icon { width: 44px; height: 44px; border-radius: 12px; }
+                    .sec-icon svg { width: 20px; height: 20px; }
+                    .sec-title { font-size: 22px; }
+                }
 
                 /* ─── Card Preview ─── */
                 .reg-card-preview-wrap {
