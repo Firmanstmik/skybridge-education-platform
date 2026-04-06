@@ -1,284 +1,253 @@
 import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, Home, UserPlus, Lock, ClipboardCheck, BookOpen } from 'lucide-react';
+import { Menu, X, Home, UserPlus, ClipboardCheck, BookOpen, ChevronRight } from 'lucide-react';
 import Logo from '../assets/img/SKYBRIDGE_LOGO.webp';
+
+const navLinks = [
+  { path: '/', label: 'Beranda', icon: Home },
+  { path: '/kursus-bahasa-jepang-online', label: 'Kursus', icon: BookOpen },
+  { path: '/pelatihan-kerja-ke-jepang', label: 'Pelatihan', icon: ClipboardCheck },
+  { path: '/magang-ke-jepang', label: 'Magang', icon: UserPlus },
+  { path: '/student/check-status', label: 'Cek Status', icon: ClipboardCheck },
+];
+
+/* ─── detect if we're on a dark-hero page (landing) ─── */
+const DARK_HERO_PATHS = ['/'];
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
 
   const isActive = (path) => location.pathname === path;
+  const isDarkHeroPage = DARK_HERO_PATHS.includes(location.pathname);
 
   useEffect(() => {
-    if (isOpen) {
-      try { window.scrollTo({ top: 0, behavior: 'auto' }); } catch {}
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'auto';
-    }
-    return () => { document.body.style.overflow = 'auto'; };
+    const onScroll = () => setScrolled(window.scrollY > 24);
+    // Always initialise correctly (e.g. page loaded at scroll position)
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
+  useEffect(() => {
+    document.body.style.overflow = isOpen ? 'hidden' : '';
+    return () => { document.body.style.overflow = ''; };
   }, [isOpen]);
 
+  /* ─── derived states ─── */
+  // On dark-hero pages: start transparent, blur on scroll
+  // On all other pages: always show the glass bar
+  const showSolid = !isDarkHeroPage || scrolled;
+
   return (
-    <nav className="sticky top-0 z-50">
+    <>
       <style>{`
-        .nav-pill {
-          height: 40px;
-          border-radius: 9999px;
-          display: flex;
-          align-items: center;
+        /* Animated underline on hover */
+        .nav-link-hover {
+          position: relative;
         }
-        .nav-link {
-          height: 36px;
-          display: flex;
-          align-items: center;
-          line-height: 1;
-          padding-left: 16px;
-          padding-right: 16px;
+        .nav-link-hover::after {
+          content: '';
+          position: absolute;
+          left: 50%;
+          bottom: -2px;
+          width: 0;
+          height: 2px;
           border-radius: 9999px;
-          font-weight: 600;
+          background: linear-gradient(90deg, #6366f1, #3b82f6);
+          transition: width 0.28s cubic-bezier(0.4,0,0.2,1), left 0.28s cubic-bezier(0.4,0,0.2,1);
         }
-        .nav-cta {
-          min-height: 40px;
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          line-height: 1;
-          padding-left: 20px;
-          padding-right: 20px;
-          border-radius: 9999px;
-          font-weight: 700;
+        .nav-link-hover:hover::after,
+        .nav-link-hover.active::after {
+          width: 70%;
+          left: 15%;
         }
-        .brand-school-name {
-          font-family: "Brush Script MT", "Lucida Handwriting", "Segoe Script", cursive;
-          font-style: italic;
-          color: #D97706;
-          text-shadow: 0 1px 1px rgba(0, 0, 0, 0.05), 0 0 10px rgba(217, 119, 6, 0.2);
-          letter-spacing: 0.03em;
+        /* CTA glow pulse */
+        @keyframes glow-pulse {
+          0%, 100% { box-shadow: 0 0 12px 2px rgba(99,102,241,0.35); }
+          50% { box-shadow: 0 0 24px 6px rgba(99,102,241,0.55); }
+        }
+        .cta-glow:hover {
+          animation: glow-pulse 2s ease-in-out infinite;
+        }
+        /* Float animation for hero image */
+        @keyframes float-y {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-14px); }
+        }
+        .float-anim {
+          animation: float-y 5s ease-in-out infinite;
+        }
+        /* Radial glow background */
+        .radial-glow {
+          background: radial-gradient(ellipse 80% 50% at 50% 0%, rgba(99,102,241,0.22) 0%, transparent 70%);
+        }
+        /* Gradient border card trick */
+        .gradient-border {
+          position: relative;
+          background: white;
+          z-index: 0;
+        }
+        .gradient-border::before {
+          content: '';
+          position: absolute;
+          inset: 0;
+          border-radius: inherit;
+          padding: 1.5px;
+          background: linear-gradient(135deg, rgba(99,102,241,0.35), rgba(59,130,246,0.2), rgba(139,92,246,0.25));
+          -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+          -webkit-mask-composite: xor;
+          mask-composite: exclude;
+          pointer-events: none;
+          opacity: 0;
+          transition: opacity 0.3s ease;
+        }
+        .gradient-border:hover::before {
+          opacity: 1;
+        }
+        /* Noise texture */
+        .noise-overlay {
+          background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+          opacity: 0.03;
         }
       `}</style>
-      <div
-        className="relative border-b border-slate-200/70 bg-white/90 backdrop-blur-xl shadow-[0_10px_40px_rgba(0,59,115,0.08)]"
-        style={{
-          backgroundImage:
-            'radial-gradient(circle at 20% 0%, rgba(0,59,115,0.05), transparent 45%), radial-gradient(circle at 80% 10%, rgba(0,163,224,0.06), transparent 40%)',
-        }}
-      >
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute left-0 top-0 h-full w-2 bg-gradient-to-b from-[#003B73] to-[#002D58]" />
-          <div className="absolute left-2 top-0 h-full w-1 bg-gradient-to-b from-[#00A3E0] to-[#0077B6]" />
-          <div className="absolute inset-x-0 top-0 h-[3px] bg-gradient-to-r from-[#002D58] via-[#003B73] to-[#00A3E0] opacity-80" />
-        </div>
 
-        <div className="container mx-auto px-4 py-3 flex justify-between items-center relative z-20">
-          <Link to="/" className="flex items-center group relative">
-            <div className="absolute -inset-2 rounded-2xl bg-gradient-to-r from-blue-600/10 to-cyan-500/10 opacity-0 blur transition-opacity duration-300 group-hover:opacity-100" />
-            <img src={Logo} alt="SKYBRIDGE Nusantara International School Logo" className="h-10 md:h-12 w-auto mr-3 transition-transform duration-300 group-hover:scale-105 relative" />
-            <span className="text-xl font-bold font-sans text-sky-blue hidden lg:block tracking-tight relative">
-              SKYBRIDGE
-            </span>
-            <span className="hidden xl:block text-base leading-none ml-2 brand-school-name relative pt-1.5">
-              Nusantara International School
-            </span>
-          </Link>
-        
-        {/* Desktop Menu */}
-          <div className="hidden md:flex items-center gap-3">
-            <div className="relative nav-pill border border-slate-200/80 bg-white/70 backdrop-blur-md shadow-sm px-1">
-              <div className="absolute inset-0 rounded-full bg-gradient-to-r from-blue-500/5 to-cyan-500/10" />
-              <div className="relative flex items-center gap-1">
-                <Link
-                  to="/"
-                  className={`relative nav-link text-sm font-bold transition-all duration-200 ${
-                    isActive('/')
-                      ? 'text-sky-blue'
-                      : 'text-slate-700 hover:text-sky-blue'
-                  }`}
-                  style={{ height: 36, lineHeight: 1, paddingLeft: 16, paddingRight: 16 }}
-                >
-                  <span className="relative z-10">Beranda</span>
-                  {isActive('/') && (
-                    <span className="absolute inset-x-3 -bottom-0.5 h-0.5 rounded-full bg-gradient-to-r from-[#003B73] to-[#00A3E0]" />
-                  )}
-                </Link>
-                <Link
-                  to="/kursus-bahasa-jepang-online"
-                  className={`relative nav-link text-sm font-bold transition-all duration-200 ${
-                    isActive('/kursus-bahasa-jepang-online')
-                      ? 'text-sky-blue'
-                      : 'text-slate-700 hover:text-sky-blue'
-                  }`}
-                >
-                  Kursus
-                </Link>
-                <Link
-                  to="/pelatihan-kerja-ke-jepang"
-                  className={`relative nav-link text-sm font-bold transition-all duration-200 ${
-                    isActive('/pelatihan-kerja-ke-jepang')
-                      ? 'text-sky-blue'
-                      : 'text-slate-700 hover:text-sky-blue'
-                  }`}
-                >
-                  Pelatihan
-                </Link>
-                <Link
-                  to="/magang-ke-jepang"
-                  className={`relative nav-link text-sm font-bold transition-all duration-200 ${
-                    isActive('/magang-ke-jepang')
-                      ? 'text-sky-blue'
-                      : 'text-slate-700 hover:text-sky-blue'
-                  }`}
-                >
-                  Magang
-                </Link>
-                <Link
-                  to="/student/check-status"
-                  className={`relative nav-link text-sm font-bold transition-all duration-200 ${
-                    isActive('/student/check-status')
-                      ? 'text-sky-blue'
-                      : 'text-slate-700 hover:text-sky-blue'
-                  }`}
-                  style={{ height: 36, lineHeight: 1, paddingLeft: 16, paddingRight: 16 }}
-                >
-                  <span className="relative z-10">Cek Status</span>
-                  {isActive('/student/check-status') && (
-                    <span className="absolute inset-x-3 -bottom-0.5 h-0.5 rounded-full bg-gradient-to-r from-[#003B73] to-[#00A3E0]" />
-                  )}
-                </Link>
+      <nav className="sticky top-0 z-50 w-full">
+        {/* ── Main bar ── */}
+        <div
+          className={`w-full transition-all duration-300 ${
+            showSolid
+              ? 'bg-slate-950/80 backdrop-blur-2xl border-b border-white/[0.06] shadow-2xl shadow-black/30'
+              : 'bg-transparent'
+          }`}
+        >
+          {/* Top rainbow line – only when solid */}
+          {showSolid && (
+            <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-indigo-500/40 to-transparent pointer-events-none" />
+          )}
+
+          <div className="max-w-7xl mx-auto px-6 h-[66px] flex items-center justify-between gap-8">
+
+            {/* ── Logo ── */}
+            <Link to="/" className="flex items-center gap-3 group flex-shrink-0" style={{ textDecoration: 'none' }}>
+              <div className="relative w-10 h-10 flex-shrink-0">
+                <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-indigo-500/20 to-blue-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-sm" />
+                <img src={Logo} alt="SKYBRIDGE Logo" className="relative w-10 h-10 object-contain" />
               </div>
+              <div className="hidden sm:block">
+                <div className="text-white font-black text-[18px] leading-none tracking-tight" style={{ fontFamily: "'Bebas Neue', sans-serif", letterSpacing: '0.04em' }}>SKYBRIDGE</div>
+                <div className="text-indigo-400/80 text-[9.5px] font-semibold tracking-[0.18em] uppercase leading-none mt-1" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+                  Nusantara International School
+                </div>
+              </div>
+            </Link>
+
+            {/* ── Desktop Links ── */}
+            <div className="hidden md:flex items-center gap-0.5 flex-1 justify-center">
+              {navLinks.map(({ path, label }) => (
+                <Link
+                  key={path}
+                  to={path}
+                  style={{ textDecoration: 'none', fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+                  className={`nav-link-hover ${isActive(path) ? 'active' : ''} px-4 py-2 rounded-xl text-[13.5px] font-semibold tracking-wide transition-colors duration-200 ${
+                    isActive(path) ? 'text-white' : 'text-slate-400 hover:text-white'
+                  }`}
+                >
+                  {label}
+                </Link>
+              ))}
             </div>
 
-            <Link
-              to="/register"
-              className={`group relative nav-cta transition-all duration-300 transform hover:-translate-y-0.5 shadow-md flex items-center ${
-                isActive('/register')
-                  ? 'bg-dory-red text-white shadow-lg ring-2 ring-red-200'
-                  : 'bg-dory-red text-white hover:bg-[#C9161C] hover:shadow-lg'
-              }`}
-              style={{ minHeight: 40, lineHeight: 1, paddingLeft: 20, paddingRight: 20 }}
-            >
-              <span className="absolute inset-0 rounded-full bg-gradient-to-r from-white/0 via-white/20 to-white/0 opacity-0 group-hover:opacity-100 transition-opacity" />
-              <span className="absolute -inset-1 rounded-full bg-gradient-to-r from-[#E31E24]/35 to-[#FF8C42]/25 blur opacity-0 group-hover:opacity-100 transition-opacity" />
-              <span className="relative z-10">Pendaftaran</span>
-            </Link>
-          </div>
-
-        {/* Mobile Menu Button */}
-          <button
-            className="md:hidden relative text-slate-700 focus:outline-none p-2.5 rounded-2xl border border-slate-200/80 bg-white/70 backdrop-blur hover:bg-white transition-colors duration-200 shadow-sm"
-            onClick={() => setIsOpen(!isOpen)}
-            aria-label="Toggle menu"
-          >
-            <span className="absolute inset-0 rounded-2xl bg-gradient-to-r from-blue-500/5 to-cyan-500/10 opacity-0 hover:opacity-100 transition-opacity" />
-            {isOpen ? (
-              <X className="w-6 h-6 text-sky-blue transition-transform duration-300 rotate-90 relative" />
-            ) : (
-              <Menu className="w-6 h-6 transition-transform duration-300 hover:scale-110 relative" />
-            )}
-          </button>
-        </div>
-      </div>
-
-      {/* Mobile Menu Dropdown Overlay */}
-      {isOpen && (
-        <div 
-          className="fixed inset-0 bg-slate-950/45 z-40 md:hidden backdrop-blur-sm transition-opacity duration-300"
-          onClick={() => setIsOpen(false)}
-        />
-      )}
-
-      {/* Mobile Menu Content */}
-      <div
-        className={`
-          md:hidden fixed inset-0 z-50 flex items-start
-          transition-all duration-300 ease-out
-          ${isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}
-        `}
-      >
-        <div
-          className={`
-            w-full bg-white/95 backdrop-blur-xl shadow-[0_20px_80px_rgba(2,6,23,0.25)] border-b border-slate-200/80
-            rounded-b-[28px] overflow-hidden
-            transition-transform duration-300 ease-out
-            ${isOpen ? 'translate-y-0' : '-translate-y-4'}
-          `}
-          style={{ marginTop: 0, maxHeight: '100vh' }}
-        >
-          <div className="h-1.5 bg-gradient-to-r from-[#002D58] via-[#003B73] to-[#00A3E0]" />
-          <div className="px-4 pt-3 pb-4 border-b border-slate-200/80 bg-white/60 sticky top-0 z-10">
-            <div className="mx-auto h-1 w-14 rounded-full bg-slate-200" />
-            <div className="mt-3 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="relative h-11 w-11 rounded-2xl bg-white border border-slate-200 shadow-sm overflow-hidden">
-                  <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-cyan-500/10" />
-                  <img src={Logo} alt="SKYBRIDGE Logo" className="relative h-full w-full object-contain p-2" />
-                </div>
-                <div>
-                  <div className="text-[10px] font-extrabold tracking-[0.22em] text-slate-500 uppercase">Menu</div>
-                  <div className="text-sm font-extrabold text-slate-900 leading-tight">SKYBRIDGE</div>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => setIsOpen(false)}
-                aria-label="Tutup menu"
-                className="group relative h-11 w-11 rounded-2xl border border-slate-200 bg-white shadow-sm active:scale-95 transition-transform"
+            {/* ── CTA + Mobile toggle ── */}
+            <div className="flex items-center gap-3 flex-shrink-0">
+              <Link
+                to="/register"
+                id="navbar-cta"
+                className="cta-glow hidden sm:inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 via-indigo-500 to-blue-500 text-white text-[13px] font-bold tracking-wide transition-all duration-300 hover:-translate-y-0.5 hover:brightness-110"
+                style={{ textDecoration: 'none', fontFamily: "'Plus Jakarta Sans', sans-serif" }}
               >
-                <span className="absolute inset-0 rounded-2xl bg-gradient-to-br from-blue-500/10 to-cyan-500/10 opacity-70 group-hover:opacity-100 transition-opacity" />
-                <span className="absolute -inset-1 rounded-2xl bg-gradient-to-r from-[#003B73]/20 to-[#00A3E0]/20 blur opacity-0 group-hover:opacity-100 transition-opacity" />
-                <X className="relative mx-auto h-5 w-5 text-sky-blue transition-transform duration-300 group-hover:rotate-90" />
+                Pendaftaran <ChevronRight size={14} />
+              </Link>
+
+              <button
+                className="md:hidden w-10 h-10 rounded-xl border border-white/12 bg-white/8 flex items-center justify-center text-white hover:bg-white/15 transition-colors duration-200"
+                onClick={() => setIsOpen(!isOpen)}
+                aria-label="Toggle menu"
+              >
+                {isOpen ? <X size={19} /> : <Menu size={19} />}
               </button>
             </div>
           </div>
+        </div>
 
-          <div
-            className="p-4 space-y-2 overflow-auto"
-            style={{
-              maxHeight: 'calc(100vh - 64px - 60px)',
-              backgroundImage:
-                'repeating-linear-gradient(45deg, rgba(0,59,115,0.04) 0px, rgba(0,59,115,0.04) 1px, transparent 1px, transparent 36px), repeating-linear-gradient(-45deg, rgba(0,163,224,0.04) 0px, rgba(0,163,224,0.04) 1px, transparent 1px, transparent 36px)',
-            }}
-          >
-            {[
-              { path: '/', label: 'Beranda', icon: Home },
-              { path: '/kursus-bahasa-jepang-online', label: 'Kursus Bahasa Jepang', icon: BookOpen },
-              { path: '/pelatihan-kerja-ke-jepang', label: 'Pelatihan Kerja', icon: ClipboardCheck },
-              { path: '/magang-ke-jepang', label: 'Program Magang', icon: UserPlus },
-              { path: '/student/check-status', label: 'Cek Status', icon: ClipboardCheck },
-              { path: '/register', label: 'Pendaftaran', icon: UserPlus },
-            ].map((item) => (
-              <Link
-                key={item.path}
-                to={item.path}
-                className={`
-                  group flex items-center px-4 py-4 rounded-2xl transition-all duration-200 border
-                  ${item.path === '/register'
-                    ? 'bg-red-50 text-dory-red font-extrabold border-red-200 hover:bg-red-100'
-                    : isActive(item.path) 
-                    ? 'bg-white text-sky-blue font-extrabold border-blue-200 shadow-sm translate-x-1' 
-                    : 'bg-white/70 text-slate-700 border-slate-200/80 hover:bg-white hover:text-sky-blue hover:translate-x-0.5'
-                  }
-                `}
-                onClick={() => setIsOpen(false)}
-              >
-                <span className={`mr-3 p-2 rounded-xl border ${item.path === '/register' || isActive(item.path) ? 'bg-red-50 border-red-200' : 'bg-white border-slate-200 group-hover:bg-red-50 group-hover:border-red-200'}`}>
-                  <item.icon className={`w-5 h-5 ${item.path === '/register' || isActive(item.path) ? 'text-dory-red' : 'text-slate-400 group-hover:text-dory-red'}`} />
-                </span>
-                <span className="flex-1">{item.label}</span>
-                <span className={`h-2 w-2 rounded-full ${item.path === '/register' || isActive(item.path) ? 'bg-gradient-to-r from-[#D0021B] to-[#F5A623]' : 'bg-slate-300 group-hover:bg-[#D0021B]'}`} />
-              </Link>
-            ))}
-            
-            <div className="pt-4 mt-2 border-t border-slate-200/80">
-              <div className="px-4 text-[10px] text-slate-500 font-extrabold uppercase tracking-[0.22em] mb-2">Kontak Kami</div>
-              <a href="#" className="block px-4 py-3 rounded-xl text-sm text-slate-700 hover:text-dory-red bg-white/70 border border-slate-200/80 hover:bg-white transition-colors">
-                <span>+62 821 456 000 28</span>
-              </a>
+        {/* ── Mobile Backdrop ── */}
+        <div
+          className={`md:hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-40 transition-opacity duration-300 ${isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
+          onClick={() => setIsOpen(false)}
+        />
+
+        {/* ── Mobile Drawer ── */}
+        <div
+          className={`md:hidden fixed top-0 right-0 h-full w-[300px] max-w-[90vw] bg-slate-950 border-l border-white/8 z-50 flex flex-col transition-transform duration-300 ease-out ${
+            isOpen ? 'translate-x-0' : 'translate-x-full'
+          }`}
+        >
+          {/* Top gradient accent */}
+          <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-indigo-500/60 to-transparent" />
+
+          {/* Drawer header */}
+          <div className="flex items-center justify-between px-6 h-[66px] border-b border-white/8 flex-shrink-0">
+            <div className="flex items-center gap-3">
+              <img src={Logo} alt="SKYBRIDGE" className="h-8 w-auto" />
+              <span className="text-white font-black text-lg tracking-tight" style={{ fontFamily: "'Bebas Neue', sans-serif", letterSpacing: '0.04em' }}>SKYBRIDGE</span>
             </div>
+            <button
+              onClick={() => setIsOpen(false)}
+              className="w-9 h-9 rounded-xl border border-white/10 bg-white/6 flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/12 transition-all"
+              aria-label="Close menu"
+            >
+              <X size={18} />
+            </button>
+          </div>
+
+          {/* Nav links */}
+          <div className="flex-1 overflow-y-auto px-4 py-5 space-y-1.5">
+            {[...navLinks, { path: '/register', label: 'Pendaftaran', icon: ChevronRight, isCta: true }].map(
+              ({ path, label, icon: Icon, isCta }) => (
+                <Link
+                  key={path}
+                  to={path}
+                  style={{ textDecoration: 'none', fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+                  onClick={() => setIsOpen(false)}
+                  className={`flex items-center gap-3 px-4 py-3.5 rounded-2xl text-[13px] font-semibold transition-all duration-200 ${
+                    isCta
+                      ? 'mt-3 bg-gradient-to-r from-indigo-600 to-blue-500 text-white shadow-lg shadow-indigo-500/25'
+                      : isActive(path)
+                      ? 'bg-white/10 text-white border border-white/12'
+                      : 'text-slate-400 hover:bg-white/8 hover:text-white'
+                  }`}
+                >
+                  <span className={`w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 ${isCta ? 'bg-white/20' : 'bg-white/8'}`}>
+                    <Icon size={15} />
+                  </span>
+                  {label}
+                  {!isCta && <ChevronRight size={14} className="ml-auto text-slate-600" />}
+                </Link>
+              )
+            )}
+          </div>
+
+          {/* Contact strip */}
+          <div className="px-6 py-5 border-t border-white/8 flex-shrink-0">
+            <p className="text-slate-600 text-[10px] font-bold uppercase tracking-[0.2em] mb-2">Kontak Kami</p>
+            <a href="tel:+821708418215" className="text-slate-300 text-sm font-medium hover:text-white transition-colors">
+              +81 70-8418-2215
+            </a>
           </div>
         </div>
-      </div>
-    </nav>
+      </nav>
+    </>
   );
 };
 

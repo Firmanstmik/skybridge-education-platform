@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Navbar from '../components/Navbar';
 import { Search, IdCard } from 'lucide-react';
-import heroBg from '../assets/img/hero-lpk-doryouku.png';
+import { motion } from 'framer-motion';
+import heroBg from '../assets/img/bg-internasional.webp';
 
 const StatusInfoCard = () => {
     return (
@@ -98,7 +99,7 @@ const CheckStatusPage = () => {
                 }
 
                 .reg-banner {
-                    background: linear-gradient(135deg, rgba(26,0,5,0.9) 0%, rgba(45,0,8,0.9) 60%, rgba(26,9,0,0.9) 100%), url(${heroBg}) center/cover no-repeat;
+                    background: linear-gradient(135deg, rgba(2,6,23,0.85) 0%, rgba(15,23,42,0.9) 60%, rgba(2,6,23,0.85) 100%), url(${heroBg}) center/cover no-repeat;
                     position: relative;
                     overflow: hidden;
                     padding: 28px 24px 80px;
@@ -277,7 +278,12 @@ const CheckStatusPage = () => {
             `}</style>
             <Navbar />
             <div className="reg-root">
-                <div className="reg-banner">
+                <motion.div 
+                    initial={{ opacity: 0, y: -20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.8 }}
+                    className="reg-banner"
+                >
                     <div className="banner-pattern" />
                     <div className="banner-sun" />
                     <span className="banner-kana">CEK STATUS / 確認</span>
@@ -287,9 +293,14 @@ const CheckStatusPage = () => {
                     <p className="banner-sub">
                         Masukkan Nomor Registrasi dan NIK kamu untuk melihat status pendaftaran yang sudah diproses oleh tim SKYBRIDGE.
                     </p>
-                </div>
+                </motion.div>
 
-                <div className="reg-card">
+                <motion.div 
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.6, delay: 0.2 }}
+                    className="reg-card"
+                >
                     <div className="form-body">
                         <p className="section-label">INPUT DATA / 入力</p>
                         <h2 className="section-title">Masukkan Data Pendaftaran</h2>
@@ -365,7 +376,7 @@ const CheckStatusPage = () => {
                             <StatusInfoCard />
                         </div>
                     </div>
-                </div>
+                </motion.div>
             </div>
         </>
     );

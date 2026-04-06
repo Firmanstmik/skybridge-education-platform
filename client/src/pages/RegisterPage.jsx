@@ -10,7 +10,8 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Calendar, Info, Download } from 'lucide-react';
 import { toPng } from 'html-to-image';
 import Logo from '../assets/img/SKYBRIDGE_LOGO.webp';
-import heroBg from '../assets/img/hero-lpk-doryouku.png';
+import heroBg from '../assets/img/bg-internasional.webp';
+import { motion } from 'framer-motion';
 
 /* ─── Zod Schema (unchanged) ─── */
 const rowSchema = (lvl, required) =>
@@ -360,10 +361,10 @@ const RegisterPage = () => {
 
         /* Page header banner */
         .reg-banner {
-          background: linear-gradient(135deg, rgba(26,0,5,0.9) 0%, rgba(45,0,8,0.9) 60%, rgba(26,9,0,0.9) 100%), url(${heroBg}) center/cover no-repeat;
+          background: linear-gradient(135deg, rgba(2,6,23,0.85) 0%, rgba(15,23,42,0.9) 60%, rgba(2,6,23,0.85) 100%), url(${heroBg}) center/cover no-repeat;
           position: relative;
           overflow: hidden;
-          padding: 28px 24px 80px;
+          padding: 28px 24px 100px;
           text-align: center;
         }
         .reg-banner::before {
@@ -401,8 +402,15 @@ const RegisterPage = () => {
           letter-spacing: 0.3em;
           color: rgba(245,166,35,0.7);
           text-transform: uppercase;
-          display: block;
-          margin-bottom: 8px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          padding: 7px 16px;
+          border-radius: 999px;
+          background: rgba(255,255,255,0.06);
+          border: 1px solid rgba(255,255,255,0.10);
+          backdrop-filter: blur(10px);
+          position: relative; z-index: 1;
         }
         .banner-title {
           font-family: 'Bebas Neue', sans-serif;
@@ -410,13 +418,17 @@ const RegisterPage = () => {
           color: #fff;
           letter-spacing: 0.04em;
           line-height: 1;
+          margin-top: 14px;
           position: relative; z-index: 1;
         }
         .banner-title .acc { color: var(--red-light); }
         .banner-sub {
           font-size: 13px;
           color: rgba(255,255,255,0.55);
-          margin-top: 6px;
+          margin-top: 8px;
+          max-width: 520px;
+          margin-left: auto;
+          margin-right: auto;
           position: relative; z-index: 1;
         }
 
@@ -425,7 +437,7 @@ const RegisterPage = () => {
           position: relative;
           max-width: 1200px;
           width: calc(100% - 32px);
-          margin: -44px auto 48px;
+          margin: -54px auto 48px;
           background: var(--white);
           border-radius: 24px;
           box-shadow: 0 24px 80px rgba(0,0,0,0.12), 0 4px 16px rgba(0,0,0,0.06);
@@ -435,7 +447,7 @@ const RegisterPage = () => {
         @media (min-width: 1024px) {
           .reg-card {
             max-width: 1320px;
-            margin: -56px auto 64px;
+            margin: -64px auto 64px;
             border-radius: 28px;
           }
           .form-body { padding: 34px 40px 0; }
@@ -997,22 +1009,30 @@ const RegisterPage = () => {
         <Navbar />
 
         {/* ── Banner ── */}
-        <div className="reg-banner">
+        <motion.div 
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+          className="reg-banner"
+        >
           <div className="banner-pattern" />
           <div className="banner-sun" />
-          <span className="banner-kana" style={{ position: 'relative', zIndex: 1 }}>
-            申請フォーム · Formulir Pendaftaran
-          </span>
-          <div className="banner-title" style={{ position: 'relative', zIndex: 1 }}>
+          <span className="banner-kana">FORMULIR PENDAFTARAN / 申請フォーム</span>
+          <h1 className="banner-title">
             FORMULIR <span className="acc">PENDAFTARAN</span> SISWA
-          </div>
+          </h1>
           <p className="banner-sub">
             SKYBRIDGE Nusantara International School — Wujudkan mimpimu bekerja di Jepang
           </p>
-        </div>
+        </motion.div>
 
         {/* ── Card ── */}
-        <div className="reg-card">
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+          className="reg-card"
+        >
           <div style={{ maxWidth: '100%', margin: '0 auto' }}>
 
             {/* Step Nav */}
@@ -1579,7 +1599,7 @@ const RegisterPage = () => {
               </form>
             </div>
           </div>
-        </div>
+        </motion.div>
       </div>
     </>
   );
