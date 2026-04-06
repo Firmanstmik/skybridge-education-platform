@@ -3,10 +3,17 @@ const dotenv = require('dotenv');
 const cors = require('cors');
 const path = require('path');
 const http = require('http');
+const fs = require('fs');
 
 dotenv.config();
 
 const app = express();
+
+// Ensure uploads directory exists
+const uploadsDir = path.join(__dirname, 'uploads');
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
 
 app.use(cors());
 app.use(express.json({ limit: '20mb' }));
