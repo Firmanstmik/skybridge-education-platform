@@ -157,7 +157,15 @@ const StaffDashboard = () => {
                         <td className="px-4 py-3 md:px-6 md:py-4 whitespace-nowrap">
                             <div className="flex items-center gap-3">
                                 {student.photo_path ? (
-                                    <img src={`/${student.photo_path.replace(/\\/g, '/')}`} alt="" className="w-8 h-8 rounded-full object-cover" />
+                                    <img 
+                                        src={`${(import.meta.env.VITE_API_URL || '').replace('/api', '')}/${student.photo_path.replace(/\\/g, '/')}`} 
+                                        alt="" 
+                                        className="w-8 h-8 rounded-full object-cover" 
+                                        onError={(e) => {
+                                            e.target.onerror = null;
+                                            e.target.src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(student.full_name || 'U') + '&background=random';
+                                        }}
+                                    />
                                 ) : (
                                     <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-400"><User size={14} /></div>
                                 )}
@@ -226,7 +234,15 @@ const StaffDashboard = () => {
                         <td className="px-4 py-3 md:px-6 md:py-4 whitespace-nowrap">
                             <div className="flex items-center gap-3">
                                 {student.photo_path ? (
-                                    <img src={`/${student.photo_path.replace(/\\/g, '/')}`} alt="" className="w-8 h-8 rounded-full object-cover" />
+                                    <img 
+                                        src={`${(import.meta.env.VITE_API_URL || '').replace('/api', '')}/${student.photo_path.replace(/\\/g, '/')}`} 
+                                        alt="" 
+                                        className="w-8 h-8 rounded-full object-cover" 
+                                        onError={(e) => {
+                                            e.target.onerror = null;
+                                            e.target.src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(student.full_name || 'U') + '&background=random';
+                                        }}
+                                    />
                                 ) : (
                                     <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-400"><User size={14} /></div>
                                 )}

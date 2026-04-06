@@ -214,7 +214,10 @@ const StudentDashboard = () => {
                     has_piercing: (freshData.has_piercing === 1 || freshData.has_piercing === '1' || freshData.has_piercing === true || freshData.has_piercing === 'true') ? 'true' : 'false',
                     education: freshData.education,
                 });
-                if (freshData.photo_path) setPhotoPreview(`/${freshData.photo_path}`);
+                if (freshData.photo_path) {
+                    const baseUrl = (import.meta.env.VITE_API_URL || '').replace('/api', '');
+                    setPhotoPreview(`${baseUrl}/${freshData.photo_path.replace(/\\/g, '/')}`);
+                }
             }
         } catch (error) {
             console.error('Error fetching data:', error);

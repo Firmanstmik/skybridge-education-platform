@@ -27,7 +27,8 @@ export const DocumentUpload = ({ label, name, register, watch, currentFile, quan
              const filePath = typeof files === 'string' ? files : currentFile;
              const isImage = filePath.match(/\.(jpeg|jpg|png|gif|webp)$/i);
              if (isImage) {
-                 setPreview(`/${filePath}`);
+                 const baseUrl = (import.meta.env.VITE_API_URL || '').replace('/api', '');
+                 setPreview(`${baseUrl}/${filePath.replace(/\\/g, '/')}`);
              } else {
                  setPreview(null);
              }
@@ -37,6 +38,11 @@ export const DocumentUpload = ({ label, name, register, watch, currentFile, quan
     }, [files, currentFile]);
 
     const effectiveFilePath = typeof files === 'string' ? files : currentFile;
+    const getFileUrl = (path) => {
+        if (!path) return '#';
+        const baseUrl = (import.meta.env.VITE_API_URL || '').replace('/api', '');
+        return `${baseUrl}/${path.replace(/\\/g, '/')}`;
+    };
     const hasFile = (files && files.length > 0 && typeof files !== 'string') || !!effectiveFilePath;
     const MAX_SIZE_BYTES = 10 * 1024 * 1024;
 
@@ -93,7 +99,7 @@ export const DocumentUpload = ({ label, name, register, watch, currentFile, quan
             ) : effectiveFilePath && !preview && (
                 <div className="mb-3 mt-2">
                     <a
-                        href={`/${effectiveFilePath}`}
+                        href={getFileUrl(effectiveFilePath)}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="flex items-center p-3 bg-gray-50 dark:bg-slate-700/50 rounded-xl border border-gray-200 dark:border-slate-600 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors group/file"

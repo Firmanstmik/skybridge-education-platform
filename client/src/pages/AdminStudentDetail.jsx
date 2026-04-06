@@ -850,7 +850,14 @@ const AdminStudentDetail = () => {
                   <div className="reg-card-main">
                     <div className="reg-card-photo">
                       {student?.photo_path ? (
-                        <img src={`/${student.photo_path.replace(/\\/g, '/')}`} alt="Foto peserta" />
+                        <img 
+                          src={`${(import.meta.env.VITE_API_URL || '').replace('/api', '')}/${student.photo_path.replace(/\\/g, '/')}`} 
+                          alt="Foto peserta" 
+                          onError={(e) => {
+                            e.target.onerror = null;
+                            e.target.src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(student.full_name) + '&background=random';
+                          }}
+                        />
                       ) : (
                         <div style={{ width:'100%', height:'100%', display:'flex', alignItems:'center', justifyContent:'center' }}><User size={32} style={{ color:'#94A3B8' }} /></div>
                       )}
