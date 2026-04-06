@@ -10,12 +10,21 @@ export default defineConfig({
       output: {
         manualChunks(id) {
           if (id.includes('node_modules')) {
-            if (id.includes('react') || id.includes('react-dom') || id.includes('react-router')) {
+            // Satukan semua core dependencies (React, Router, dll) untuk menghindari circularity
+            if (
+              id.includes('react') || 
+              id.includes('react-dom') || 
+              id.includes('react-router') ||
+              id.includes('scheduler') ||
+              id.includes('axios')
+            ) {
               return 'vendor-core';
             }
-            if (id.includes('framer-motion') || id.includes('lucide-react')) {
+            // Pisahkan library UI yang besar
+            if (id.includes('framer-motion') || id.includes('lucide-react') || id.includes('recharts')) {
               return 'vendor-ui';
             }
+            // Sisanya masuk ke vendor-libs
             return 'vendor-libs';
           }
         },
