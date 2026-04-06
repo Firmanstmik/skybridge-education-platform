@@ -1075,6 +1075,7 @@ const StudentDashboard = () => {
                         {/* ─── Documents ─── */}
                         {activeTab === 'documents' && (
                             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
+                                <DocumentUpload label="Pas Photo"        name="photo"              register={register} watch={watch} currentFile={student?.documents?.photo_path              || student?.photo_path}              />
                                 <DocumentUpload label="Ijazah Terakhir"  name="diploma"            register={register} watch={watch} currentFile={student?.documents?.diploma_path            || student?.diploma_path}            />
                                 <DocumentUpload label="KTP / KIA"        name="ktp"                register={register} watch={watch} currentFile={student?.documents?.ktp_path                || student?.ktp_path}                />
                                 <DocumentUpload label="Kartu Keluarga"   name="family_card"        register={register} watch={watch} currentFile={student?.documents?.family_card_path        || student?.family_card_path}        />

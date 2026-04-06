@@ -757,6 +757,7 @@ const AdminStudentDetail = () => {
                   {fullDataTab === 'documents' && (
                     <div className="space-y-3 md:space-y-4">
                       {[
+                        { key: 'photo_path', label: 'Pas Photo' },
                         { key: 'diploma_path', label: 'Ijazah Terakhir' },
                         { key: 'ktp_path', label: 'KTP / KIA' },
                         { key: 'family_card_path', label: 'Kartu Keluarga' },
