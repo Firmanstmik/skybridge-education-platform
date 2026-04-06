@@ -34,249 +34,279 @@ const LandingPage = () => {
         /* ── HERO SECTION ── */
         .hero-wrap {
           position: relative;
-          background: linear-gradient(135deg, #001A35 0%, #003B73 50%, #005696 100%);
+          background: linear-gradient(135deg, #F8FAFC 0%, #EFF6FF 100%);
           overflow: hidden;
           min-height: 100vh;
           display: flex;
-          flex-direction: column;
-          padding-top: 20px;
-        }
-
-        .hero-lp-bg {
-          position: absolute;
-          inset: 0;
-          background-image: url(${HeroBg});
-          background-size: cover;
-          background-position: center;
-          opacity: 0.15;
-          mix-blend-mode: overlay;
-          pointer-events: none;
-          z-index: 1;
-        }
-
-        /* Modern sun/glow effect */
-        .hero-sun {
-          position: absolute;
-          top: -10%;
-          right: -10%;
-          width: 600px;
-          height: 600px;
-          border-radius: 50%;
-          background: radial-gradient(circle, rgba(0, 163, 224, 0.2) 0%, rgba(0, 59, 115, 0.05) 50%, transparent 70%);
-          pointer-events: none;
-          z-index: 1;
-        }
-
-        /* Japanese pattern overlay */
-        .hero-pattern {
-          position: absolute;
-          inset: 0;
-          background-image: url("https://www.transparenttextures.com/patterns/japanese-sayagata.png");
-          opacity: 0.05;
-          pointer-events: none;
-          z-index: 1;
-        }
-
-        .hero-img-col {
-          position: relative;
-          z-index: 5;
-          width: 100%;
-          max-width: 1200px;
-          margin: 0 auto;
-          padding: 0 20px;
-        }
-
-        .hero-main-img {
-          width: 100%;
-          height: auto;
-          object-fit: cover;
-          display: block;
-          filter: drop-shadow(0 30px 60px rgba(0,0,0,0.4));
-          border-radius: 40px;
-        }
-
-        /* Floating kanji stamp - Modern Style */
-        .kanji-stamp {
-          position: absolute;
-          top: 40px;
-          right: 40px;
-          z-index: 20;
-          width: 70px;
-          height: 70px;
-          border: 2px solid rgba(255, 255, 255, 0.2);
-          border-radius: 12px;
-          display: flex;
           align-items: center;
-          justify-content: center;
-          font-family: 'Noto Sans JP', sans-serif;
-          font-weight: 900;
-          font-size: 24px;
-          color: white;
-          background: rgba(255, 255, 255, 0.1);
-          backdrop-filter: blur(8px);
-          line-height: 1.1;
-          text-align: center;
-          box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+          padding: 120px 0 80px;
         }
 
-        /* Hero text card - Glassmorphism */
-        .hero-text-card {
+        .hero-container {
+          width: 100%;
+          max-width: 1400px;
+          margin: 0 auto;
+          padding: 0 40px;
+          display: grid;
+          grid-template-columns: 1fr;
+          gap: 60px;
+          align-items: center;
           position: relative;
           z-index: 10;
-          padding: 48px 32px;
-          background: rgba(15, 23, 42, 0.6);
-          backdrop-filter: blur(20px);
-          border: 1px solid rgba(255, 255, 255, 0.1);
-          border-radius: 40px;
-          margin: -80px 20px 40px;
-          max-width: 1100px;
-          align-self: center;
-          box-shadow: 0 40px 100px -20px rgba(0,0,0,0.5);
-          text-align: center;
         }
 
         @media (min-width: 1024px) {
-          .hero-text-card {
-            margin-top: -120px;
-            padding: 60px 80px;
+          .hero-container {
+            grid-template-columns: 1.1fr 0.9fr;
           }
+        }
+
+        /* Abstract Background Elements */
+        .hero-shape-1 {
+          position: absolute;
+          top: -100px;
+          right: -100px;
+          width: 600px;
+          height: 600px;
+          background: radial-gradient(circle, rgba(0, 163, 224, 0.1) 0%, transparent 70%);
+          border-radius: 50%;
+          z-index: 1;
+        }
+
+        .hero-shape-2 {
+          position: absolute;
+          bottom: -50px;
+          left: -50px;
+          width: 400px;
+          height: 400px;
+          background: radial-gradient(circle, rgba(245, 166, 35, 0.05) 0%, transparent 70%);
+          border-radius: 50%;
+          z-index: 1;
+        }
+
+        .hero-content {
+          text-align: left;
+          z-index: 10;
         }
 
         .hero-badge {
           display: inline-flex;
           align-items: center;
           gap: 10px;
-          background: linear-gradient(135deg, #F5A623 0%, #D97706 100%);
-          color: white;
+          background: rgba(0, 163, 224, 0.1);
+          color: #003B73;
           font-family: 'Plus Jakarta Sans', sans-serif;
-          font-weight: 800;
-          font-size: 12px;
-          letter-spacing: 0.1em;
+          font-weight: 700;
+          font-size: 13px;
+          letter-spacing: 0.05em;
           text-transform: uppercase;
-          padding: 10px 24px;
+          padding: 8px 20px;
           border-radius: 100px;
-          margin-bottom: 32px;
-          box-shadow: 0 10px 25px rgba(217, 119, 6, 0.3);
+          margin-bottom: 24px;
+          border: 1px solid rgba(0, 163, 224, 0.2);
         }
 
         .hero-title {
           font-family: 'Plus Jakarta Sans', sans-serif;
-          font-size: clamp(32px, 5vw, 56px);
+          font-size: clamp(36px, 5vw, 64px);
           font-weight: 800;
-          color: var(--white);
-          line-height: 1.15;
-          letter-spacing: -0.02em;
+          color: #0F172A;
+          line-height: 1.1;
+          letter-spacing: -0.03em;
           margin-bottom: 24px;
         }
 
         .hero-title .accent {
           color: #00A3E0;
-          background: linear-gradient(to right, #00A3E0, #60E5FF);
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
+          position: relative;
+          display: inline-block;
+        }
+
+        .hero-title .accent::after {
+          content: '';
+          position: absolute;
+          bottom: 8px;
+          left: 0;
+          width: 100%;
+          height: 12px;
+          background: rgba(0, 163, 224, 0.1);
+          z-index: -1;
         }
 
         .hero-subtitle {
           font-size: 18px;
-          color: rgba(255, 255, 255, 0.75);
+          color: #64748B;
           margin-bottom: 40px;
           line-height: 1.7;
-          max-width: 800px;
-          margin-left: auto;
-          margin-right: auto;
+          max-width: 600px;
+        }
+
+        .hero-actions {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 20px;
+          margin-bottom: 48px;
         }
 
         .hero-cta {
           display: inline-flex;
           align-items: center;
-          gap: 14px;
-          background: #00A3E0;
+          gap: 12px;
+          background: #003B73;
           color: white;
-          padding: 20px 48px;
-          border-radius: 100px;
-          font-weight: 800;
-          font-size: 17px;
+          padding: 18px 36px;
+          border-radius: 16px;
+          font-weight: 700;
+          font-size: 16px;
           text-decoration: none;
-          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-          box-shadow: 0 15px 35px rgba(0, 163, 224, 0.4);
+          transition: all 0.3s;
+          box-shadow: 0 10px 25px rgba(0, 59, 115, 0.2);
         }
 
         .hero-cta:hover {
+          background: #00A3E0;
+          transform: translateY(-3px);
+          box-shadow: 0 15px 30px rgba(0, 163, 224, 0.3);
+        }
+
+        .hero-secondary-cta {
+          display: inline-flex;
+          align-items: center;
+          gap: 12px;
           background: white;
           color: #003B73;
-          transform: translateY(-5px);
-          box-shadow: 0 20px 45px rgba(0, 163, 224, 0.5);
+          padding: 18px 36px;
+          border-radius: 16px;
+          font-weight: 700;
+          font-size: 16px;
+          text-decoration: none;
+          transition: all 0.3s;
+          border: 1px solid #E2E8F0;
         }
 
-        /* Stats row - Modern & Integrated */
-        .stats-row {
+        .hero-secondary-cta:hover {
+          background: #F8FAFC;
+          border-color: #CBD5E1;
+          transform: translateY(-3px);
+        }
+
+        /* Stats in Hero */
+        .hero-stats {
+          display: flex;
+          gap: 40px;
+          border-top: 1px solid #E2E8F0;
+          padding-top: 32px;
+        }
+
+        .hero-stat-item {
+          display: flex;
+          flex-direction: column;
+        }
+
+        .hero-stat-num {
+          font-size: 28px;
+          font-weight: 800;
+          color: #0F172A;
+          line-height: 1;
+          margin-bottom: 4px;
+        }
+
+        .hero-stat-label {
+          font-size: 13px;
+          color: #64748B;
+          font-weight: 600;
+        }
+
+        /* Hero Image Column */
+        .hero-image-wrap {
           position: relative;
           z-index: 10;
+        }
+
+        .hero-main-image {
+          width: 100%;
+          height: auto;
+          border-radius: 40px;
+          box-shadow: 0 40px 100px -20px rgba(0,0,0,0.15);
+          transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .hero-main-image:hover {
+          transform: scale(1.02) rotate(-1deg);
+        }
+
+        /* Floating elements */
+        .floating-card {
+          position: absolute;
+          background: white;
+          padding: 20px;
+          border-radius: 20px;
+          box-shadow: 0 20px 50px rgba(0,0,0,0.1);
+          z-index: 20;
+          animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-20px); }
+        }
+
+        .float-1 { bottom: 40px; left: -20px; }
+        .float-2 { top: 40px; right: -20px; animation-delay: 2s; }
+
+        .kanji-stamp {
+          position: absolute;
+          top: -20px;
+          left: -20px;
+          z-index: 30;
+          width: 64px;
+          height: 64px;
+          background: #D0021B;
+          color: white;
+          border-radius: 12px;
           display: flex;
+          align-items: center;
           justify-content: center;
-          gap: 24px;
-          margin: 0 auto 32px;
-          max-width: 900px;
-          padding: 0 20px;
-        }
-
-        @media (min-width: 768px) {
-          .stats-row { gap: 60px; }
-        }
-
-        .stat-item {
-          text-align: center;
-          position: relative;
-        }
-
-        .stat-num {
-          font-family: 'Plus Jakarta Sans', sans-serif;
-          font-size: clamp(32px, 4vw, 48px);
-          font-weight: 800;
-          color: #F5A623;
+          font-family: 'Noto Sans JP', sans-serif;
+          font-weight: 900;
+          font-size: 20px;
           line-height: 1;
-          display: block;
-          margin-bottom: 8px;
-          text-shadow: 0 4px 15px rgba(245, 166, 35, 0.2);
-        }
-
-        .stat-label {
-          font-size: 12px;
-          color: rgba(255, 255, 255, 0.5);
-          font-weight: 700;
-          letter-spacing: 0.1em;
-          text-transform: uppercase;
+          box-shadow: 0 10px 25px rgba(208, 2, 27, 0.3);
         }
 
         /* ── WHY SECTION ── */
         .why-section {
           position: relative;
-          padding: 100px 0;
-          background: #F8FAFC;
+          padding: 120px 0;
+          background: white;
           overflow: hidden;
         }
 
-        /* Subtle Japanese Pattern for Section Bg */
-        .why-section::before {
+        /* Modern background blob */
+        .why-section::after {
           content: '';
           position: absolute;
-          inset: 0;
-          background-image: url("https://www.transparenttextures.com/patterns/natural-paper.png");
-          opacity: 0.4;
-          pointer-events: none;
+          bottom: -200px;
+          right: -200px;
+          width: 600px;
+          height: 600px;
+          background: radial-gradient(circle, rgba(0, 163, 224, 0.03) 0%, transparent 70%);
+          border-radius: 50%;
+          z-index: 1;
         }
 
         .why-label {
           display: inline-block;
-          background: rgba(0, 59, 115, 0.05);
+          background: rgba(0, 163, 224, 0.1);
           color: #003B73;
-          padding: 8px 20px;
+          padding: 10px 24px;
           border-radius: 100px;
           font-size: 13px;
           font-weight: 700;
           letter-spacing: 0.1em;
           text-transform: uppercase;
           margin-bottom: 24px;
+          border: 1px solid rgba(0, 163, 224, 0.1);
         }
 
         .why-title {
@@ -286,15 +316,20 @@ const LandingPage = () => {
           color: #0F172A;
           letter-spacing: -0.02em;
           line-height: 1.2;
-          margin-bottom: 20px;
+          margin-bottom: 24px;
         }
 
-        .why-title .blue { color: #00A3E0; }
+        .why-title .blue { 
+          color: #00A3E0;
+          background: linear-gradient(to right, #003B73, #00A3E0);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+        }
 
         .why-desc {
-          font-size: 17px;
+          font-size: 18px;
           color: #64748B;
-          max-width: 700px;
+          max-width: 800px;
           margin: 0 auto;
           line-height: 1.8;
         }
@@ -304,11 +339,13 @@ const LandingPage = () => {
           display: grid;
           grid-template-columns: 1fr;
           gap: 32px;
-          padding: 0 24px;
-          margin-top: 64px;
-          max-width: 1280px;
+          padding: 0 40px;
+          margin-top: 80px;
+          max-width: 1400px;
           margin-left: auto;
           margin-right: auto;
+          position: relative;
+          z-index: 10;
         }
 
         @media (min-width: 1024px) {
@@ -318,66 +355,84 @@ const LandingPage = () => {
         .feature-card {
           position: relative;
           background: white;
-          border-radius: 32px;
-          padding: 48px 32px;
+          border-radius: 40px;
+          padding: 60px 40px;
           border: 1px solid #F1F5F9;
-          overflow: hidden;
           transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
           display: flex;
           flex-direction: column;
-          box-shadow: 0 10px 30px -10px rgba(0,0,0,0.05);
+          box-shadow: 0 10px 30px rgba(0,0,0,0.02);
         }
 
         .feature-card:hover {
-          transform: translateY(-12px);
-          box-shadow: 0 40px 80px -20px rgba(0,0,0,0.1);
-          border-color: #E2E8F0;
+          transform: translateY(-15px);
+          box-shadow: 0 50px 80px -20px rgba(0,0,0,0.08);
+          border-color: rgba(0, 163, 224, 0.1);
         }
 
         .card-num {
           position: absolute;
-          top: 32px;
-          right: 32px;
+          top: 40px;
+          right: 40px;
           font-family: 'Plus Jakarta Sans', sans-serif;
-          font-size: 64px;
+          font-size: 80px;
           font-weight: 900;
-          color: rgba(0,0,0,0.03);
+          color: rgba(0, 163, 224, 0.05);
           line-height: 1;
           pointer-events: none;
         }
 
         .card-icon-wrap {
-          width: 64px;
-          height: 64px;
-          border-radius: 20px;
+          width: 80px;
+          height: 80px;
+          border-radius: 24px;
           display: flex;
           align-items: center;
           justify-content: center;
-          margin-bottom: 32px;
-          background: #F0F7FF;
-          color: #003B73;
-          transition: all 0.3s;
+          margin-bottom: 40px;
+          background: #F0F9FF;
+          color: #00A3E0;
+          transition: all 0.4s;
+          box-shadow: inset 0 0 0 1px rgba(0, 163, 224, 0.1);
         }
 
         .feature-card:hover .card-icon-wrap {
           background: #003B73;
           color: white;
           transform: scale(1.1) rotate(5deg);
+          box-shadow: 0 20px 40px rgba(0, 59, 115, 0.2);
         }
 
         .card-title {
           font-weight: 800;
-          font-size: 22px;
+          font-size: 24px;
           color: #0F172A;
-          margin-bottom: 16px;
+          margin-bottom: 20px;
           line-height: 1.4;
         }
 
         .card-desc {
-          font-size: 15px;
+          font-size: 16px;
           color: #64748B;
           line-height: 1.7;
-          margin-bottom: 32px;
+          margin-bottom: 40px;
+          flex-grow: 1;
+        }
+
+        .card-link {
+          display: inline-flex;
+          align-items: center;
+          gap: 10px;
+          font-weight: 700;
+          font-size: 15px;
+          color: #003B73;
+          text-decoration: none;
+          transition: gap 0.3s;
+        }
+
+        .feature-card:hover .card-link {
+          color: #00A3E0;
+          gap: 15px;
         }
 
         /* Card themes */
@@ -408,36 +463,36 @@ const LandingPage = () => {
         /* ── SCROLLING TICKER - Enhanced ── */
         .ticker-wrap {
           overflow: hidden;
-          background: rgba(15, 23, 42, 0.8);
-          backdrop-filter: blur(10px);
-          border-top: 1px solid rgba(255, 255, 255, 0.05);
-          padding: 20px 0;
+          background: #003B73;
+          padding: 24px 0;
           position: relative;
-          z-index: 10;
+          z-index: 20;
+          box-shadow: 0 10px 30px rgba(0, 59, 115, 0.2);
         }
 
         .ticker-inner {
           display: flex;
           white-space: nowrap;
-          animation: ticker 22s linear infinite;
-          gap: 0;
+          animation: ticker 30s linear infinite;
         }
 
         .ticker-item {
           display: inline-flex;
           align-items: center;
-          gap: 12px;
-          padding: 0 32px;
-          font-family: 'Bebas Neue', sans-serif;
-          font-size: 18px;
-          letter-spacing: 0.08em;
+          gap: 16px;
+          padding: 0 40px;
+          font-family: 'Plus Jakarta Sans', sans-serif;
+          font-size: 15px;
+          font-weight: 700;
+          letter-spacing: 0.02em;
           color: white;
+          text-transform: uppercase;
         }
 
         .ticker-dot {
           width: 6px;
           height: 6px;
-          background: rgba(255,255,255,0.5);
+          background: #00A3E0;
           border-radius: 50%;
           flex-shrink: 0;
         }
@@ -636,59 +691,88 @@ const LandingPage = () => {
 
         {/* ═══════════ HERO ═══════════ */}
         <div className="hero-wrap">
-          <div className="hero-lp-bg" />
-          <div className="hero-pattern" />
-          <div className="hero-sun" />
+          <div className="hero-shape-1" />
+          <div className="hero-shape-2" />
 
-          {/* Hero Image Section */}
-          <div className="hero-img-col">
-            <div style={{ position: 'relative' }}>
-              <img 
-                src={HeroImg} 
-                alt="Program Pelatihan Kerja dan Magang ke Jepang di SKYBRIDGE" 
-                className="hero-main-img" 
-                loading="eager"
-                fetchPriority="high"
-              />
-              {/* Kanji stamp */}
+          <div className="hero-container">
+            {/* Left Column: Content */}
+            <div className="hero-content">
+              <div className="hero-badge">
+                <Star size={14} fill="currentColor" />
+                Program Magang Jepang Terpercaya
+              </div>
+              
+              <h1 className="hero-title">
+                Pintu Gerbang Karir <br />
+                Profesional di <span className="accent">Jepang</span>
+              </h1>
+              
+              <p className="hero-subtitle">
+                Belajar bahasa Jepang dari nol hingga mahir dan ikuti program pelatihan kerja resmi bersama SKYBRIDGE. Kami membantu Anda meraih masa depan cerah di Negeri Sakura.
+              </p>
+              
+              <div className="hero-actions">
+                <Link to="/register" className="hero-cta">
+                  Mulai Pendaftaran <ArrowRight size={20} />
+                </Link>
+                <Link to="/pelatihan-kerja-ke-jepang" className="hero-secondary-cta">
+                  Lihat Program
+                </Link>
+              </div>
+
+              {/* Stats Integrated into Hero */}
+              <div className="hero-stats">
+                {[
+                  { num: '500+', label: 'Alumni' },
+                  { num: '98%', label: 'Lulus' },
+                  { num: '50+', label: 'Mitra' },
+                ].map((s, i) => (
+                  <div className="hero-stat-item" key={i}>
+                    <span className="hero-stat-num">{s.num}</span>
+                    <span className="hero-stat-label">{s.label}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Right Column: Image */}
+            <div className="hero-image-wrap">
               <div className="kanji-stamp">
                 努<br/>力
               </div>
-            </div>
-          </div>
+              
+              <img 
+                src={HeroImg} 
+                alt="Program Pelatihan Kerja dan Magang ke Jepang di SKYBRIDGE" 
+                className="hero-main-image" 
+                loading="eager"
+              />
 
-          {/* Hero Content Card */}
-          <div className="hero-text-card">
-            {/* Stats Row Integrated into Card or Above */}
-            <div className="stats-row">
-              {[
-                { num: '500+', label: 'Alumni Berangkat' },
-                { num: '98%', label: 'Tingkat Kelulusan' },
-                { num: '50+', label: 'Mitra Kumiai' },
-              ].map((s, i) => (
-                <div className="stat-item" key={i}>
-                  <span className="stat-num">{s.num}</span>
-                  <span className="stat-label">{s.label}</span>
+              {/* Floating elements for extra flair */}
+              <div className="floating-card float-1">
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <div style={{ background: '#E0F2FE', padding: '10px', borderRadius: '12px' }}>
+                    <CheckCircle size={24} color="#00A3E0" />
+                  </div>
+                  <div>
+                    <div style={{ fontWeight: 800, fontSize: '14px' }}>Resmi & Terpercaya</div>
+                    <div style={{ fontSize: '12px', color: '#64748B' }}>Izin LPK Resmi</div>
+                  </div>
                 </div>
-              ))}
-            </div>
+              </div>
 
-            <div className="hero-badge">
-              <Star size={14} fill="currentColor" />
-              Program Magang Jepang Terpercaya
+              <div className="floating-card float-2">
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <div style={{ background: '#FEF3C7', padding: '10px', borderRadius: '12px' }}>
+                    <Users size={24} color="#D97706" />
+                  </div>
+                  <div>
+                    <div style={{ fontWeight: 800, fontSize: '14px' }}>Pembimbing Ahli</div>
+                    <div style={{ fontSize: '12px', color: '#64748B' }}>Native Speaker</div>
+                  </div>
+                </div>
+              </div>
             </div>
-            
-            <h1 className="hero-title">
-              Kursus Bahasa Jepang & Program Kerja ke Jepang – <span className="accent">SKYBRIDGE</span>
-            </h1>
-            
-            <p className="hero-subtitle">
-              Belajar bahasa Jepang dari nol, ikuti pelatihan kerja resmi, dan program magang ke Jepang bersama SKYBRIDGE Nusantara International School. Institusi profesional dan terpercaya di Indonesia.
-            </p>
-            
-            <Link to="/register" className="hero-cta">
-              Daftar Sekarang <ArrowRight size={20} />
-            </Link>
           </div>
         </div>
 
@@ -736,7 +820,7 @@ const LandingPage = () => {
               {
                 icon: BookOpen,
                 num: '01',
-                title: 'Kursus Bahasa Jepang Online',
+                title: 'Kursus Bahasa Jepang',
                 desc: 'Kurikulum terpadu dari nol hingga mahir (N5-N4) dengan metode interaktif yang fleksibel.',
                 link: '/kursus-bahasa-jepang-online',
                 color: '#00A3E0'
@@ -767,37 +851,47 @@ const LandingPage = () => {
                   </div>
                   <h3 className="card-title">{card.title}</h3>
                   <p className="card-desc">{card.desc}</p>
-                  <div style={{ marginTop: 'auto', display: 'flex', alignItems: 'center', gap: '8px', color: card.color, fontWeight: '800', fontSize: '15px' }}>
-                    Pelajari Program <ArrowRight size={18} />
+                  <div className="card-link">
+                    Pelajari Selengkapnya <ArrowRight size={18} />
                   </div>
                 </Link>
               );
             })}
           </div>
         </section>
+
         {/* ═══════════ TRUST SIGNALS ═══════════ */}
-        <section className="section-lp" style={{ padding: '80px 20px', background: '#F9FAFB' }}>
-          <div style={{ textAlign: 'center', marginBottom: '48px' }}>
-            <h2 className="h2-seo">Testimoni Alumni Sukses</h2>
-            <p className="why-desc">Ribuan alumni SKYBRIDGE telah berhasil membangun karir impian mereka di Jepang.</p>
-          </div>
-          <div className="cards-grid" style={{ marginTop: '0' }}>
-            {[
-              { name: 'Budi Santoso', job: 'Engineering - Tokyo', text: 'Berkat SKYBRIDGE, saya bisa bekerja di perusahaan konstruksi ternama di Tokyo. Pelatihannya sangat intensif dan membantu adaptasi saya.' },
-              { name: 'Siti Aminah', job: 'Kaigo - Osaka', text: 'Sensei di SKYBRIDGE sangat sabar membimbing dari nol sampai saya lulus JLPT N4. Sekarang saya sudah 2 tahun di Osaka.' },
-              { name: 'Rian Hidayat', job: 'Agriculture - Hokkaido', text: 'Program magang resmi yang aman. Proses pemberangkatan transparan dan pendampingan di Jepang sangat membantu.' },
-            ].map((t, i) => (
-              <div key={i} style={{ background: 'white', padding: '32px', borderRadius: '24px', boxShadow: '0 10px 30px rgba(0,0,0,0.05)', border: '1px solid #F3F4F6' }}>
-                <div style={{ color: '#F5A623', display: 'flex', gap: '4px', marginBottom: '16px' }}>
-                  {[...Array(5)].map((_, i) => <Star key={i} size={16} fill="currentColor" />)}
+        <section style={{ padding: '120px 0', background: '#F8FAFC', position: 'relative' }}>
+          <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 40px' }}>
+            <div style={{ textAlign: 'center', marginBottom: '80px' }}>
+              <span className="why-label">Testimoni Alumni</span>
+              <h2 className="why-title">Kisah Sukses Bersama <span className="blue">SKYBRIDGE</span></h2>
+              <p className="why-desc">Ribuan alumni telah berhasil membangun karir impian mereka di Negeri Sakura.</p>
+            </div>
+            
+            <div className="cards-grid" style={{ marginTop: '0' }}>
+              {[
+                { name: 'Budi Santoso', job: 'Engineering - Tokyo', text: 'Berkat SKYBRIDGE, saya bisa bekerja di perusahaan konstruksi ternama di Tokyo. Pelatihannya sangat intensif.' },
+                { name: 'Siti Aminah', job: 'Kaigo - Osaka', text: 'Sensei di SKYBRIDGE sangat sabar membimbing dari nol sampai saya lulus JLPT N4. Sekarang saya di Osaka.' },
+                { name: 'Rian Hidayat', job: 'Agriculture - Hokkaido', text: 'Program magang resmi yang aman. Proses pemberangkatan transparan dan pendampingan di Jepang sangat membantu.' },
+              ].map((t, i) => (
+                <div key={i} className="feature-card" style={{ padding: '48px 40px' }}>
+                  <div style={{ color: '#F5A623', display: 'flex', gap: '4px', marginBottom: '24px' }}>
+                    {[...Array(5)].map((_, i) => <Star key={i} size={16} fill="currentColor" />)}
+                  </div>
+                  <p style={{ fontStyle: 'italic', color: '#64748B', marginBottom: '32px', lineHeight: '1.8', fontSize: '16px' }}>"{t.text}"</p>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                    <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: '#E2E8F0', display: 'flex', alignItems: 'center', justifyCenter: 'center', fontWeight: 800, color: '#003B73' }}>
+                      {t.name[0]}
+                    </div>
+                    <div>
+                      <div style={{ fontWeight: '800', color: '#0F172A', fontSize: '16px' }}>{t.name}</div>
+                      <div style={{ fontSize: '14px', color: '#94A3B8' }}>{t.job}</div>
+                    </div>
+                  </div>
                 </div>
-                <p style={{ fontStyle: 'italic', color: '#4B5563', marginBottom: '24px', lineHeight: '1.7' }}>"{t.text}"</p>
-                <div>
-                  <div style={{ fontWeight: '800', color: '#1C1C1C' }}>{t.name}</div>
-                  <div style={{ fontSize: '13px', color: '#9CA3AF' }}>{t.job}</div>
-                </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </section>
 
