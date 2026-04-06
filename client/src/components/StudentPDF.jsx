@@ -188,8 +188,8 @@ const StudentPDF = ({ students }) => (
                 <View style={styles.photoBox}>
                     {student.photo_path ? (
                         <Image 
-                            src={`http://localhost:5001/${student.photo_path.replace(/\\/g, '/')}`} 
-                            style={styles.photoImage} 
+                            src={`${(import.meta.env.VITE_API_URL || '').replace('/api', '')}/${student.photo_path.replace(/\\/g, '/')}`} 
+                            style={styles.photo} 
                         />
                     ) : (
                         <Text style={styles.photoText}>3 X 4</Text>

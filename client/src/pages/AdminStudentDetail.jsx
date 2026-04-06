@@ -201,7 +201,8 @@ const AdminStudentDetail = () => {
     if (!raw) return '';
     const normalized = raw.replaceAll('\\', '/');
     if (normalized.startsWith('http://') || normalized.startsWith('https://')) return normalized;
-    return `/${normalized.replace(/^\/+/, '')}`;
+    const baseUrl = (import.meta.env.VITE_API_URL || '').replace('/api', '');
+    return `${baseUrl}/${normalized.replace(/^\/+/, '')}`;
   };
 
   const formatDate = (value) => {
