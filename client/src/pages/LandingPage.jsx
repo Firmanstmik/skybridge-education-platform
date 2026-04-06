@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
-import { ArrowRight, CheckCircle, BookOpen, Users, Briefcase, Star, Zap, MapPin, Phone, Mail, Globe, Trophy } from 'lucide-react';
+import { ArrowRight, CheckCircle, BookOpen, Users, Briefcase, Star, Zap, MapPin, Phone, Mail, Globe, Trophy, Instagram, Facebook, Youtube } from 'lucide-react';
 import HeroImage from '../assets/img/hero-lpk-doryouku.png';
 import HeroBg from '../assets/img/heroskybridge.webp';
 import HeroImg from '../assets/img/Hero LPK DORYOUKU.webp';
@@ -446,6 +446,189 @@ const LandingPage = () => {
           from { transform: translateX(0); }
           to { transform: translateX(-50%); }
         }
+
+        /* ── FOOTER ── */
+        .footer-premium {
+          background: #0B1120;
+          color: white;
+          padding: 100px 0 40px;
+          position: relative;
+          overflow: hidden;
+        }
+
+        .footer-premium::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          height: 1px;
+          background: linear-gradient(to right, transparent, rgba(255,255,255,0.1), transparent);
+        }
+
+        .footer-grid {
+          max-width: 1280px;
+          margin: 0 auto;
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+          gap: 60px;
+          padding: 0 24px;
+          position: relative;
+          z-index: 2;
+        }
+
+        .footer-brand h3 {
+          font-size: 24px;
+          font-weight: 900;
+          margin-bottom: 24px;
+          color: #00A3E0;
+          letter-spacing: -0.02em;
+        }
+
+        .footer-brand p {
+          color: #94A3B8;
+          line-height: 1.8;
+          margin-bottom: 32px;
+          font-size: 15px;
+          max-width: 320px;
+        }
+
+        .social-wrap {
+          display: flex;
+          gap: 12px;
+        }
+
+        .social-btn {
+          width: 44px;
+          height: 44px;
+          border-radius: 12px;
+          background: rgba(255, 255, 255, 0.03);
+          border: 1px solid rgba(255, 255, 255, 0.08);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: white;
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+          text-decoration: none;
+        }
+
+        .social-btn:hover {
+          background: #00A3E0;
+          border-color: #00A3E0;
+          transform: translateY(-5px);
+          box-shadow: 0 10px 20px rgba(0, 163, 224, 0.3);
+          color: white;
+        }
+
+        .footer-col h4 {
+          font-size: 17px;
+          font-weight: 800;
+          margin-bottom: 32px;
+          color: white;
+          position: relative;
+          display: inline-block;
+        }
+
+        .footer-col h4::after {
+          content: '';
+          position: absolute;
+          left: 0;
+          bottom: -8px;
+          width: 30px;
+          height: 2px;
+          background: #00A3E0;
+          border-radius: 2px;
+        }
+
+        .footer-links {
+          list-style: none;
+          padding: 0;
+          margin: 0;
+          display: flex;
+          flex-direction: column;
+          gap: 16px;
+        }
+
+        .footer-links a {
+          color: #94A3B8;
+          text-decoration: none;
+          font-size: 15px;
+          transition: 0.3s;
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+        }
+
+        .footer-links a:hover {
+          color: white;
+          transform: translateX(5px);
+        }
+
+        .contact-info {
+          display: flex;
+          flex-direction: column;
+          gap: 20px;
+        }
+
+        .contact-item {
+          display: flex;
+          gap: 16px;
+          color: #94A3B8;
+          font-size: 15px;
+          line-height: 1.5;
+        }
+
+        .contact-icon {
+          flex-shrink: 0;
+          color: #00A3E0;
+        }
+
+        .map-placeholder {
+          border-radius: 24px;
+          overflow: hidden;
+          height: 180px;
+          background: #1E293B;
+          border: 1px solid rgba(255, 255, 255, 0.05);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          position: relative;
+          margin-top: 16px;
+        }
+
+        .map-placeholder::before {
+          content: 'Google Maps Integration';
+          font-size: 12px;
+          color: #475569;
+          font-weight: 600;
+          letter-spacing: 0.05em;
+          text-transform: uppercase;
+        }
+
+        .footer-bottom {
+          max-width: 1280px;
+          margin: 80px auto 0;
+          padding: 40px 24px 0;
+          border-top: 1px solid rgba(255, 255, 255, 0.05);
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 20px;
+          text-align: center;
+        }
+
+        @media (min-width: 768px) {
+          .footer-bottom {
+            flex-direction: row;
+            justify-content: space-between;
+            text-align: left;
+          }
+        }
+
+        .copyright {
+          font-size: 14px;
+          color: #64748B;
+        }
       `}</style>
 
       <div className="lpk-body">
@@ -619,39 +802,78 @@ const LandingPage = () => {
         </section>
 
         {/* ═══════════ FOOTER ═══════════ */}
-        <footer style={{ background: '#0F172A', color: 'white', padding: '100px 20px 40px' }}>
-          <div style={{ maxWidth: '1280px', margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '80px' }}>
-            <div className="col-span-1 lg:col-span-2">
-              <h3 style={{ fontSize: '24px', fontWeight: '900', marginBottom: '28px', color: '#00A3E0', letterSpacing: '-0.02em' }}>SKYBRIDGE NUSANTARA</h3>
-              <p style={{ color: 'rgba(255,255,255,0.6)', lineHeight: '1.8', marginBottom: '32px', fontSize: '16px', maxWidth: '400px' }}>
-                Lembaga pendidikan dan pelatihan kerja internasional terpercaya di Indonesia. Pintu gerbang utama menuju karir sukses di Jepang.
+        <footer className="footer-premium">
+          <div className="footer-grid">
+            {/* Column 1: Brand */}
+            <div className="footer-brand">
+              <h3>SKYBRIDGE NUSANTARA</h3>
+              <p>
+                Lembaga pendidikan dan pelatihan kerja internasional terpercaya di Indonesia. 
+                Pintu gerbang utama menuju karir sukses di Jepang.
               </p>
-              <div style={{ display: 'flex', gap: '16px' }}>
-                {/* Social icons would go here */}
+              <div className="social-wrap">
+                <a href="#" className="social-btn" aria-label="Instagram">
+                  <Instagram size={20} />
+                </a>
+                <a href="#" className="social-btn" aria-label="Facebook">
+                  <Facebook size={20} />
+                </a>
+                <a href="#" className="social-btn" aria-label="Youtube">
+                  <Youtube size={20} />
+                </a>
               </div>
             </div>
             
-            <div>
-              <h4 style={{ fontSize: '18px', fontWeight: '800', marginBottom: '32px', color: 'white' }}>Program Unggulan</h4>
-              <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                <li><Link to="/kursus-bahasa-jepang-online" style={{ color: 'rgba(255,255,255,0.5)', textDecoration: 'none', fontSize: '15px', transition: '0.3s' }}>Kursus Bahasa Jepang</Link></li>
-                <li><Link to="/pelatihan-kerja-ke-jepang" style={{ color: 'rgba(255,255,255,0.5)', textDecoration: 'none', fontSize: '15px' }}>Pelatihan Kerja</Link></li>
-                <li><Link to="/magang-ke-jepang" style={{ color: 'rgba(255,255,255,0.5)', textDecoration: 'none', fontSize: '15px' }}>Program Magang</Link></li>
+            {/* Column 2: Programs */}
+            <div className="footer-col">
+              <h4>Program Kami</h4>
+              <ul className="footer-links">
+                <li><Link to="/kursus-bahasa-jepang-online">Kursus Bahasa Jepang</Link></li>
+                <li><Link to="/pelatihan-kerja-ke-jepang">Pelatihan Kerja</Link></li>
+                <li><Link to="/magang-ke-jepang">Program Magang</Link></li>
+                <li><Link to="/register">Belajar Dari Nol</Link></li>
               </ul>
             </div>
 
-            <div>
-              <h4 style={{ fontSize: '18px', fontWeight: '800', marginBottom: '32px', color: 'white' }}>Hubungi Kami</h4>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', color: 'rgba(255,255,255,0.5)', fontSize: '15px' }}>
-                <div style={{ display: 'flex', gap: '14px' }}><MapPin size={20} className="text-sky-blue-light" /> Mataram, NTB, Indonesia</div>
-                <div style={{ display: 'flex', gap: '14px' }}><Phone size={20} className="text-sky-blue-light" /> +81 70-8418-2215</div>
-                <div style={{ display: 'flex', gap: '14px' }}><Mail size={20} className="text-sky-blue-light" /> info@snischool.com</div>
+            {/* Column 3: Blog */}
+            <div className="footer-col">
+              <h4>Blog & Artikel</h4>
+              <ul className="footer-links">
+                <li><Link to="/blog/kerja-jepang-tanpa-pengalaman">Kerja Jepang Tanpa Pengalaman</Link></li>
+                <li><Link to="/blog/biaya-kursus-bahasa-jepang">Berapa Biaya Kursus Jepang?</Link></li>
+                <li><Link to="/blog/tips-lolos-magang-ke-jepang">Tips Lolos Magang Jepang</Link></li>
+              </ul>
+            </div>
+
+            {/* Column 4: Contact & Location */}
+            <div className="footer-col">
+              <h4>Hubungi Kami</h4>
+              <div className="contact-info">
+                <div className="contact-item">
+                  <MapPin size={20} className="contact-icon" />
+                  <span>Komplek Pertokoan Grand Lingkar No.7, Mataram, Indonesia</span>
+                </div>
+                <div className="contact-item">
+                  <Phone size={20} className="contact-icon" />
+                  <span>+81 70-8418-2215</span>
+                </div>
+                <div className="contact-item">
+                  <Mail size={20} className="contact-icon" />
+                  <span>info@snischool.com</span>
+                </div>
               </div>
+              <div className="map-placeholder"></div>
             </div>
           </div>
           
-          <div style={{ maxWidth: '1280px', margin: '80px auto 0', paddingTop: '40px', borderTop: '1px solid rgba(255,255,255,0.05)', textAlign: 'center', fontSize: '14px', color: 'rgba(255,255,255,0.3)' }}>
-            <p>&copy; {new Date().getFullYear()} SKYBRIDGE Nusantara International School. All Rights Reserved.</p>
+          <div className="footer-bottom">
+            <p className="copyright">
+              &copy; {new Date().getFullYear()} SKYBRIDGE Nusantara International School. All Rights Reserved.
+            </p>
+            <div style={{ display: 'flex', gap: '24px' }}>
+              <Link to="/privacy" style={{ color: '#64748B', fontSize: '14px', textDecoration: 'none' }}>Kebijakan Privasi</Link>
+              <Link to="/terms" style={{ color: '#64748B', fontSize: '14px', textDecoration: 'none' }}>Syarat & Ketentuan</Link>
+            </div>
           </div>
         </footer>
       </div>
