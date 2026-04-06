@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
-import { ArrowRight, CheckCircle, BookOpen, Users, Briefcase, Star, Zap, MapPin, Phone, Mail } from 'lucide-react';
+import { ArrowRight, CheckCircle, BookOpen, Users, Briefcase, Star, Zap, MapPin, Phone, Mail, Globe, Trophy } from 'lucide-react';
 import HeroImage from '../assets/img/hero-lpk-doryouku.png';
 import HeroBg from '../assets/img/heroskybridge.webp';
 import HeroImg from '../assets/img/Hero LPK DORYOUKU.webp';
