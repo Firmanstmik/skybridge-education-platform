@@ -90,6 +90,7 @@ const StudentDashboard = () => {
     const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = useState(false);
     const [isDownloadingCard,   setIsDownloadingCard]   = useState(false);
     const [qrDataUrl, setQrDataUrl] = useState('');
+    const [cachedCardBlob, setCachedCardBlob] = useState(null);
     const cardRef = useRef(null);
 
     const { register, control, handleSubmit, watch, reset } = useForm({ defaultValues: { education: [] } });
@@ -118,9 +119,9 @@ const StudentDashboard = () => {
         });
         QRCode.toDataURL(payload, {
             errorCorrectionLevel: 'H',
-            margin: 2,
+            margin: 1,
             width: 512,
-            color: { dark: '#111827', light: '#ffffff' },
+            color: { dark: '#000000', light: '#ffffff' },
         }).then((url) => {
             if (!cancelled) setQrDataUrl(url);
         }).catch(() => {
@@ -313,14 +314,59 @@ const StudentDashboard = () => {
         saveNotifs(student, next);
     };
 
+    /* ─── Pre-generate card for instant download ─── */
+    useEffect(() => {
+        const isAccepted = String(student?.status || '').toLowerCase() === 'diterima';
+        if (!isAccepted || !qrDataUrl || !photoPreview) return;
+
+        const timer = setTimeout(async () => {
+            const target = document.getElementById('reg-card-download');
+            if (target && !cachedCardBlob) {
+                try {
+                    const dataUrl = await toPng(target, { 
+                        pixelRatio: 3, 
+                        skipAutoScale: true,
+                        backgroundColor: '#ffffff'
+                    });
+                    setCachedCardBlob(dataUrl);
+                } catch (err) {
+                    console.warn('Background card prep failed:', err);
+                }
+            }
+        }, 2000); // Tunggu 2 detik setelah mount agar font & gambar benar-benar stabil
+
+        return () => clearTimeout(timer);
+    }, [student?.status, qrDataUrl, photoPreview, cachedCardBlob]);
+
     /* ─── Download card ─── */
     const handleDownloadCard = async () => {
         if (!student?.registration_number) return;
+        
+        // Jika sudah ada di cache, langsung download (INSTANT!)
+        if (cachedCardBlob) {
+            const link = document.createElement('a');
+            link.download = `KARTU-SKYBRIDGE-${student.registration_number}.png`;
+            link.href = cachedCardBlob;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            showAlert('Kartu peserta berhasil diunduh!', 'success', 'Download Berhasil');
+            return;
+        }
+
         let target = cardRef.current || document.getElementById('reg-card-download');
         if (!target) return;
+        
         setIsDownloadingCard(true);
         try {
-            const dataUrl = await toPng(target, { cacheBust: true, pixelRatio: 3, backgroundColor: '#ffffff' });
+            const dataUrl = await toPng(target, { 
+                pixelRatio: 3, 
+                skipAutoScale: true,
+                backgroundColor: '#ffffff'
+            });
+            
+            setCachedCardBlob(dataUrl); // Simpan ke cache untuk klik berikutnya
+            
             const link = document.createElement('a');
             link.download = `KARTU-SKYBRIDGE-${student.registration_number}.png`;
             link.href = dataUrl;
@@ -652,7 +698,7 @@ const StudentDashboard = () => {
                 .reg-card-micro { min-width: 0; }
                 .reg-card-serial { font-size: 10px; font-weight: 900; letter-spacing: 0.16em; text-transform: uppercase; color: #94A3B8; }
                 .reg-card-tagline { margin-top: 6px; font-size: 11px; color: #64748B; line-height: 1.4; }
-                .reg-card-qr { width: 82px; height: 82px; padding: 8px; border-radius: 18px; background: rgba(255,255,255,0.92); border: 1px solid rgba(226,232,240,0.95); box-shadow: 0 18px 50px rgba(2,6,23,0.10); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+                .reg-card-qr { width: 96px; height: 96px; padding: 4px; border-radius: 18px; background: rgba(255,255,255,0.92); border: 1px solid rgba(226,232,240,0.95); box-shadow: 0 18px 50px rgba(2,6,23,0.10); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
                 .reg-card-qr img { width: 100%; height: 100%; object-fit: contain; image-rendering: pixelated; }
                 .reg-card-qr-ph { width: 100%; height: 100%; border-radius: 12px; background: repeating-linear-gradient(90deg, rgba(2,6,23,0.08) 0px, rgba(2,6,23,0.08) 6px, transparent 6px, transparent 12px); }
                 .reg-card-preview-foot { margin-top: 14px; font-size: 11px; color: #64748B; line-height: 1.5; text-align: center; }
