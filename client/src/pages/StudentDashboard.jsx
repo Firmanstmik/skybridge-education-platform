@@ -222,6 +222,13 @@ const StudentDashboard = () => {
             }
         } catch (error) {
             console.error('Error fetching data:', error);
+            // Jika data tidak ditemukan (misal dihapus oleh admin), otomatis logout
+            if (error.response && error.response.status === 401) {
+                localStorage.removeItem('studentData');
+                showAlert('Data pendaftaran Anda sudah tidak ada atau telah dihapus.', 'error', 'Sesi Berakhir');
+                navigate('/student/check-status');
+                return;
+            }
             if (isInitialLoad) navigate('/student/check-status');
         } finally {
             if (isInitialLoad) setLoading(false);
