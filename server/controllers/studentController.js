@@ -15,9 +15,10 @@ try {
     Tesseract = null;
 }
 
-const generateRegistrationNumber = async (year, connection = null) => {
+const generateRegistrationNumber = async (year, nik, connection = null) => {
     const conn = connection || db;
-    const prefix = `DORY-${year}-`;
+    const last4Nik = String(nik || '').slice(-4).padStart(4, '0');
+    const prefix = `SNIS-${year}-`;
     const [rows] = await conn.query(
         'SELECT registration_number FROM students WHERE registration_number LIKE ? ORDER BY registration_number DESC LIMIT 1',
         [`${prefix}%`]
@@ -30,7 +31,7 @@ const generateRegistrationNumber = async (year, connection = null) => {
         next = Number.isFinite(suffix) ? (suffix + 1) : 1;
     }
     while (true) {
-        const candidate = `${prefix}${String(next).padStart(4, '0')}`;
+        const candidate = `${prefix}${last4Nik}-${String(next).padStart(4, '0')}`;
         const [exists] = await conn.query('SELECT id FROM students WHERE registration_number = ? LIMIT 1', [candidate]);
         if (exists.length === 0) return candidate;
         next++;
@@ -342,10 +343,9 @@ exports.registerStudent = async (req, res) => {
         const body = req.body;
         const files = req.files || {};
 
-        // 2. Generate Registration Number (use requested year if legacy)
+        // 2. Generate Registration Number (use requested year if legacy) - MOVED AFTER NIK
         const tentativeYear = body && body.data_year && String(body.data_year).trim() !== '' ? Number(String(body.data_year).trim()) : new Date().getFullYear();
-        const regNumber = await generateRegistrationNumber(tentativeYear, connection);
-
+        
         let status = 'Menunggu Verifikasi';
         const role = getDecodedRoleFromAuthHeader(req);
         if (isPrivilegedRole(role) && body.status) status = body.status;
@@ -376,6 +376,9 @@ exports.registerStudent = async (req, res) => {
         } else {
             body.nik = nikTrimmed;
         }
+
+        // Generate Registration Number NOW with NIK
+        const regNumber = await generateRegistrationNumber(tentativeYear, body.nik, connection);
 
         const [existingNik] = await connection.query(
             'SELECT id FROM students WHERE nik = ?',
@@ -720,7 +723,7 @@ exports.downloadStudentFormPdf = async (req, res) => {
         const lineHeight = 15;
 
         // Header
-        page.drawText('LPK DORYOUKU', { x: margin, y, size: 18, font: fontBold, color: rgb(0.89, 0.11, 0.14) });
+        page.drawText('SKYBRIDGE - NUSANTARA INTERNATIONAL SCHOOL', { x: margin, y, size: 18, font: fontBold, color: rgb(0.1, 0.3, 0.6) });
         y -= 25;
         page.drawText('FORMULIR PENDAFTARAN PESERTA PELATIHAN', { x: margin, y, size: 14, font: fontBold });
         y -= 30;
@@ -850,12 +853,12 @@ exports.downloadStudentPdf = async (req, res) => {
         const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
 
         // Card Design
-        page.drawText('KARTU PENDAFTARAN - LPK DORYOUKU', {
-            x: 50,
-            y: height - 50,
+        page.drawText('KARTU PENDAFTARAN - SKYBRIDGE', {
+            x: margin,
+            y,
             size: 16,
             font: fontBold,
-            color: rgb(0.89, 0.11, 0.14),
+            color: rgb(0.1, 0.3, 0.6)
         });
 
         page.drawText(`Nama: ${s.full_name}`, { x: 50, y: height - 100, size: 12, font });
@@ -928,12 +931,12 @@ exports.exportStudentsSummaryPdf = async (req, res) => {
         let y = height - pageMargin;
 
         const drawHeader = () => {
-            page.drawText('Laporan Pendaftar - LPK DORYOUKU', {
+            page.drawText('Laporan Pendaftar - SKYBRIDGE', {
                 x: pageMargin,
                 y,
                 size: 16,
                 font: fontBold,
-                color: rgb(0.89, 0.11, 0.14),
+                color: rgb(0.1, 0.3, 0.6),
             });
             y -= headerHeight;
             page.drawText(`Total Pendaftar: ${students.length}`, {

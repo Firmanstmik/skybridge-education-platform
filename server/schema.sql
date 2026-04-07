@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS users (
 -- Students Table (Main Registration Data)
 CREATE TABLE IF NOT EXISTS students (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    registration_number VARCHAR(20) UNIQUE, -- Generated: DORY-YYYY-XXXX
+    registration_number VARCHAR(20) UNIQUE, -- Generated: SNIS-YYYY-NIK4-XXXX
     
     -- A. KETERANGAN PRIBADI
     nik VARCHAR(16) NOT NULL,

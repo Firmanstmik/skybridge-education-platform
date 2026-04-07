@@ -326,13 +326,13 @@ const CheckStatusPage = () => {
                                             type="text"
                                             value={regNumber}
                                             onChange={(e) => setRegNumber(e.target.value)}
-                                            placeholder="Contoh: DORY-2026-0001"
+                                            placeholder="Contoh: SNIS-2026-XXXX-0001"
                                             className="input-field"
                                             style={{ paddingLeft: 70 }}
                                             required
                                         />
                                         <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-[11px] font-mono pr-2 mr-1 border-r border-gray-200">
-                                            DORY
+                                            SNIS
                                         </span>
                                     </div>
                                     <p className="mt-1 text-[11px] text-gray-500">

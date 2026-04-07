@@ -67,43 +67,58 @@ const AdminScanQr = () => {
   );
 
   const extractLegacyStudentId = useCallback((decodedText) => {
-    const serialMatch = String(decodedText || '').match(/(?:^|\n)\s*ID\s*:\s*(LPK-\d+)\s*(?:\n|$)/i);
-    if (!serialMatch) return null;
-    const numeric = serialMatch[1].replace(/\D/g, '');
-    const parsed = Number.parseInt(numeric, 10);
-    if (!Number.isFinite(parsed) || parsed <= 0) return null;
-    return parsed;
+    if (!decodedText) return null;
+    const text = String(decodedText).trim();
+    
+    // 1. Match format "ID : LPK-12345" or just "LPK-12345"
+    const serialMatch = text.match(/(?:ID\s*:\s*)?(LPK-(\d+))/i);
+    if (serialMatch) {
+      const numeric = serialMatch[2];
+      const parsed = Number.parseInt(numeric, 10);
+      if (Number.isFinite(parsed) && parsed > 0) return parsed;
+    }
+    
+    // 2. Match numeric only string
+    if (/^\d+$/.test(text)) {
+      const parsed = Number.parseInt(text, 10);
+      if (Number.isFinite(parsed) && parsed > 0) return parsed;
+    }
+
+    return null;
   }, []);
 
   const handleScanSuccess = useCallback(
     async (decodedText) => {
+      if (!decodedText) return;
+      
       scanModeRef.current = 'camera';
       fileErrorShownRef.current = false;
       setLastResult(decodedText);
       setErrorMessage('');
 
-      try {
-        const data = JSON.parse(decodedText);
-        const studentId = data?.id ?? data?.studentId ?? data?.student_id;
-        const targetPath = getStudentDetailPath(studentId);
-        if (targetPath) {
-          await stopScanner();
-          navigate(targetPath);
-        } else {
-          showAlert('QR Code tidak berisi ID peserta yang valid.', 'error', 'Scan Gagal');
-        }
-      } catch (e) {
-        const legacyId = extractLegacyStudentId(decodedText);
-        const targetPath = getStudentDetailPath(legacyId);
-        if (targetPath) {
-          await stopScanner();
-          navigate(targetPath);
-          return;
-        }
+      let studentId = null;
 
-        console.error('Invalid QR Code Data', e);
-        setErrorMessage('QR Code tidak valid atau format tidak dikenali.');
-        showAlert('QR Code tidak valid atau format salah.', 'error', 'Scan Gagal');
+      try {
+        // 1. Try JSON parsing (New format)
+        const data = JSON.parse(decodedText);
+        studentId = data?.id ?? data?.studentId ?? data?.student_id;
+      } catch (e) {
+        // 2. Try legacy / numeric fallback
+        studentId = extractLegacyStudentId(decodedText);
+      }
+
+      const targetPath = getStudentDetailPath(studentId);
+      
+      if (targetPath) {
+        // Success feedback
+        if (navigator.vibrate) navigator.vibrate(100);
+        
+        await stopScanner();
+        navigate(targetPath);
+      } else {
+        console.error('Invalid QR Code Data:', decodedText);
+        setErrorMessage('QR Code tidak berisi ID peserta yang valid.');
+        showAlert('QR Code tidak berisi ID peserta yang valid. Pastikan ini adalah QR Code dari kartu peserta resmi.', 'error', 'Scan Gagal');
       }
     },
     [extractLegacyStudentId, getStudentDetailPath, navigate, showAlert, stopScanner]
@@ -111,26 +126,14 @@ const AdminScanQr = () => {
 
   const handleScanFailure = useCallback(
     (error) => {
+      // Don't show errors for "No QR code found" in every frame
       const message = String(error || '');
+      if (message.includes('NotFoundException')) return;
 
-      if (message.includes('NotFoundException')) {
-        if (scanModeRef.current === 'file' && !fileErrorShownRef.current) {
-          fileErrorShownRef.current = true;
-          setErrorMessage('Gambar yang dipilih tidak berisi QR Code yang valid.');
-          showAlert(
-            'Gambar yang kamu pilih tidak berisi QR Code yang bisa dibaca. Gunakan foto kartu peserta atau QR Code yang jelas dan tidak blur.',
-            'error',
-            'Scan Gambar Gagal'
-          );
-        }
-        return;
-      }
-
-      setErrorMessage(
-        'Kesalahan saat membaca kamera. Coba stabilkan perangkat atau ulangi scan.'
-      );
+      console.warn('Scan failure:', error);
+      // setErrorMessage('Kesalahan saat membaca kamera. Coba stabilkan perangkat atau ulangi scan.');
     },
-    [showAlert]
+    []
   );
 
   const handleStartCamera = useCallback(async () => {
@@ -149,24 +152,28 @@ const AdminScanQr = () => {
     try {
       setErrorMessage('');
       setIsScanning(true);
+      
       const isMobile = window.innerWidth < 768;
 
+      // Optimasi untuk sensitivitas dan kecepatan
       const config = {
-        fps: isMobile ? 10 : 12,
+        fps: 20, // Lebih tinggi = lebih peka (10 -> 20)
+        qrbox: (viewWidth, viewHeight) => {
+          const minEdge = Math.min(viewWidth, viewHeight);
+          const size = isMobile ? Math.floor(minEdge * 0.7) : Math.floor(minEdge * 0.6);
+          return { width: size, height: size };
+        },
+        aspectRatio: 1.0,
         disableFlip: true,
+        experimentalFeatures: {
+          useBarCodeDetectorIfSupported: true
+        }
       };
 
-      if (!isMobile) {
-        const qrboxFunction = (viewWidth, viewHeight) => {
-          const minEdge = Math.min(viewWidth, viewHeight);
-          const size = Math.floor(minEdge * 0.7);
-          return { width: size, height: size };
-        };
-        config.qrbox = qrboxFunction;
-      }
-
       await scannerRef.current.start(
-        { facingMode: 'environment' },
+        { 
+          facingMode: 'environment',
+        },
         config,
         handleScanSuccess,
         handleScanFailure
