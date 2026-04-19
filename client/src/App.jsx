@@ -28,6 +28,16 @@ import GajiMagangJepangBersih from './pages/blog/GajiMagangJepangBersih';
 import TokuteiGinouSSWItuApa from './pages/blog/TokuteiGinouSSWItuApa';
 import GajiKerjaDiJepangPerBulan from './pages/blog/GajiKerjaDiJepangPerBulan';
 import KurikulumBelajarJepangUntukKerja3Bulan from './pages/blog/KurikulumBelajarJepangUntukKerja3Bulan';
+import DataKelas from './pages/akademik/DataKelas';
+import DataSiswa from './pages/akademik/DataSiswa';
+import JadwalMengajar from './pages/akademik/JadwalMengajar';
+import AbsensiSiswa from './pages/akademik/AbsensiSiswa';
+import NilaiSiswa from './pages/akademik/NilaiSiswa';
+import JurnalMengajar from './pages/akademik/JurnalMengajar';
+import RekapAkademik from './pages/akademik/RekapAkademik';
+import CetakLaporan from './pages/akademik/CetakLaporan';
+import TahunAjaran from './pages/akademik/TahunAjaran';
+import Kurikulum from './pages/akademik/Kurikulum';
 import ScrollToTop from './components/ScrollToTop';
 import WhatsAppButton from './components/WhatsAppButton';
 
@@ -75,6 +85,16 @@ function App() {
               <Route path="/admin/scan" element={<PrivateRoute allowedRoles={['SUPER_ADMIN', 'superadmin']}><AdminScanQr /></PrivateRoute>} />
               <Route path="/admin/input-student" element={<PrivateRoute allowedRoles={['SUPER_ADMIN', 'superadmin']}><StaffInputData /></PrivateRoute>} />
               <Route path="/admin/input-student/:id" element={<PrivateRoute allowedRoles={['SUPER_ADMIN', 'superadmin']}><StaffInputData /></PrivateRoute>} />
+              <Route path="/admin/akademik/data-kelas" element={<PrivateRoute allowedRoles={['SUPER_ADMIN', 'superadmin']}><DataKelas /></PrivateRoute>} />
+              <Route path="/admin/akademik/data-siswa" element={<PrivateRoute allowedRoles={['SUPER_ADMIN', 'superadmin']}><DataSiswa /></PrivateRoute>} />
+              <Route path="/admin/akademik/jadwal-mengajar" element={<PrivateRoute allowedRoles={['SUPER_ADMIN', 'superadmin']}><JadwalMengajar /></PrivateRoute>} />
+              <Route path="/admin/akademik/absensi-siswa" element={<PrivateRoute allowedRoles={['SUPER_ADMIN', 'superadmin']}><AbsensiSiswa /></PrivateRoute>} />
+              <Route path="/admin/akademik/nilai-siswa" element={<PrivateRoute allowedRoles={['SUPER_ADMIN', 'superadmin']}><NilaiSiswa /></PrivateRoute>} />
+              <Route path="/admin/akademik/jurnal-mengajar" element={<PrivateRoute allowedRoles={['SUPER_ADMIN', 'superadmin']}><JurnalMengajar /></PrivateRoute>} />
+              <Route path="/admin/akademik/rekap-akademik" element={<PrivateRoute allowedRoles={['SUPER_ADMIN', 'superadmin']}><RekapAkademik /></PrivateRoute>} />
+              <Route path="/admin/akademik/cetak-laporan" element={<PrivateRoute allowedRoles={['SUPER_ADMIN', 'superadmin']}><CetakLaporan /></PrivateRoute>} />
+              <Route path="/admin/akademik/tahun-ajaran" element={<PrivateRoute allowedRoles={['SUPER_ADMIN', 'superadmin']}><TahunAjaran /></PrivateRoute>} />
+              <Route path="/admin/akademik/kurikulum" element={<PrivateRoute allowedRoles={['SUPER_ADMIN', 'superadmin']}><Kurikulum /></PrivateRoute>} />
               
               {/* Staff Routes */}
               <Route path="/staff" element={<PrivateRoute allowedRoles={['STAFF']}><AdminDashboard /></PrivateRoute>} />
@@ -84,12 +104,32 @@ function App() {
               <Route path="/staff/scan" element={<PrivateRoute allowedRoles={['STAFF']}><AdminScanQr /></PrivateRoute>} />
               <Route path="/staff/input-student" element={<PrivateRoute allowedRoles={['STAFF']}><StaffInputData /></PrivateRoute>} />
               <Route path="/staff/input-student/:id" element={<PrivateRoute allowedRoles={['STAFF']}><StaffInputData /></PrivateRoute>} />
+              <Route path="/staff/akademik/data-kelas" element={<PrivateRoute allowedRoles={['STAFF']}><DataKelas /></PrivateRoute>} />
+              <Route path="/staff/akademik/data-siswa" element={<PrivateRoute allowedRoles={['STAFF']}><DataSiswa /></PrivateRoute>} />
+              <Route path="/staff/akademik/jadwal-mengajar" element={<PrivateRoute allowedRoles={['STAFF']}><JadwalMengajar /></PrivateRoute>} />
+              <Route path="/staff/akademik/absensi-siswa" element={<PrivateRoute allowedRoles={['STAFF']}><AbsensiSiswa /></PrivateRoute>} />
+              <Route path="/staff/akademik/nilai-siswa" element={<PrivateRoute allowedRoles={['STAFF']}><NilaiSiswa /></PrivateRoute>} />
+              <Route path="/staff/akademik/jurnal-mengajar" element={<PrivateRoute allowedRoles={['STAFF']}><JurnalMengajar /></PrivateRoute>} />
+              <Route path="/staff/akademik/rekap-akademik" element={<PrivateRoute allowedRoles={['STAFF']}><RekapAkademik /></PrivateRoute>} />
+              <Route path="/staff/akademik/cetak-laporan" element={<PrivateRoute allowedRoles={['STAFF']}><CetakLaporan /></PrivateRoute>} />
+              <Route path="/staff/akademik/tahun-ajaran" element={<PrivateRoute allowedRoles={['STAFF']}><TahunAjaran /></PrivateRoute>} />
+              <Route path="/staff/akademik/kurikulum" element={<PrivateRoute allowedRoles={['STAFF']}><Kurikulum /></PrivateRoute>} />
 
               {/* Kepala LPK Routes */}
               <Route path="/kepalalpk" element={<PrivateRoute allowedRoles={['KEPALA_LPK']}><AdminDashboard /></PrivateRoute>} />
               <Route path="/kepalalpk/dashboard" element={<PrivateRoute allowedRoles={['KEPALA_LPK']}><AdminDashboard /></PrivateRoute>} />
               <Route path="/kepalalpk/students" element={<PrivateRoute allowedRoles={['KEPALA_LPK']}><AdminStudentsPage /></PrivateRoute>} />
               <Route path="/kepalalpk/student/:id" element={<PrivateRoute allowedRoles={['KEPALA_LPK']}><AdminStudentDetail /></PrivateRoute>} />
+              <Route path="/kepalalpk/akademik/data-kelas" element={<PrivateRoute allowedRoles={['KEPALA_LPK']}><DataKelas /></PrivateRoute>} />
+              <Route path="/kepalalpk/akademik/data-siswa" element={<PrivateRoute allowedRoles={['KEPALA_LPK']}><DataSiswa /></PrivateRoute>} />
+              <Route path="/kepalalpk/akademik/jadwal-mengajar" element={<PrivateRoute allowedRoles={['KEPALA_LPK']}><JadwalMengajar /></PrivateRoute>} />
+              <Route path="/kepalalpk/akademik/absensi-siswa" element={<PrivateRoute allowedRoles={['KEPALA_LPK']}><AbsensiSiswa /></PrivateRoute>} />
+              <Route path="/kepalalpk/akademik/nilai-siswa" element={<PrivateRoute allowedRoles={['KEPALA_LPK']}><NilaiSiswa /></PrivateRoute>} />
+              <Route path="/kepalalpk/akademik/jurnal-mengajar" element={<PrivateRoute allowedRoles={['KEPALA_LPK']}><JurnalMengajar /></PrivateRoute>} />
+              <Route path="/kepalalpk/akademik/rekap-akademik" element={<PrivateRoute allowedRoles={['KEPALA_LPK']}><RekapAkademik /></PrivateRoute>} />
+              <Route path="/kepalalpk/akademik/cetak-laporan" element={<PrivateRoute allowedRoles={['KEPALA_LPK']}><CetakLaporan /></PrivateRoute>} />
+              <Route path="/kepalalpk/akademik/tahun-ajaran" element={<PrivateRoute allowedRoles={['KEPALA_LPK']}><TahunAjaran /></PrivateRoute>} />
+              <Route path="/kepalalpk/akademik/kurikulum" element={<PrivateRoute allowedRoles={['KEPALA_LPK']}><Kurikulum /></PrivateRoute>} />
             </Routes>
             <WhatsAppButton />
           </div>

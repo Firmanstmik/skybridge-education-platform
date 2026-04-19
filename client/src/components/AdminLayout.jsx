@@ -14,7 +14,18 @@ import {
     Moon,
     Users,
     Clock,
-    FileText
+    FileText,
+    GraduationCap,
+    School,
+    CalendarDays,
+    ClipboardCheck,
+    Award,
+    NotebookPen,
+    BarChart3,
+    Printer,
+    CalendarRange,
+    BookOpen,
+    ChevronDown
 } from 'lucide-react';
 import { BsFileEarmarkPdfFill, BsFileEarmarkExcelFill } from 'react-icons/bs';
 import Logo from '../assets/img/SKYBRIDGE_LOGO.webp';
@@ -25,6 +36,7 @@ import StudentPDF from './StudentPDF';
 const AdminLayout = ({ children }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [isAcademicMenuOpen, setIsAcademicMenuOpen] = useState(false);
   const [isDark, setIsDark] = useState(() => {
     if (typeof window === 'undefined') return false;
     return localStorage.getItem('admin-theme') === 'dark';
@@ -59,6 +71,30 @@ const AdminLayout = ({ children }) => {
   });
   const navigate = useNavigate();
   const location = useLocation();
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return undefined;
+
+    const vv = window.visualViewport;
+    if (!vv) return undefined;
+
+    const updateBottomOffset = () => {
+      const bottomOffset = Math.max(0, window.innerHeight - (vv.height + vv.offsetTop));
+      document.documentElement.style.setProperty('--vv-bottom', `${bottomOffset}px`);
+    };
+
+    updateBottomOffset();
+    vv.addEventListener('resize', updateBottomOffset);
+    vv.addEventListener('scroll', updateBottomOffset);
+    window.addEventListener('resize', updateBottomOffset);
+
+    return () => {
+      vv.removeEventListener('resize', updateBottomOffset);
+      vv.removeEventListener('scroll', updateBottomOffset);
+      window.removeEventListener('resize', updateBottomOffset);
+      document.documentElement.style.setProperty('--vv-bottom', '0px');
+    };
+  }, []);
 
   const [profileData, setProfileData] = useState({
     full_name: userInfo?.full_name || '',
@@ -333,6 +369,78 @@ const AdminLayout = ({ children }) => {
               </div>
             </div>
 
+            <div>
+              {!isSidebarCollapsed && (
+                <p className="px-2 mb-2 text-[11px] font-semibold tracking-[0.22em] text-slate-400 uppercase">
+                  Akademik
+                </p>
+              )}
+              <div className="space-y-1.5">
+                <button
+                  type="button"
+                  onClick={() => setIsAcademicMenuOpen((prev) => !prev)}
+                  className={`w-full flex items-center justify-between px-4 py-2.5 rounded-xl transition-all ${
+                    isAcademicMenuOpen
+                      ? 'bg-slate-100/70 dark:bg-slate-800/60 border border-slate-200/70 dark:border-slate-700/60'
+                      : 'hover:bg-slate-100/70 dark:hover:bg-slate-800/60 border border-transparent'
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <GraduationCap size={20} className="text-slate-400" />
+                    {!isSidebarCollapsed && (
+                      <span className="font-medium text-sm truncate text-slate-700 dark:text-slate-200">
+                        Akademik
+                      </span>
+                    )}
+                  </div>
+                  {!isSidebarCollapsed && (
+                    <ChevronDown
+                      size={16}
+                      className={`text-slate-400 transition-transform ${isAcademicMenuOpen ? 'rotate-180' : ''}`}
+                    />
+                  )}
+                </button>
+
+                {isAcademicMenuOpen && (
+                  <div className="space-y-3">
+                    <div className="space-y-1.5">
+                      {!isSidebarCollapsed && (
+                        <p className="px-4 pt-1 text-[10px] font-semibold tracking-[0.18em] text-slate-400 uppercase">
+                          Akademik
+                        </p>
+                      )}
+                      <SidebarItem icon={School} label="Data Kelas" to={`${basePath}/akademik/data-kelas`} />
+                      <SidebarItem icon={Users} label="Data Siswa" to={`${basePath}/akademik/data-siswa`} />
+                      <SidebarItem icon={CalendarDays} label="Jadwal Mengajar" to={`${basePath}/akademik/jadwal-mengajar`} />
+                      <SidebarItem icon={ClipboardCheck} label="Absensi Siswa" to={`${basePath}/akademik/absensi-siswa`} />
+                      <SidebarItem icon={Award} label="Nilai Siswa" to={`${basePath}/akademik/nilai-siswa`} />
+                      <SidebarItem icon={NotebookPen} label="Jurnal Mengajar" to={`${basePath}/akademik/jurnal-mengajar`} />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      {!isSidebarCollapsed && (
+                        <p className="px-4 pt-1 text-[10px] font-semibold tracking-[0.18em] text-slate-400 uppercase">
+                          Laporan Akademik
+                        </p>
+                      )}
+                      <SidebarItem icon={BarChart3} label="Rekap Akademik" to={`${basePath}/akademik/rekap-akademik`} />
+                      <SidebarItem icon={Printer} label="Cetak Laporan" to={`${basePath}/akademik/cetak-laporan`} />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      {!isSidebarCollapsed && (
+                        <p className="px-4 pt-1 text-[10px] font-semibold tracking-[0.18em] text-slate-400 uppercase">
+                          Pengaturan Akademik
+                        </p>
+                      )}
+                      <SidebarItem icon={CalendarRange} label="Tahun Ajaran" to={`${basePath}/akademik/tahun-ajaran`} />
+                      <SidebarItem icon={BookOpen} label="Kurikulum" to={`${basePath}/akademik/kurikulum`} />
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
             {(userRole === 'SUPER_ADMIN' || userRole === 'superadmin') && (
             <div>
               {!isSidebarCollapsed && (
@@ -409,6 +517,46 @@ const AdminLayout = ({ children }) => {
                 <SidebarItem icon={QrCode} label="Scan QR Code" to={`${basePath}/scan`} />
             )}
             <SidebarItem icon={FileText} label="Data Pendaftar" to={`${basePath}/students`} />
+
+            <div className="pt-2 border-t border-slate-200 dark:border-slate-800">
+              <button
+                type="button"
+                onClick={() => setIsAcademicMenuOpen((prev) => !prev)}
+                className="w-full flex items-center justify-between px-4 py-2.5 rounded-xl hover:bg-slate-100/70 dark:hover:bg-slate-800/60 transition-colors"
+              >
+                <span className="flex items-center gap-3">
+                  <GraduationCap size={18} className="text-slate-400" />
+                  <span className="font-semibold text-slate-700 dark:text-slate-200">Akademik</span>
+                </span>
+                <ChevronDown size={16} className={`text-slate-400 transition-transform ${isAcademicMenuOpen ? 'rotate-180' : ''}`} />
+              </button>
+
+              {isAcademicMenuOpen && (
+                <div className="mt-2 space-y-4">
+                  <div className="space-y-1.5">
+                    <p className="px-2 text-[10px] font-semibold tracking-wider text-slate-400 uppercase">Akademik</p>
+                    <SidebarItem icon={School} label="Data Kelas" to={`${basePath}/akademik/data-kelas`} />
+                    <SidebarItem icon={Users} label="Data Siswa" to={`${basePath}/akademik/data-siswa`} />
+                    <SidebarItem icon={CalendarDays} label="Jadwal Mengajar" to={`${basePath}/akademik/jadwal-mengajar`} />
+                    <SidebarItem icon={ClipboardCheck} label="Absensi Siswa" to={`${basePath}/akademik/absensi-siswa`} />
+                    <SidebarItem icon={Award} label="Nilai Siswa" to={`${basePath}/akademik/nilai-siswa`} />
+                    <SidebarItem icon={NotebookPen} label="Jurnal Mengajar" to={`${basePath}/akademik/jurnal-mengajar`} />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <p className="px-2 text-[10px] font-semibold tracking-wider text-slate-400 uppercase">Laporan Akademik</p>
+                    <SidebarItem icon={BarChart3} label="Rekap Akademik" to={`${basePath}/akademik/rekap-akademik`} />
+                    <SidebarItem icon={Printer} label="Cetak Laporan" to={`${basePath}/akademik/cetak-laporan`} />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <p className="px-2 text-[10px] font-semibold tracking-wider text-slate-400 uppercase">Pengaturan Akademik</p>
+                    <SidebarItem icon={CalendarRange} label="Tahun Ajaran" to={`${basePath}/akademik/tahun-ajaran`} />
+                    <SidebarItem icon={BookOpen} label="Kurikulum" to={`${basePath}/akademik/kurikulum`} />
+                  </div>
+                </div>
+              )}
+            </div>
             
             {(userRole === 'SUPER_ADMIN' || userRole === 'superadmin') && (
                 <SidebarItem icon={Users} label="Manajemen User" to="/admin/users" />
@@ -613,7 +761,13 @@ const AdminLayout = ({ children }) => {
           {children}
         </main>
 
-          <nav className="md:hidden fixed inset-x-0 bottom-0 z-40 border-t border-slate-200/80 dark:border-slate-800 bg-white/95 dark:bg-slate-950/95 backdrop-blur-xl">
+          <nav
+            className="md:hidden fixed inset-x-0 z-40 border-t border-slate-200/80 dark:border-slate-800 bg-white/95 dark:bg-slate-950/95 backdrop-blur-xl"
+            style={{
+              bottom: 'calc(var(--vv-bottom, 0px) + env(safe-area-inset-bottom))',
+              paddingBottom: 'env(safe-area-inset-bottom)',
+            }}
+          >
           <div className="flex items-center justify-between px-3 py-2">
             <button
               type="button"
