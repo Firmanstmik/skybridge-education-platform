@@ -5,20 +5,9 @@ import { ArrowRight, CheckCircle, BookOpen, Star, Clock, Globe, Award } from 'lu
 import { motion } from 'framer-motion';
 import HeroBg from '../assets/img/bg-internasional.webp';
 
+const MotionDiv = motion.div;
+
 const KursusBahasaJepang = () => {
-  const fadeUp = {
-    hidden: { opacity: 0, y: 30 },
-    show: { opacity: 1, y: 0, transition: { duration: 0.8, ease: [0.22, 1, 0.36, 1] } }
-  };
-
-  const container = {
-    hidden: { opacity: 0 },
-    show: {
-      opacity: 1,
-      transition: { staggerChildren: 0.1, delayChildren: 0.3 }
-    }
-  };
-
   return (
     <>
       <style>{`
@@ -218,7 +207,7 @@ const KursusBahasaJepang = () => {
         <Navbar />
 
         {/* HERO SECTION - BANNER STYLE */}
-        <motion.div 
+        <MotionDiv 
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
@@ -233,10 +222,10 @@ const KursusBahasaJepang = () => {
                 Belajar bahasa Jepang dari nol hingga mahir (JLPT N5 - N4) bersama SKYBRIDGE Nusantara International School.
                 Metode belajar interaktif, instruktur berpengalaman, and jaminan kualitas internasional.
             </p>
-        </motion.div>
+        </MotionDiv>
 
         {/* MAIN CARD SECTION */}
-        <motion.div 
+        <MotionDiv 
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.6, delay: 0.2 }}
@@ -349,7 +338,7 @@ const KursusBahasaJepang = () => {
               </div>
             </div>
           </div>
-        </motion.div>
+        </MotionDiv>
       </div>
     </>
   );

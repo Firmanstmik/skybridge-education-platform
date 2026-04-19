@@ -5,20 +5,9 @@ import { ArrowRight, CheckCircle, Briefcase, Star, MapPin, Building, ShieldCheck
 import { motion } from 'framer-motion';
 import HeroBg from '../assets/img/bg-internasional.webp';
 
+const MotionDiv = motion.div;
+
 const PelatihanKerjaJepang = () => {
-  const fadeUp = {
-    hidden: { opacity: 0, y: 30 },
-    show: { opacity: 1, y: 0, transition: { duration: 0.8, ease: [0.22, 1, 0.36, 1] } }
-  };
-
-  const container = {
-    hidden: { opacity: 0 },
-    show: {
-      opacity: 1,
-      transition: { staggerChildren: 0.1, delayChildren: 0.3 }
-    }
-  };
-
   return (
     <>
       <style>{`
@@ -210,7 +199,7 @@ const PelatihanKerjaJepang = () => {
         <Navbar />
 
         {/* HERO SECTION - BANNER STYLE */}
-        <motion.div 
+        <MotionDiv 
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
@@ -225,10 +214,10 @@ const PelatihanKerjaJepang = () => {
                 Persiapkan diri Anda untuk karir profesional di Jepang bersama SKYBRIDGE Nusantara International School. 
                 Program pelatihan kerja terintegrasi, sertifikasi kompetensi, dan jaminan penempatan kerja.
             </p>
-        </motion.div>
+        </MotionDiv>
 
         {/* MAIN CARD SECTION */}
-        <motion.div 
+        <MotionDiv 
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.6, delay: 0.2 }}
@@ -321,7 +310,7 @@ const PelatihanKerjaJepang = () => {
               </div>
             </div>
           </div>
-        </motion.div>
+        </MotionDiv>
       </div>
     </>
   );

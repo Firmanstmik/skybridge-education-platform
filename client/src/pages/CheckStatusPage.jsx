@@ -6,6 +6,8 @@ import { Search, IdCard } from 'lucide-react';
 import { motion } from 'framer-motion';
 import heroBg from '../assets/img/bg-internasional.webp';
 
+const MotionDiv = motion.div;
+
 const StatusInfoCard = () => {
     return (
         <div className="relative w-full max-w-sm mx-auto">
@@ -278,7 +280,7 @@ const CheckStatusPage = () => {
             `}</style>
             <Navbar />
             <div className="reg-root">
-                <motion.div 
+                <MotionDiv 
                     initial={{ opacity: 0, y: -20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.8 }}
@@ -293,9 +295,9 @@ const CheckStatusPage = () => {
                     <p className="banner-sub">
                         Masukkan Nomor Registrasi dan NIK kamu untuk melihat status pendaftaran yang sudah diproses oleh tim SKYBRIDGE.
                     </p>
-                </motion.div>
+                </MotionDiv>
 
-                <motion.div 
+                <MotionDiv 
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ duration: 0.6, delay: 0.2 }}
@@ -376,7 +378,7 @@ const CheckStatusPage = () => {
                             <StatusInfoCard />
                         </div>
                     </div>
-                </motion.div>
+                </MotionDiv>
             </div>
         </>
     );

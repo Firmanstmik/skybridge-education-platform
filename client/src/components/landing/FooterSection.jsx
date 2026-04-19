@@ -128,6 +128,8 @@ const FooterSection = () => {
                 { label: 'Kerja Jepang Tanpa Pengalaman', to: '/blog/kerja-jepang-tanpa-pengalaman' },
                 { label: 'Berapa Biaya Kursus Jepang?', to: '/blog/biaya-kursus-bahasa-jepang' },
                 { label: 'Tips Lolos Magang Jepang', to: '/blog/tips-lolos-magang-ke-jepang' },
+                { label: 'Magang Jepang vs SSW', to: '/blog/magang-jepang-itu-apa-bedanya-ssw' },
+                { label: 'Gaji Kerja di Jepang', to: '/blog/gaji-kerja-di-jepang-per-bulan' },
               ].map(({ label, to }) => (
                 <li key={to}>
                   <Link

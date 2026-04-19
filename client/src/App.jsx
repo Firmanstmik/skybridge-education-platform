@@ -21,6 +21,13 @@ import BelajarBahasaJepangDariNol from './pages/BelajarBahasaJepangDariNol';
 import KerjaJepangTanpaPengalaman from './pages/blog/KerjaJepangTanpaPengalaman';
 import BiayaKursusJepang from './pages/blog/BiayaKursusJepang';
 import TipsLolosMagang from './pages/blog/TipsLolosMagang';
+import MagangJepangVsSSW from './pages/blog/MagangJepangVsSSW';
+import SyaratMagangJepangTerbaru from './pages/blog/SyaratMagangJepangTerbaru';
+import TahapanSeleksiMagangJepang from './pages/blog/TahapanSeleksiMagangJepang';
+import GajiMagangJepangBersih from './pages/blog/GajiMagangJepangBersih';
+import TokuteiGinouSSWItuApa from './pages/blog/TokuteiGinouSSWItuApa';
+import GajiKerjaDiJepangPerBulan from './pages/blog/GajiKerjaDiJepangPerBulan';
+import KurikulumBelajarJepangUntukKerja3Bulan from './pages/blog/KurikulumBelajarJepangUntukKerja3Bulan';
 import ScrollToTop from './components/ScrollToTop';
 import WhatsAppButton from './components/WhatsAppButton';
 
@@ -49,6 +56,13 @@ function App() {
               <Route path="/blog/kerja-jepang-tanpa-pengalaman" element={<KerjaJepangTanpaPengalaman />} />
               <Route path="/blog/biaya-kursus-bahasa-jepang" element={<BiayaKursusJepang />} />
               <Route path="/blog/tips-lolos-magang-ke-jepang" element={<TipsLolosMagang />} />
+              <Route path="/blog/magang-jepang-itu-apa-bedanya-ssw" element={<MagangJepangVsSSW />} />
+              <Route path="/blog/syarat-magang-jepang-terbaru" element={<SyaratMagangJepangTerbaru />} />
+              <Route path="/blog/tahapan-seleksi-magang-jepang" element={<TahapanSeleksiMagangJepang />} />
+              <Route path="/blog/magang-jepang-gaji-berapa-hitungan-bersih" element={<GajiMagangJepangBersih />} />
+              <Route path="/blog/tokutei-ginou-ssw-itu-apa" element={<TokuteiGinouSSWItuApa />} />
+              <Route path="/blog/gaji-kerja-di-jepang-per-bulan" element={<GajiKerjaDiJepangPerBulan />} />
+              <Route path="/blog/kurikulum-belajar-bahasa-jepang-untuk-kerja-3-bulan" element={<KurikulumBelajarJepangUntukKerja3Bulan />} />
 
               <Route path="/admin/login" element={<AdminLogin />} />
               <Route path="/staff/login" element={<AdminLogin />} />

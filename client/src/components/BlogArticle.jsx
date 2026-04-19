@@ -1,9 +1,127 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import Navbar from './Navbar';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { ArrowLeft, Calendar, User, Tag } from 'lucide-react';
 
-const BlogArticle = ({ title, content, date, author, category, image }) => {
+const SITE_URL = 'https://www.skybridgenisantara.com';
+
+const upsertMetaTag = ({ selector, attrs }) => {
+  let el = document.head.querySelector(selector);
+  if (!el) {
+    el = document.createElement('meta');
+    document.head.appendChild(el);
+  }
+  Object.entries(attrs).forEach(([key, value]) => {
+    if (value === undefined || value === null || value === '') return;
+    el.setAttribute(key, value);
+  });
+};
+
+const upsertLinkTag = ({ selector, attrs }) => {
+  let el = document.head.querySelector(selector);
+  if (!el) {
+    el = document.createElement('link');
+    document.head.appendChild(el);
+  }
+  Object.entries(attrs).forEach(([key, value]) => {
+    if (value === undefined || value === null || value === '') return;
+    el.setAttribute(key, value);
+  });
+};
+
+const upsertJsonLd = (jsonLd) => {
+  if (!jsonLd) return;
+  const id = 'page-jsonld';
+  let el = document.head.querySelector(`script#${id}`);
+  if (!el) {
+    el = document.createElement('script');
+    el.type = 'application/ld+json';
+    el.id = id;
+    document.head.appendChild(el);
+  }
+  el.text = JSON.stringify(jsonLd);
+};
+
+const BlogArticle = ({
+  title,
+  content,
+  date,
+  author,
+  category,
+  image,
+  metaTitle,
+  metaDescription,
+  metaKeywords,
+  canonicalUrl,
+  ogImage,
+  jsonLd,
+}) => {
+  const location = useLocation();
+
+  useEffect(() => {
+    const resolvedCanonicalUrl = canonicalUrl || `${SITE_URL}${location.pathname}`;
+    const resolvedMetaTitle = metaTitle || title;
+    const resolvedMetaDescription = metaDescription || '';
+    const resolvedOgImage = ogImage || image;
+
+    if (resolvedMetaTitle) document.title = resolvedMetaTitle;
+
+    upsertLinkTag({
+      selector: 'link[rel="canonical"]',
+      attrs: { rel: 'canonical', href: resolvedCanonicalUrl },
+    });
+
+    upsertMetaTag({
+      selector: 'meta[name="description"]',
+      attrs: { name: 'description', content: resolvedMetaDescription },
+    });
+
+    upsertMetaTag({
+      selector: 'meta[name="keywords"]',
+      attrs: { name: 'keywords', content: metaKeywords || '' },
+    });
+
+    upsertMetaTag({
+      selector: 'meta[property="og:type"]',
+      attrs: { property: 'og:type', content: 'article' },
+    });
+    upsertMetaTag({
+      selector: 'meta[property="og:title"]',
+      attrs: { property: 'og:title', content: resolvedMetaTitle },
+    });
+    upsertMetaTag({
+      selector: 'meta[property="og:description"]',
+      attrs: { property: 'og:description', content: resolvedMetaDescription },
+    });
+    upsertMetaTag({
+      selector: 'meta[property="og:url"]',
+      attrs: { property: 'og:url', content: resolvedCanonicalUrl },
+    });
+    upsertMetaTag({
+      selector: 'meta[property="og:image"]',
+      attrs: { property: 'og:image', content: resolvedOgImage || '' },
+    });
+
+    upsertMetaTag({
+      selector: 'meta[name="twitter:card"]',
+      attrs: { name: 'twitter:card', content: 'summary_large_image' },
+    });
+    upsertMetaTag({
+      selector: 'meta[name="twitter:title"]',
+      attrs: { name: 'twitter:title', content: resolvedMetaTitle },
+    });
+    upsertMetaTag({
+      selector: 'meta[name="twitter:description"]',
+      attrs: { name: 'twitter:description', content: resolvedMetaDescription },
+    });
+    upsertMetaTag({
+      selector: 'meta[name="twitter:image"]',
+      attrs: { name: 'twitter:image', content: resolvedOgImage || '' },
+    });
+
+    upsertJsonLd(jsonLd);
+  }, [location.pathname, canonicalUrl, metaTitle, metaDescription, metaKeywords, ogImage, image, jsonLd, title]);
+
   return (
     <div className="bg-white min-h-screen font-sans">
       <Navbar />

@@ -13,6 +13,8 @@ import Logo from '../assets/img/SKYBRIDGE_LOGO.webp';
 import heroBg from '../assets/img/bg-internasional.webp';
 import { motion } from 'framer-motion';
 
+const MotionDiv = motion.div;
+
 /* ─── Zod Schema (unchanged) ─── */
 const rowSchema = (lvl, required) =>
   z.object({
@@ -1026,7 +1028,7 @@ const RegisterPage = () => {
         <Navbar />
 
         {/* ── Banner ── */}
-        <motion.div 
+        <MotionDiv 
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
@@ -1041,10 +1043,9 @@ const RegisterPage = () => {
           <p className="banner-sub">
             SKYBRIDGE Nusantara International School — Wujudkan mimpimu bekerja di Jepang
           </p>
-        </motion.div>
+        </MotionDiv>
 
-        {/* ── Card ── */}
-        <motion.div 
+        <MotionDiv
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.6, delay: 0.2 }}
@@ -1616,7 +1617,7 @@ const RegisterPage = () => {
               </form>
             </div>
           </div>
-        </motion.div>
+        </MotionDiv>
       </div>
     </>
   );
