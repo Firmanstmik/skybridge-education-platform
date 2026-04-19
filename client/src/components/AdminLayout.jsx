@@ -75,23 +75,56 @@ const AdminLayout = ({ children }) => {
   useEffect(() => {
     if (typeof window === 'undefined') return undefined;
 
-    const vv = window.visualViewport;
-    if (!vv) return undefined;
-
     const updateBottomOffset = () => {
-      const bottomOffset = Math.max(0, window.innerHeight - (vv.height + vv.offsetTop));
+      const vv = window.visualViewport;
+      const viewportHeight = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0);
+
+      const vvHeight = vv?.height ?? window.innerHeight ?? 0;
+      const vvTop = vv?.offsetTop ?? 0;
+
+      const vvBottomOffset = Math.max(0, viewportHeight - (vvHeight + vvTop));
+      const ua = navigator.userAgent || '';
+      const isAndroid = /Android/i.test(ua);
+      const chromeOverlayGuess = Math.min(56, Math.max(0, (window.outerHeight || 0) - (window.innerHeight || 0)));
+      const fallbackOffset = Math.max(isAndroid ? 56 : 0, chromeOverlayGuess);
+      const bottomOffset = Math.max(vvBottomOffset, fallbackOffset);
+
       document.documentElement.style.setProperty('--vv-bottom', `${bottomOffset}px`);
     };
 
     updateBottomOffset();
-    vv.addEventListener('resize', updateBottomOffset);
-    vv.addEventListener('scroll', updateBottomOffset);
+
+    const vv = window.visualViewport;
+    vv?.addEventListener('resize', updateBottomOffset);
+    vv?.addEventListener('scroll', updateBottomOffset);
     window.addEventListener('resize', updateBottomOffset);
+    window.addEventListener('orientationchange', updateBottomOffset);
+
+    let rafId = 0;
+    let frame = 0;
+    const rafLoop = () => {
+      updateBottomOffset();
+      frame += 1;
+      if (frame < 10) rafId = window.requestAnimationFrame(rafLoop);
+    };
+    rafId = window.requestAnimationFrame(rafLoop);
+    const t1 = window.setTimeout(updateBottomOffset, 250);
+    const t2 = window.setTimeout(updateBottomOffset, 800);
+
+    const onVisibility = () => {
+      if (!document.hidden) updateBottomOffset();
+    };
+    document.addEventListener('visibilitychange', onVisibility);
 
     return () => {
-      vv.removeEventListener('resize', updateBottomOffset);
-      vv.removeEventListener('scroll', updateBottomOffset);
+      vv?.removeEventListener('resize', updateBottomOffset);
+      vv?.removeEventListener('scroll', updateBottomOffset);
       window.removeEventListener('resize', updateBottomOffset);
+      window.removeEventListener('orientationchange', updateBottomOffset);
+      document.removeEventListener('visibilitychange', onVisibility);
+      window.clearTimeout(t1);
+      window.clearTimeout(t2);
+      window.cancelAnimationFrame(rafId);
       document.documentElement.style.setProperty('--vv-bottom', '0px');
     };
   }, []);
@@ -274,21 +307,25 @@ const AdminLayout = ({ children }) => {
       }
   };
 
-  const SidebarItem = ({ icon: Icon, label, to, onClick, iconColor, customIconClass }) => {
+  const SidebarItem = ({ icon: Icon, label, to, onClick, iconColor, customIconClass, variant = 'default' }) => {
       const active = location.pathname === to;
+      const isSub = variant === 'sub';
       const content = (
-          <div className={`flex items-center gap-3 px-4 py-2.5 cursor-pointer rounded-xl transition-all ${
+          <div className={`flex items-center ${isSub ? 'gap-2.5 px-3 py-2' : 'gap-3 px-4 py-2.5'} cursor-pointer rounded-xl transition-all ${
               active 
                 ? 'bg-gradient-to-r from-red-500/10 via-red-500/5 to-transparent text-dory-red border border-red-100 dark:border-red-500/40' 
                 : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100/70 dark:hover:bg-slate-800/60 border border-transparent'
           }`}>
+              {isSub && (
+                <span className={`h-1.5 w-1.5 rounded-full ${active ? 'bg-red-500' : 'bg-slate-300 dark:bg-slate-700'}`} />
+              )}
               <Icon 
-                size={20} 
+                size={isSub ? 18 : 20} 
                 className={customIconClass || (active ? 'text-dory-red' : 'text-slate-400')} 
                 style={iconColor ? { color: iconColor } : {}}
               />
               {!isSidebarCollapsed && (
-                <span className="font-medium text-sm truncate">{label}</span>
+                <span className={`${isSub ? 'text-[13px]' : 'text-sm'} font-medium truncate`}>{label}</span>
               )}
           </div>
       );
@@ -379,14 +416,16 @@ const AdminLayout = ({ children }) => {
                 <button
                   type="button"
                   onClick={() => setIsAcademicMenuOpen((prev) => !prev)}
-                  className={`w-full flex items-center justify-between px-4 py-2.5 rounded-xl transition-all ${
+                  className={`w-full flex items-center justify-between px-4 py-2.5 rounded-2xl transition-all ${
                     isAcademicMenuOpen
-                      ? 'bg-slate-100/70 dark:bg-slate-800/60 border border-slate-200/70 dark:border-slate-700/60'
-                      : 'hover:bg-slate-100/70 dark:hover:bg-slate-800/60 border border-transparent'
+                      ? 'bg-white/80 dark:bg-slate-950/40 border border-slate-200/70 dark:border-slate-800/60 shadow-sm'
+                      : 'hover:bg-white/70 dark:hover:bg-slate-950/30 border border-transparent'
                   }`}
                 >
                   <div className="flex items-center gap-3">
-                    <GraduationCap size={20} className="text-slate-400" />
+                    <div className="h-9 w-9 rounded-2xl bg-slate-100 dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 flex items-center justify-center">
+                      <GraduationCap size={18} className="text-slate-500 dark:text-slate-300" />
+                    </div>
                     {!isSidebarCollapsed && (
                       <span className="font-medium text-sm truncate text-slate-700 dark:text-slate-200">
                         Akademik
@@ -402,39 +441,39 @@ const AdminLayout = ({ children }) => {
                 </button>
 
                 {isAcademicMenuOpen && (
-                  <div className="space-y-3">
-                    <div className="space-y-1.5">
+                  <div className="rounded-2xl border border-slate-200/70 dark:border-slate-800/60 bg-white/70 dark:bg-slate-950/30 p-2 space-y-2">
+                    <div className="rounded-xl bg-slate-50/80 dark:bg-slate-900/40 border border-slate-100 dark:border-slate-800 px-2 py-2 space-y-1.5">
                       {!isSidebarCollapsed && (
-                        <p className="px-4 pt-1 text-[10px] font-semibold tracking-[0.18em] text-slate-400 uppercase">
+                        <p className="px-2 pt-1 text-[10px] font-semibold tracking-[0.18em] text-slate-400 uppercase">
                           Akademik
                         </p>
                       )}
-                      <SidebarItem icon={School} label="Data Kelas" to={`${basePath}/akademik/data-kelas`} />
-                      <SidebarItem icon={Users} label="Data Siswa" to={`${basePath}/akademik/data-siswa`} />
-                      <SidebarItem icon={CalendarDays} label="Jadwal Mengajar" to={`${basePath}/akademik/jadwal-mengajar`} />
-                      <SidebarItem icon={ClipboardCheck} label="Absensi Siswa" to={`${basePath}/akademik/absensi-siswa`} />
-                      <SidebarItem icon={Award} label="Nilai Siswa" to={`${basePath}/akademik/nilai-siswa`} />
-                      <SidebarItem icon={NotebookPen} label="Jurnal Mengajar" to={`${basePath}/akademik/jurnal-mengajar`} />
+                      <SidebarItem icon={School} label="Data Kelas" to={`${basePath}/akademik/data-kelas`} variant="sub" />
+                      <SidebarItem icon={Users} label="Data Siswa" to={`${basePath}/akademik/data-siswa`} variant="sub" />
+                      <SidebarItem icon={CalendarDays} label="Jadwal Mengajar" to={`${basePath}/akademik/jadwal-mengajar`} variant="sub" />
+                      <SidebarItem icon={ClipboardCheck} label="Absensi Siswa" to={`${basePath}/akademik/absensi-siswa`} variant="sub" />
+                      <SidebarItem icon={Award} label="Nilai Siswa" to={`${basePath}/akademik/nilai-siswa`} variant="sub" />
+                      <SidebarItem icon={NotebookPen} label="Jurnal Mengajar" to={`${basePath}/akademik/jurnal-mengajar`} variant="sub" />
                     </div>
 
-                    <div className="space-y-1.5">
+                    <div className="rounded-xl bg-slate-50/80 dark:bg-slate-900/40 border border-slate-100 dark:border-slate-800 px-2 py-2 space-y-1.5">
                       {!isSidebarCollapsed && (
-                        <p className="px-4 pt-1 text-[10px] font-semibold tracking-[0.18em] text-slate-400 uppercase">
+                        <p className="px-2 pt-1 text-[10px] font-semibold tracking-[0.18em] text-slate-400 uppercase">
                           Laporan Akademik
                         </p>
                       )}
-                      <SidebarItem icon={BarChart3} label="Rekap Akademik" to={`${basePath}/akademik/rekap-akademik`} />
-                      <SidebarItem icon={Printer} label="Cetak Laporan" to={`${basePath}/akademik/cetak-laporan`} />
+                      <SidebarItem icon={BarChart3} label="Rekap Akademik" to={`${basePath}/akademik/rekap-akademik`} variant="sub" />
+                      <SidebarItem icon={Printer} label="Cetak Laporan" to={`${basePath}/akademik/cetak-laporan`} variant="sub" />
                     </div>
 
-                    <div className="space-y-1.5">
+                    <div className="rounded-xl bg-slate-50/80 dark:bg-slate-900/40 border border-slate-100 dark:border-slate-800 px-2 py-2 space-y-1.5">
                       {!isSidebarCollapsed && (
-                        <p className="px-4 pt-1 text-[10px] font-semibold tracking-[0.18em] text-slate-400 uppercase">
+                        <p className="px-2 pt-1 text-[10px] font-semibold tracking-[0.18em] text-slate-400 uppercase">
                           Pengaturan Akademik
                         </p>
                       )}
-                      <SidebarItem icon={CalendarRange} label="Tahun Ajaran" to={`${basePath}/akademik/tahun-ajaran`} />
-                      <SidebarItem icon={BookOpen} label="Kurikulum" to={`${basePath}/akademik/kurikulum`} />
+                      <SidebarItem icon={CalendarRange} label="Tahun Ajaran" to={`${basePath}/akademik/tahun-ajaran`} variant="sub" />
+                      <SidebarItem icon={BookOpen} label="Kurikulum" to={`${basePath}/akademik/kurikulum`} variant="sub" />
                     </div>
                   </div>
                 )}
@@ -522,37 +561,43 @@ const AdminLayout = ({ children }) => {
               <button
                 type="button"
                 onClick={() => setIsAcademicMenuOpen((prev) => !prev)}
-                className="w-full flex items-center justify-between px-4 py-2.5 rounded-xl hover:bg-slate-100/70 dark:hover:bg-slate-800/60 transition-colors"
+                className={`w-full flex items-center justify-between px-4 py-3 rounded-2xl transition-all ${
+                  isAcademicMenuOpen
+                    ? 'bg-white/80 dark:bg-slate-950/40 border border-slate-200/70 dark:border-slate-800/60 shadow-sm'
+                    : 'hover:bg-white/70 dark:hover:bg-slate-950/30'
+                }`}
               >
                 <span className="flex items-center gap-3">
-                  <GraduationCap size={18} className="text-slate-400" />
+                  <div className="h-9 w-9 rounded-2xl bg-slate-100 dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 flex items-center justify-center">
+                    <GraduationCap size={18} className="text-slate-500 dark:text-slate-300" />
+                  </div>
                   <span className="font-semibold text-slate-700 dark:text-slate-200">Akademik</span>
                 </span>
                 <ChevronDown size={16} className={`text-slate-400 transition-transform ${isAcademicMenuOpen ? 'rotate-180' : ''}`} />
               </button>
 
               {isAcademicMenuOpen && (
-                <div className="mt-2 space-y-4">
-                  <div className="space-y-1.5">
-                    <p className="px-2 text-[10px] font-semibold tracking-wider text-slate-400 uppercase">Akademik</p>
-                    <SidebarItem icon={School} label="Data Kelas" to={`${basePath}/akademik/data-kelas`} />
-                    <SidebarItem icon={Users} label="Data Siswa" to={`${basePath}/akademik/data-siswa`} />
-                    <SidebarItem icon={CalendarDays} label="Jadwal Mengajar" to={`${basePath}/akademik/jadwal-mengajar`} />
-                    <SidebarItem icon={ClipboardCheck} label="Absensi Siswa" to={`${basePath}/akademik/absensi-siswa`} />
-                    <SidebarItem icon={Award} label="Nilai Siswa" to={`${basePath}/akademik/nilai-siswa`} />
-                    <SidebarItem icon={NotebookPen} label="Jurnal Mengajar" to={`${basePath}/akademik/jurnal-mengajar`} />
+                <div className="mt-3 rounded-2xl border border-slate-200/70 dark:border-slate-800/60 bg-white/70 dark:bg-slate-950/30 p-2 space-y-2">
+                  <div className="rounded-xl bg-slate-50/80 dark:bg-slate-900/40 border border-slate-100 dark:border-slate-800 px-2 py-2 space-y-1.5">
+                    <p className="px-2 pt-1 text-[10px] font-semibold tracking-wider text-slate-400 uppercase">Akademik</p>
+                    <SidebarItem icon={School} label="Data Kelas" to={`${basePath}/akademik/data-kelas`} variant="sub" />
+                    <SidebarItem icon={Users} label="Data Siswa" to={`${basePath}/akademik/data-siswa`} variant="sub" />
+                    <SidebarItem icon={CalendarDays} label="Jadwal Mengajar" to={`${basePath}/akademik/jadwal-mengajar`} variant="sub" />
+                    <SidebarItem icon={ClipboardCheck} label="Absensi Siswa" to={`${basePath}/akademik/absensi-siswa`} variant="sub" />
+                    <SidebarItem icon={Award} label="Nilai Siswa" to={`${basePath}/akademik/nilai-siswa`} variant="sub" />
+                    <SidebarItem icon={NotebookPen} label="Jurnal Mengajar" to={`${basePath}/akademik/jurnal-mengajar`} variant="sub" />
                   </div>
 
-                  <div className="space-y-1.5">
-                    <p className="px-2 text-[10px] font-semibold tracking-wider text-slate-400 uppercase">Laporan Akademik</p>
-                    <SidebarItem icon={BarChart3} label="Rekap Akademik" to={`${basePath}/akademik/rekap-akademik`} />
-                    <SidebarItem icon={Printer} label="Cetak Laporan" to={`${basePath}/akademik/cetak-laporan`} />
+                  <div className="rounded-xl bg-slate-50/80 dark:bg-slate-900/40 border border-slate-100 dark:border-slate-800 px-2 py-2 space-y-1.5">
+                    <p className="px-2 pt-1 text-[10px] font-semibold tracking-wider text-slate-400 uppercase">Laporan Akademik</p>
+                    <SidebarItem icon={BarChart3} label="Rekap Akademik" to={`${basePath}/akademik/rekap-akademik`} variant="sub" />
+                    <SidebarItem icon={Printer} label="Cetak Laporan" to={`${basePath}/akademik/cetak-laporan`} variant="sub" />
                   </div>
 
-                  <div className="space-y-1.5">
-                    <p className="px-2 text-[10px] font-semibold tracking-wider text-slate-400 uppercase">Pengaturan Akademik</p>
-                    <SidebarItem icon={CalendarRange} label="Tahun Ajaran" to={`${basePath}/akademik/tahun-ajaran`} />
-                    <SidebarItem icon={BookOpen} label="Kurikulum" to={`${basePath}/akademik/kurikulum`} />
+                  <div className="rounded-xl bg-slate-50/80 dark:bg-slate-900/40 border border-slate-100 dark:border-slate-800 px-2 py-2 space-y-1.5">
+                    <p className="px-2 pt-1 text-[10px] font-semibold tracking-wider text-slate-400 uppercase">Pengaturan Akademik</p>
+                    <SidebarItem icon={CalendarRange} label="Tahun Ajaran" to={`${basePath}/akademik/tahun-ajaran`} variant="sub" />
+                    <SidebarItem icon={BookOpen} label="Kurikulum" to={`${basePath}/akademik/kurikulum`} variant="sub" />
                   </div>
                 </div>
               )}
