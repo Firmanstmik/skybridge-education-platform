@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { toPng } from 'html-to-image';
 import { toast } from 'react-hot-toast';
 import KpiCard from './KpiCard';
 import { 
@@ -34,6 +33,7 @@ const KepalaLpkDashboard = () => {
         // Wait for animation to complete (longer delay for labels)
         await new Promise(resolve => setTimeout(resolve, 1500));
 
+        const { toPng } = await import('html-to-image');
         const dataUrl = await toPng(chartRef.current, {
           cacheBust: true,
           pixelRatio: 3, // HD Quality

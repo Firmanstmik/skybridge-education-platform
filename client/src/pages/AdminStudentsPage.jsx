@@ -98,7 +98,7 @@ const MobileStudentCard = ({ student, canDelete, onDeleteStudent, onDownloadStud
       <div className="flex items-center gap-3">
         <div className="h-10 w-10 rounded-full overflow-hidden border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800">
           {student.photo_path ? (
-            <img src={`/${student.photo_path.replace(/\\/g, '/')}`} alt="Foto" className="h-full w-full object-cover" />
+            <img src={`/${student.photo_path.replace(/\\/g, '/')}`} alt="Foto" loading="lazy" decoding="async" className="h-full w-full object-cover" />
           ) : (
             <div className="h-full w-full flex items-center justify-center text-slate-400">
               <User size={20} />
@@ -174,31 +174,58 @@ const AdminStudentsPage = () => {
         try {
             const payload = JSON.parse(atob(token.split('.')[1]));
             setUserRole(payload.role);
-        } catch (e) {
-            console.error('Failed to parse token', e);
+        } catch (_e) {
+            console.error('Failed to parse token', _e);
         }
     }
   }, []);
 
   // Stats calculation
   const stats = useMemo(() => {
-    return {
-      total: students.length,
-      pending: students.filter(s => s.status === 'Menunggu Verifikasi').length,
-      accepted: students.filter(s => s.status === 'Diterima').length,
-      rejected: students.filter(s => s.status === 'Ditolak').length
-    };
+    const result = { total: 0, pending: 0, accepted: 0, rejected: 0 };
+    for (const s of students) {
+      result.total += 1;
+      if (s.status === 'Menunggu Verifikasi') result.pending += 1;
+      if (s.status === 'Diterima') result.accepted += 1;
+      if (s.status === 'Ditolak') result.rejected += 1;
+    }
+    return result;
   }, [students]);
 
   const fetchStudents = async () => {
+    const cacheKey = 'students_cache_v1';
+    const cacheTtlMs = 60_000;
+    const setFromCache = () => {
+      try {
+        const raw = sessionStorage.getItem(cacheKey);
+        if (!raw) return false;
+        const parsed = JSON.parse(raw);
+        if (!parsed || !Array.isArray(parsed.data) || typeof parsed.ts !== 'number') return false;
+        if (Date.now() - parsed.ts > cacheTtlMs) return false;
+        setStudents(parsed.data);
+        setFiltered(parsed.data);
+        setIsLoading(false);
+        return true;
+      } catch (_e) {
+        return false;
+      }
+    };
+
     try {
       const token = localStorage.getItem('token');
+      setIsLoading(true);
+      setFromCache();
       const response = await axios.get('/api/students', {
         headers: { Authorization: `Bearer ${token}` }
       });
       setStudents(response.data);
       setFiltered(response.data);
       setIsLoading(false);
+
+      try {
+        sessionStorage.setItem(cacheKey, JSON.stringify({ ts: Date.now(), data: response.data }));
+      } catch (_e) {
+      }
     } catch (error) {
       console.error('Error fetching students:', error);
       toast.error('Gagal memuat data pendaftar');

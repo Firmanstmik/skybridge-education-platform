@@ -1,6 +1,5 @@
-import { useEffect, useMemo, useState, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 import axios from 'axios';
-import { toPng } from 'html-to-image';
 import { toast } from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import { 
@@ -33,6 +32,8 @@ import {
 import { motion } from 'framer-motion';
 import KpiCard from './KpiCard';
 
+const MotionDiv = motion.div;
+
 const SuperAdminDashboard = () => {
   const [students, setStudents] = useState([]);
   const [filteredStudents, setFilteredStudents] = useState([]);
@@ -50,6 +51,7 @@ const SuperAdminDashboard = () => {
         // Wait for animation to complete (longer delay for labels)
         await new Promise(resolve => setTimeout(resolve, 1500));
 
+        const { toPng } = await import('html-to-image');
         const dataUrl = await toPng(chartRef.current, {
           cacheBust: true,
           pixelRatio: 3, // HD Quality
@@ -105,10 +107,6 @@ const SuperAdminDashboard = () => {
   };
 
   useEffect(() => {
-    fetchStudents();
-  }, []);
-
-  useEffect(() => {
     let result = students;
 
     if (filterStatus !== 'All') {
@@ -127,36 +125,82 @@ const SuperAdminDashboard = () => {
     setFilteredStudents(limited);
   }, [students, filterStatus, searchTerm]);
 
-  const fetchStudents = async () => {
+  const fetchStudents = useCallback(async () => {
     const token = localStorage.getItem('token');
     if (!token) {
         navigate('/admin/login');
         return;
     }
+
+    const cacheKey = 'students_cache_v1';
+    const cacheTtlMs = 60_000;
+    const setFromCache = () => {
+      try {
+        const raw = sessionStorage.getItem(cacheKey);
+        if (!raw) return false;
+        const parsed = JSON.parse(raw);
+        if (!parsed || !Array.isArray(parsed.data) || typeof parsed.ts !== 'number') return false;
+        if (Date.now() - parsed.ts > cacheTtlMs) return false;
+        setStudents(parsed.data);
+        setFilteredStudents(parsed.data.slice(0, 6));
+        const counts = parsed.data.reduce(
+          (acc, s) => {
+            acc.total += 1;
+            if (s.status === 'Menunggu Verifikasi') acc.pending += 1;
+            if (s.status === 'Diterima') acc.accepted += 1;
+            if (s.status === 'Ditolak') acc.rejected += 1;
+            return acc;
+          },
+          { total: 0, pending: 0, accepted: 0, rejected: 0 }
+        );
+        setStats(counts);
+        setLoading(false);
+        return true;
+      } catch (_e) {
+        return false;
+      }
+    };
     try {
       setLoading(true);
+      setFromCache();
+
       const { data } = await axios.get('/api/students', {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${token}` },
       });
+
       setStudents(data);
       setFilteredStudents(data.slice(0, 6));
-      
-      const total = data.length;
-      const pending = data.filter(s => s.status === 'Menunggu Verifikasi').length;
-      const accepted = data.filter(s => s.status === 'Diterima').length;
-      const rejected = data.filter(s => s.status === 'Ditolak').length;
-      
-      setStats({ total, pending, accepted, rejected });
+
+      try {
+        sessionStorage.setItem(cacheKey, JSON.stringify({ ts: Date.now(), data }));
+      } catch (_e) {
+      }
+
+      const counts = data.reduce(
+        (acc, s) => {
+          acc.total += 1;
+          if (s.status === 'Menunggu Verifikasi') acc.pending += 1;
+          if (s.status === 'Diterima') acc.accepted += 1;
+          if (s.status === 'Ditolak') acc.rejected += 1;
+          return acc;
+        },
+        { total: 0, pending: 0, accepted: 0, rejected: 0 }
+      );
+      setStats(counts);
     } catch (error) {
       console.error(error);
       if (error.response && error.response.status === 401) {
-          localStorage.removeItem('token');
-          navigate('/admin/login');
+        localStorage.removeItem('token');
+        navigate('/admin/login');
       }
     } finally {
       setLoading(false);
     }
-  };
+  }, [navigate]);
+
+  useEffect(() => {
+    fetchStudents();
+  }, [fetchStudents]);
 
   const todayStats = useMemo(() => {
     const today = new Date();
@@ -653,14 +697,6 @@ const SuperAdminDashboard = () => {
         </div>
       </div>
 
-      <button
-        type="button"
-        onClick={() => navigate('/admin/scan')}
-        className="md:hidden fixed bottom-16 right-4 z-30 inline-flex items-center justify-center px-4 py-3 rounded-full shadow-lg shadow-red-500/40 bg-gradient-to-r from-red-500 via-rose-500 to-red-600 text-white text-sm font-semibold gap-2 active:scale-[0.97] transition-transform"
-      >
-        <QrCode size={18} />
-        <span>Scan QR Pendaftar</span>
-      </button>
     </div>
   );
 };
@@ -692,7 +728,7 @@ const StatusBadge = ({ status }) => {
 
 const MobileStudentCard = ({ student, onDetail }) => {
   return (
-    <motion.div
+    <MotionDiv
       layout
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
@@ -742,7 +778,7 @@ const MobileStudentCard = ({ student, onDetail }) => {
           </button>
         </div>
       </div>
-    </motion.div>
+    </MotionDiv>
   );
 };
 

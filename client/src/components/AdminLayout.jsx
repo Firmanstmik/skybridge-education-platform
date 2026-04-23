@@ -30,8 +30,6 @@ import {
 import { BsFileEarmarkPdfFill, BsFileEarmarkExcelFill } from 'react-icons/bs';
 import Logo from '../assets/img/SKYBRIDGE_LOGO.webp';
 import axios from 'axios';
-import { pdf } from '@react-pdf/renderer';
-import StudentPDF from './StudentPDF';
 
 const AdminLayout = ({ children }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -77,19 +75,15 @@ const AdminLayout = ({ children }) => {
 
     const updateBottomOffset = () => {
       const vv = window.visualViewport;
-      const viewportHeight = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0);
+      if (!vv) {
+        document.documentElement.style.setProperty('--vv-bottom', '0px');
+        return;
+      }
 
-      const vvHeight = vv?.height ?? window.innerHeight ?? 0;
-      const vvTop = vv?.offsetTop ?? 0;
-
-      const vvBottomOffset = Math.max(0, viewportHeight - (vvHeight + vvTop));
-      const ua = navigator.userAgent || '';
-      const isAndroid = /Android/i.test(ua);
-      const chromeOverlayGuess = Math.min(56, Math.max(0, (window.outerHeight || 0) - (window.innerHeight || 0)));
-      const fallbackOffset = Math.max(isAndroid ? 56 : 0, chromeOverlayGuess);
-      const bottomOffset = Math.max(vvBottomOffset, fallbackOffset);
-
-      document.documentElement.style.setProperty('--vv-bottom', `${bottomOffset}px`);
+      const layoutHeight = document.documentElement.clientHeight || window.innerHeight || 0;
+      const rawOffset = Math.max(0, layoutHeight - (vv.height + vv.offsetTop));
+      const bottomOffset = Math.min(120, rawOffset);
+      document.documentElement.style.setProperty('--vv-bottom', `${Math.round(bottomOffset)}px`);
     };
 
     updateBottomOffset();
@@ -292,6 +286,11 @@ const AdminLayout = ({ children }) => {
               return;
           }
 
+          const [{ pdf }, { default: StudentPDF }] = await Promise.all([
+            import('@react-pdf/renderer'),
+            import('./StudentPDF'),
+          ]);
+
           const blob = await pdf(<StudentPDF students={response.data} />).toBlob();
           const url = URL.createObjectURL(blob);
           const link = document.createElement('a');
@@ -335,7 +334,7 @@ const AdminLayout = ({ children }) => {
   };
 
   return (
-    <div className="min-h-screen flex font-sans bg-gradient-to-br from-slate-50 via-slate-100 to-slate-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 text-slate-900 dark:text-slate-100">
+    <div className="min-h-[100dvh] flex font-sans bg-gradient-to-br from-slate-50 via-slate-100 to-slate-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 text-slate-900 dark:text-slate-100">
       <div 
         className={`fixed inset-0 z-40 bg-black/60 backdrop-blur-md md:hidden transition-opacity duration-300 ${isSidebarOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
         onClick={() => setIsSidebarOpen(false)}
@@ -635,7 +634,7 @@ const AdminLayout = ({ children }) => {
         </div>
       </aside>
 
-      <div className="flex-1 flex flex-col min-w-0 max-h-screen">
+      <div className="flex-1 flex flex-col min-w-0 h-[100dvh]">
         {isProfileModalOpen && (
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
                 <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl w-full max-w-md overflow-hidden">
@@ -802,56 +801,73 @@ const AdminLayout = ({ children }) => {
           </div>
         </header>
 
-        <main className="flex-1 overflow-y-auto px-4 md:px-6 py-4 md:py-6 pb-20 md:pb-8">
+        <main className="flex-1 overflow-y-auto px-4 md:px-6 py-4 md:py-6 pb-[calc(96px+var(--vv-bottom,0px)+env(safe-area-inset-bottom))] md:pb-8">
           {children}
         </main>
 
           <nav
-            className="md:hidden fixed inset-x-0 z-40 border-t border-slate-200/80 dark:border-slate-800 bg-white/95 dark:bg-slate-950/95 backdrop-blur-xl"
+            className="md:hidden fixed inset-x-0 z-40"
             style={{
               bottom: 'calc(var(--vv-bottom, 0px) + env(safe-area-inset-bottom))',
               paddingBottom: 'env(safe-area-inset-bottom)',
             }}
           >
-          <div className="flex items-center justify-between px-3 py-2">
-            <button
-              type="button"
-                onClick={() => navigate(`${basePath}/dashboard`)}
-                className={`flex flex-col items-center justify-center flex-1 py-1 ${
-                location.pathname.endsWith('/dashboard') ? 'text-red-500' : 'text-slate-500'
-              }`}
-            >
-              <LayoutDashboard size={20} />
-              <span className="text-[11px] mt-0.5">Dashboard</span>
-            </button>
-            <button
-              type="button"
-                onClick={() => navigate(`${basePath}/students`)}
-                className={`flex flex-col items-center justify-center flex-1 py-1 ${
-                location.pathname.endsWith('/students') ? 'text-red-500' : 'text-slate-500'
-              }`}
-            >
-              <FileText size={20} />
-              <span className="text-[11px] mt-0.5">Pendaftar</span>
-            </button>
-            <button
-              type="button"
-                onClick={() => navigate(`${basePath}/scan`)}
-                className={`flex flex-col items-center justify-center flex-1 py-1 ${
-                location.pathname.endsWith('/scan') ? 'text-red-500' : 'text-slate-500'
-              }`}
-            >
-              <QrCode size={20} />
-              <span className="text-[11px] mt-0.5">Scan QR</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setIsProfileModalOpen(true)}
-              className="flex flex-col items-center justify-center flex-1 py-1 text-slate-500 hover:text-red-500 transition-colors"
-            >
-              <User size={20} />
-              <span className="text-[11px] mt-0.5">Profil</span>
-            </button>
+          <div className="mx-auto w-full max-w-md px-3 pt-2 pb-3">
+            <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white/95 dark:bg-slate-950/95 backdrop-blur-xl shadow-[0_-12px_30px_rgba(0,0,0,0.18)] dark:shadow-[0_-12px_30px_rgba(0,0,0,0.45)]">
+              <div className="grid grid-cols-4 gap-1 px-2 py-2">
+                <button
+                  type="button"
+                  onClick={() => navigate(`${basePath}/dashboard`)}
+                  className={`flex flex-col items-center justify-center rounded-xl py-2 transition-colors ${
+                    location.pathname.endsWith('/dashboard')
+                      ? 'text-red-500 bg-red-500/10'
+                      : 'text-slate-500 hover:text-red-500 hover:bg-slate-100/70 dark:hover:bg-slate-900/40'
+                  }`}
+                >
+                  <LayoutDashboard size={20} />
+                  <span className="text-[11px] mt-0.5">Dashboard</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => navigate(`${basePath}/students`)}
+                  className={`flex flex-col items-center justify-center rounded-xl py-2 transition-colors ${
+                    location.pathname.endsWith('/students')
+                      ? 'text-red-500 bg-red-500/10'
+                      : 'text-slate-500 hover:text-red-500 hover:bg-slate-100/70 dark:hover:bg-slate-900/40'
+                  }`}
+                >
+                  <FileText size={20} />
+                  <span className="text-[11px] mt-0.5">Pendaftar</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => navigate(`${basePath}/scan`)}
+                  className={`flex flex-col items-center justify-center rounded-xl py-2 transition-colors ${
+                    location.pathname.endsWith('/scan')
+                      ? 'text-red-500 bg-red-500/10'
+                      : 'text-slate-500 hover:text-red-500 hover:bg-slate-100/70 dark:hover:bg-slate-900/40'
+                  }`}
+                >
+                  <QrCode size={20} />
+                  <span className="text-[11px] mt-0.5">Scan QR</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setIsProfileModalOpen(true)}
+                  className={`flex flex-col items-center justify-center rounded-xl py-2 transition-colors ${
+                    isProfileModalOpen
+                      ? 'text-red-500 bg-red-500/10'
+                      : 'text-slate-500 hover:text-red-500 hover:bg-slate-100/70 dark:hover:bg-slate-900/40'
+                  }`}
+                >
+                  <User size={20} />
+                  <span className="text-[11px] mt-0.5">Profil</span>
+                </button>
+              </div>
+            </div>
           </div>
         </nav>
       </div>
