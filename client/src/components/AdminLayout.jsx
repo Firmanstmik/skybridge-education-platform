@@ -801,15 +801,15 @@ const AdminLayout = ({ children }) => {
           </div>
         </header>
 
-        <main className="flex-1 overflow-y-auto px-4 md:px-6 py-4 md:py-6 pb-[calc(96px+var(--vv-bottom,0px)+max(env(safe-area-inset-bottom,0px),16px))] md:pb-8">
+        <main className="flex-1 overflow-y-auto px-4 md:px-6 py-4 md:py-6 pb-[calc(96px+var(--vv-bottom,0px)+max(env(safe-area-inset-bottom,0px),28px))] md:pb-8">
           {children}
         </main>
 
           <nav
             className="md:hidden fixed inset-x-0 z-40"
             style={{
-              bottom: 'calc(var(--vv-bottom,0px) + max(env(safe-area-inset-bottom,0px),16px))',
-              paddingBottom: 'max(env(safe-area-inset-bottom,0px),16px)',
+              bottom: 'calc(var(--vv-bottom,0px) + max(env(safe-area-inset-bottom,0px),28px))',
+              paddingBottom: 'max(env(safe-area-inset-bottom,0px),28px)',
             }}
           >
           <div className="mx-auto w-full max-w-md px-3 pt-2 pb-3">
