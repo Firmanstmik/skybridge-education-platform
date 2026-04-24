@@ -109,6 +109,9 @@ const RegisterPage = () => {
   const [showCard, setShowCard] = useState(false);
   const [isDownloadingCard, setIsDownloadingCard] = useState(false);
   const cardRef = useRef(null);
+  const paymentProofInputRef = useRef(null);
+  const [isUploadingPaymentProof, setIsUploadingPaymentProof] = useState(false);
+  const [paymentProofUploaded, setPaymentProofUploaded] = useState(false);
   const waGroupLink = String(import.meta.env.VITE_WA_GROUP_LINK || '').trim();
   const waAdminNumber = '817084182215';
   const waFallbackMessage = 'Halo Admin SKYBRIDGE Nusantara, saya sudah berhasil daftar. Mohon link Grup WA untuk peserta.';
@@ -158,6 +161,41 @@ const RegisterPage = () => {
     });
   };
 
+  const uploadPaymentProof = async (file) => {
+    if (!registrationNumber) return;
+    if (!file) return;
+
+    setIsUploadingPaymentProof(true);
+    try {
+      const processed = await compressImage(file);
+      const formData = new FormData();
+      formData.append('registration_number', registrationNumber);
+      formData.append('payment_proof', processed);
+
+      await axios.post(`${import.meta.env.VITE_API_URL}/students/payment-proof`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+        timeout: 60000
+      });
+
+      setPaymentProofUploaded(true);
+      showAlert('Bukti pembayaran berhasil diupload. Silakan gabung Grup WA di tombol yang muncul.', 'success', 'Upload Berhasil');
+    } catch (error) {
+      let message = 'Gagal upload bukti pembayaran.';
+      if (error.code === 'ECONNABORTED') message = 'Waktu tunggu server habis. Silakan coba lagi.';
+      if (error.response) {
+        if (error.response.data?.message) message = error.response.data.message;
+        else if (typeof error.response.data === 'string' && error.response.data.trim() !== '') message = error.response.data;
+        else if (error.response.status >= 500) message = 'Terjadi kesalahan pada server (500). Silakan coba beberapa saat lagi.';
+        else message = `Permintaan ditolak oleh server (status ${error.response.status}).`;
+      } else if (error.request) {
+        message = 'Tidak dapat terhubung ke server. Pastikan server backend berjalan.';
+      }
+      showAlert(message, 'error', 'Upload Gagal');
+    } finally {
+      setIsUploadingPaymentProof(false);
+    }
+  };
+
   const onSubmit = async (data) => {
     if (step !== 5) return;
     setIsSubmitting(true);
@@ -199,7 +237,7 @@ const RegisterPage = () => {
       setRegistrationNumber(regNumber);
       setRegistrationName(String(data.full_name || '').trim());
       setShowCard(true);
-      showAlert(['Pendaftaran Berhasil!', `Nomor Registrasi Anda: ${regNumber}`, '', 'Mohon simpan dan catat nomor pendaftaran ini.', 'Nomor ini digunakan untuk memantau status pendaftaran Anda yang akan diproses oleh admin.', '', 'Grup WhatsApp (silakan bergabung):', waJoinUrl, '', 'Tekan tombol di bawah untuk menyalin nomor pendaftaran ke clipboard Anda.'].join('\n'), 'success', 'Pendaftaran Sukses', async () => { try { if (navigator?.clipboard?.writeText) await navigator.clipboard.writeText(regNumber); } catch { return; } });
+      showAlert(['Pendaftaran Berhasil!', `Nomor Registrasi Anda: ${regNumber}`, '', 'Mohon simpan dan catat nomor pendaftaran ini.', 'Nomor ini digunakan untuk memantau status pendaftaran Anda yang akan diproses oleh admin.', '', 'Selanjutnya, upload bukti pembayaran biaya pendaftaran Rp 100.000 untuk mendapatkan link Grup WhatsApp.', '', 'Tekan tombol di bawah untuk menyalin nomor pendaftaran ke clipboard Anda.'].join('\n'), 'success', 'Pendaftaran Sukses', async () => { try { if (navigator?.clipboard?.writeText) await navigator.clipboard.writeText(regNumber); } catch { return; } });
       requestAnimationFrame(() => {
         try {
           const el = document.getElementById('registration-card-preview');
@@ -1500,21 +1538,53 @@ const RegisterPage = () => {
                             <span style={{ fontSize: 12, color: '#6B7280' }}>No. Pendaftaran:</span>
                             <span style={{ fontFamily: 'monospace', fontWeight: 800, color: '#065F46', fontSize: 14 }}>{registrationNumber}</span>
                           </div>
-                          <div style={{ marginTop: 10 }}>
-                            <a
-                              href={waJoinUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '10px 16px', borderRadius: 999, background: '#25D366', color: 'white', fontWeight: 800, fontSize: 12, textDecoration: 'none', boxShadow: '0 6px 18px rgba(37,211,102,0.35)' }}
-                            >
-                              {waJoinLabel}
-                            </a>
-                            {waGroupLink ? (
-                              <p style={{ fontSize: 11, color: '#047857', marginTop: 6 }}>Gabung grup WA untuk info lanjutan.</p>
-                            ) : (
-                              <p style={{ fontSize: 11, color: '#047857', marginTop: 6 }}>Klik untuk chat admin dan minta link grup WA.</p>
-                            )}
-                          </div>
+                          {!paymentProofUploaded ? (
+                            <div style={{ marginTop: 10 }}>
+                              <p style={{ fontSize: 12, color: '#047857', marginTop: 6, fontWeight: 700 }}>Upload bukti pembayaran biaya pendaftaran Rp 100.000</p>
+                              <p style={{ fontSize: 11, color: '#065F46', marginTop: 4 }}>Setelah bukti pembayaran berhasil diupload, tombol untuk gabung Grup WA akan muncul.</p>
+                              <div style={{ marginTop: 10, display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+                                <button
+                                  type="button"
+                                  onClick={() => paymentProofInputRef.current?.click()}
+                                  disabled={isUploadingPaymentProof}
+                                  style={{ padding: '10px 16px', borderRadius: 999, background: '#111827', color: 'white', fontWeight: 800, fontSize: 12, border: 'none', cursor: isUploadingPaymentProof ? 'not-allowed' : 'pointer' }}
+                                >
+                                  {isUploadingPaymentProof ? 'Mengupload...' : 'Upload Bukti Pembayaran'}
+                                </button>
+                                <input
+                                  ref={paymentProofInputRef}
+                                  type="file"
+                                  accept=".jpg,.jpeg,.png,.webp,.gif,.heic,.heif,.pdf,image/*,application/pdf"
+                                  className="hidden"
+                                  onChange={async (e) => {
+                                    const file = e.target.files?.[0];
+                                    e.target.value = '';
+                                    if (!file) return;
+                                    const extOk = /\.(jpe?g|png|webp|gif|heic|heif|pdf)$/i.test(file.name || '');
+                                    if (!extOk) { showAlert('Format file harus JPG/PNG/PDF.', 'warning', 'Format Tidak Didukung'); return; }
+                                    if (file.size > 10 * 1024 * 1024) { showAlert('Ukuran file maksimal 10MB.', 'warning', 'File Terlalu Besar'); return; }
+                                    await uploadPaymentProof(file);
+                                  }}
+                                />
+                              </div>
+                            </div>
+                          ) : (
+                            <div style={{ marginTop: 10 }}>
+                              <a
+                                href={waJoinUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '10px 16px', borderRadius: 999, background: '#25D366', color: 'white', fontWeight: 800, fontSize: 12, textDecoration: 'none', boxShadow: '0 6px 18px rgba(37,211,102,0.35)' }}
+                              >
+                                {waJoinLabel}
+                              </a>
+                              {waGroupLink ? (
+                                <p style={{ fontSize: 11, color: '#047857', marginTop: 6 }}>Gabung grup WA untuk info lanjutan.</p>
+                              ) : (
+                                <p style={{ fontSize: 11, color: '#047857', marginTop: 6 }}>Link grup WA belum diset, klik untuk chat admin.</p>
+                              )}
+                            </div>
+                          )}
                         </div>
                         <button
                           type="button"

@@ -85,6 +85,7 @@ CREATE TABLE IF NOT EXISTS student_documents (
     birth_certificate_path VARCHAR(255), -- Akta
     health_certificate_path VARCHAR(255), -- Surat sehat
     consent_letter_path VARCHAR(255), -- Surat kesediaan
+    payment_proof_path VARCHAR(255), -- Bukti pembayaran
     FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE CASCADE
 );
 

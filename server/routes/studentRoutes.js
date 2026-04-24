@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { registerStudent, getAllStudents, getStudentById, updateStudentStatus, downloadStudentPdf, downloadStudentFormPdf, exportStudentsExcel, getExportData, loginStudent, updateStudentData, checkNikExists, checkEmailExists, exportStudentsSummaryPdf, deleteStudent, getStudentStats, parseDocument } = require('../controllers/studentController');
+const { registerStudent, getAllStudents, getStudentById, updateStudentStatus, downloadStudentPdf, downloadStudentFormPdf, exportStudentsExcel, getExportData, loginStudent, updateStudentData, checkNikExists, checkEmailExists, exportStudentsSummaryPdf, deleteStudent, getStudentStats, parseDocument, uploadPaymentProof } = require('../controllers/studentController');
 const { protect } = require('../middleware/authMiddleware');
 const upload = require('../middleware/uploadMiddleware');
 
@@ -15,6 +15,7 @@ const cpUpload = upload.fields([
 ]);
 
 router.post('/login', loginStudent);
+router.post('/payment-proof', upload.single('payment_proof'), uploadPaymentProof);
 router.put('/update/:id', cpUpload, updateStudentData);
 router.post('/', cpUpload, registerStudent);
 router.get('/check-nik', checkNikExists);

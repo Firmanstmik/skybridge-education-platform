@@ -809,6 +809,7 @@ const AdminStudentDetail = () => {
                         { key: 'birth_certificate_path', label: 'Akta Kelahiran' },
                         { key: 'health_certificate_path', label: 'Surat Sehat' },
                         { key: 'consent_letter_path', label: 'Surat Izin Ortu' },
+                        { key: 'payment_proof_path', label: 'Bukti Pembayaran' },
                       ].map((doc) => {
                         const url = toFileUrl(docs?.[doc.key]);
                         return (

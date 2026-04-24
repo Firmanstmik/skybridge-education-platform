@@ -581,6 +581,30 @@ exports.checkEmailExists = async (req, res) => {
     }
 };
 
+exports.uploadPaymentProof = async (req, res) => {
+    try {
+        const registrationNumber = req.body?.registration_number ? String(req.body.registration_number).trim() : '';
+        if (!registrationNumber) return res.status(400).json({ message: 'Nomor registrasi harus diisi' });
+        if (!req.file) return res.status(400).json({ message: 'File bukti pembayaran harus diupload' });
+
+        const [rows] = await db.query('SELECT id FROM students WHERE registration_number = ?', [registrationNumber]);
+        if (rows.length === 0) return res.status(404).json({ message: 'Nomor registrasi tidak ditemukan' });
+
+        const studentId = rows[0].id;
+
+        const [docRowExists] = await db.query('SELECT student_id FROM student_documents WHERE student_id = ?', [studentId]);
+        if (docRowExists.length === 0) {
+            await db.query('INSERT INTO student_documents (student_id) VALUES (?)', [studentId]);
+        }
+
+        await db.query('UPDATE student_documents SET payment_proof_path = ? WHERE student_id = ?', [req.file.path, studentId]);
+
+        res.json({ message: 'Bukti pembayaran berhasil diupload', payment_proof_path: req.file.path });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
 exports.getAllStudents = async (req, res) => {
     try {
         const [students] = await db.query('SELECT * FROM students ORDER BY created_at DESC');
