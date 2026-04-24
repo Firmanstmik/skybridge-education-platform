@@ -32,11 +32,13 @@ const AdminStudentDetail = () => {
   const location = useLocation();
   const [student, setStudent] = useState(null);
   const [adminNotes, setAdminNotes] = useState('');
+  const [paymentStatusDraft, setPaymentStatusDraft] = useState('Belum Lunas');
   const [showPdf, setShowPdf] = useState(false);
   const [showFullData, setShowFullData] = useState(false);
   const [fullDataTab, setFullDataTab] = useState('personal');
   const { showAlert } = useAlert();
   const [isUpdating, setIsUpdating] = useState(false);
+  const [isUpdatingPayment, setIsUpdatingPayment] = useState(false);
   const [userRole, setUserRole] = useState(null);
   const [qrDataUrl, setQrDataUrl] = useState('');
   const [isDownloadingCard, setIsDownloadingCard] = useState(false);
@@ -70,6 +72,10 @@ const AdminStudentDetail = () => {
       });
       setStudent(data);
       setAdminNotes(data.admin_notes || '');
+      setPaymentStatusDraft(
+        data?.documents?.payment_status ||
+          (data?.documents?.payment_proof_path ? 'Lunas' : 'Belum Lunas')
+      );
     } catch (error) {
       console.error(error);
     }
@@ -111,6 +117,25 @@ const AdminStudentDetail = () => {
       showAlert('Gagal menyimpan catatan', 'error', 'Simpan Gagal');
     } finally {
         setIsUpdating(false);
+    }
+  };
+
+  const updatePaymentStatus = async () => {
+    setIsUpdatingPayment(true);
+    const token = localStorage.getItem('token');
+    try {
+      await axios.put(
+        `/api/students/${id}/payment-status`,
+        { payment_status: paymentStatusDraft },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      await fetchStudent();
+      showAlert('Status pembayaran berhasil diperbarui', 'success', 'Pembayaran');
+    } catch (error) {
+      console.error(error);
+      showAlert('Gagal memperbarui status pembayaran', 'error', 'Pembayaran');
+    } finally {
+      setIsUpdatingPayment(false);
     }
   };
 
@@ -232,6 +257,7 @@ const AdminStudentDetail = () => {
   const isAccepted = String(student?.status || '').toLowerCase() === 'diterima';
   const roleUpper = String(userRole || '').toUpperCase();
   const canEditFullData = roleUpper === 'SUPER_ADMIN' || roleUpper === 'SUPERADMIN' || roleUpper === 'KEPALA_LPK';
+  const canEditPayment = roleUpper === 'SUPER_ADMIN' || roleUpper === 'SUPERADMIN' || roleUpper === 'KEPALA_LPK';
   const cardSerial = student?.registration_number || '-';
   const registrationDateText = student?.created_at
     ? new Date(student.created_at).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })
@@ -801,6 +827,42 @@ const AdminStudentDetail = () => {
 
                   {fullDataTab === 'documents' && (
                     <div className="space-y-3 md:space-y-4">
+                      <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white/90 dark:bg-slate-950/40 px-4 md:px-5 py-4 shadow-sm">
+                        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                          <div>
+                            <div className="text-[10px] md:text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1">
+                              Pembayaran Pendaftaran (100rb)
+                            </div>
+                            <div className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+                              Status: {docs?.payment_status || (docs?.payment_proof_path ? 'Lunas' : 'Belum Lunas')}
+                            </div>
+                            <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                              Bukti upload: {docs?.payment_proof_path ? 'Ada' : 'Belum ada'}
+                            </div>
+                          </div>
+
+                          <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
+                            <select
+                              value={paymentStatusDraft}
+                              onChange={(e) => setPaymentStatusDraft(e.target.value)}
+                              disabled={!canEditPayment || isUpdatingPayment}
+                              className="h-10 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 px-3 text-sm font-semibold text-slate-800 dark:text-slate-100 disabled:opacity-60"
+                            >
+                              <option value="Belum Lunas">Belum Lunas</option>
+                              <option value="Lunas">Lunas</option>
+                            </select>
+                            <button
+                              type="button"
+                              onClick={updatePaymentStatus}
+                              disabled={!canEditPayment || isUpdatingPayment}
+                              className="h-10 inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 text-white px-4 text-sm font-semibold hover:bg-indigo-700 disabled:opacity-60 disabled:hover:bg-indigo-600 transition"
+                            >
+                              <Save size={16} />
+                              Simpan
+                            </button>
+                          </div>
+                        </div>
+                      </div>
                       {[
                         { key: 'photo_path', label: 'Pas Photo' },
                         { key: 'diploma_path', label: 'Ijazah Terakhir' },

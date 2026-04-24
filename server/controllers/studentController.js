@@ -597,19 +597,76 @@ exports.uploadPaymentProof = async (req, res) => {
             await db.query('INSERT INTO student_documents (student_id) VALUES (?)', [studentId]);
         }
 
-        await db.query('UPDATE student_documents SET payment_proof_path = ? WHERE student_id = ?', [req.file.path, studentId]);
+        await db.query(
+            'UPDATE student_documents SET payment_proof_path = ?, payment_status = ? WHERE student_id = ?',
+            [req.file.path, 'Lunas', studentId]
+        );
 
         res.json({ message: 'Bukti pembayaran berhasil diupload', payment_proof_path: req.file.path });
     } catch (error) {
+        const msg = String(error?.message || '');
+        if (msg.includes("Unknown column 'payment_proof_path'") || msg.includes("Unknown column 'payment_status'")) {
+            return res.status(500).json({ message: 'Database belum diupdate (kolom pembayaran belum ada). Jalankan migration kolom payment_proof_path & payment_status di tabel student_documents.' });
+        }
+        res.status(500).json({ message: error.message });
+    }
+};
+
+exports.updatePaymentStatus = async (req, res) => {
+    try {
+        const roleUpper = String(req.user?.role || '').toUpperCase();
+        const canEdit = roleUpper === 'SUPER_ADMIN' || roleUpper === 'SUPERADMIN' || roleUpper === 'KEPALA_LPK';
+        if (!canEdit) return res.status(403).json({ message: 'Tidak punya akses untuk mengubah status pembayaran' });
+
+        const { id } = req.params;
+        const raw = req.body?.payment_status ? String(req.body.payment_status).trim() : '';
+        const paymentStatus = raw === 'Lunas' ? 'Lunas' : raw === 'Belum Lunas' ? 'Belum Lunas' : '';
+        if (!paymentStatus) return res.status(400).json({ message: 'payment_status harus "Lunas" atau "Belum Lunas"' });
+
+        const [studentExists] = await db.query('SELECT id FROM students WHERE id = ?', [id]);
+        if (studentExists.length === 0) return res.status(404).json({ message: 'Student not found' });
+
+        const [docRowExists] = await db.query('SELECT student_id FROM student_documents WHERE student_id = ?', [id]);
+        if (docRowExists.length === 0) {
+            await db.query('INSERT INTO student_documents (student_id) VALUES (?)', [id]);
+        }
+
+        await db.query('UPDATE student_documents SET payment_status = ? WHERE student_id = ?', [paymentStatus, id]);
+        res.json({ message: 'Status pembayaran berhasil diperbarui', payment_status: paymentStatus });
+    } catch (error) {
+        const msg = String(error?.message || '');
+        if (msg.includes("Unknown column 'payment_status'")) {
+            return res.status(500).json({ message: 'Database belum diupdate (kolom payment_status belum ada). Jalankan migration kolom payment_status di tabel student_documents.' });
+        }
         res.status(500).json({ message: error.message });
     }
 };
 
 exports.getAllStudents = async (req, res) => {
     try {
-        const [students] = await db.query('SELECT * FROM students ORDER BY created_at DESC');
+        const [students] = await db.query(`
+            SELECT 
+                s.*,
+                d.payment_proof_path,
+                d.payment_status
+            FROM students s
+            LEFT JOIN student_documents d ON s.id = d.student_id
+            ORDER BY s.created_at DESC
+        `);
         res.json(students);
     } catch (error) {
+        const msg = String(error?.message || '');
+        if (msg.includes("Unknown column 'payment_proof_path'") || msg.includes("Unknown column 'payment_status'")) {
+            const [students] = await db.query(`
+                SELECT 
+                    s.*,
+                    NULL AS payment_proof_path,
+                    NULL AS payment_status
+                FROM students s
+                ORDER BY s.created_at DESC
+            `);
+            return res.json(students);
+        }
         res.status(500).json({ message: error.message });
     }
 };

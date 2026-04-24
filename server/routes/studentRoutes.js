@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { registerStudent, getAllStudents, getStudentById, updateStudentStatus, downloadStudentPdf, downloadStudentFormPdf, exportStudentsExcel, getExportData, loginStudent, updateStudentData, checkNikExists, checkEmailExists, exportStudentsSummaryPdf, deleteStudent, getStudentStats, parseDocument, uploadPaymentProof } = require('../controllers/studentController');
+const { registerStudent, getAllStudents, getStudentById, updateStudentStatus, downloadStudentPdf, downloadStudentFormPdf, exportStudentsExcel, getExportData, loginStudent, updateStudentData, checkNikExists, checkEmailExists, exportStudentsSummaryPdf, deleteStudent, getStudentStats, parseDocument, uploadPaymentProof, updatePaymentStatus } = require('../controllers/studentController');
 const { protect } = require('../middleware/authMiddleware');
 const upload = require('../middleware/uploadMiddleware');
 
@@ -25,6 +25,7 @@ router.get('/stats', protect, getStudentStats);
 router.get('/export/json', protect, getExportData);
 router.get('/export/excel', protect, exportStudentsExcel);
 router.get('/export/pdf-summary', protect, exportStudentsSummaryPdf);
+router.put('/:id/payment-status', protect, updatePaymentStatus);
 router.get('/:id', protect, getStudentById);
 router.delete('/:id', protect, deleteStudent);
 router.put('/:id/status', protect, updateStudentStatus);

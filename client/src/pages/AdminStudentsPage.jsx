@@ -92,6 +92,36 @@ const StatusBadge = ({ status }) => {
   );
 };
 
+const PaymentBadge = ({ payment_status, payment_proof_path }) => {
+  const computed = payment_status || (payment_proof_path ? 'Lunas' : 'Belum Lunas');
+  const styles = {
+    Lunas: {
+      bg: 'bg-emerald-500/10 dark:bg-emerald-500/20',
+      text: 'text-emerald-700 dark:text-emerald-400',
+      border: 'border-emerald-200 dark:border-emerald-500/30',
+      icon: CheckCircle2,
+      label: 'Lunas',
+    },
+    'Belum Lunas': {
+      bg: 'bg-amber-500/10 dark:bg-amber-500/20',
+      text: 'text-amber-700 dark:text-amber-400',
+      border: 'border-amber-200 dark:border-amber-500/30',
+      icon: Clock,
+      label: 'Belum Lunas',
+    },
+  };
+
+  const style = styles[computed] || styles['Belum Lunas'];
+  const IconBadge = style.icon;
+
+  return (
+    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border ${style.bg} ${style.text} ${style.border}`}>
+      <IconBadge size={12} strokeWidth={2.5} />
+      {style.label}
+    </span>
+  );
+};
+
 const MobileStudentCard = ({ student, canDelete, onDeleteStudent, onDownloadStudentPdf, detailLinkPrefix }) => (
   <div className="bg-white dark:bg-slate-950 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm mb-3">
     <div className="flex justify-between items-start mb-3">
@@ -110,7 +140,10 @@ const MobileStudentCard = ({ student, canDelete, onDeleteStudent, onDownloadStud
           <p className="text-xs text-slate-500 dark:text-slate-400">{student.registration_number}</p>
         </div>
       </div>
-      <StatusBadge status={student.status} />
+      <div className="flex flex-col items-end gap-2">
+        <StatusBadge status={student.status} />
+        <PaymentBadge payment_status={student.payment_status} payment_proof_path={student.payment_proof_path} />
+      </div>
     </div>
 
     <div className="grid grid-cols-2 gap-2 text-xs text-slate-600 dark:text-slate-400 mb-4">
@@ -597,6 +630,9 @@ const AdminStudentsPage = () => {
                   <th className="px-6 py-4 text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">
                     Status
                   </th>
+                  <th className="px-6 py-4 text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">
+                    Pembayaran
+                  </th>
                   <th className="px-6 py-4 text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest hidden lg:table-cell">
                     Tanggal Daftar
                   </th>
@@ -613,6 +649,7 @@ const AdminStudentsPage = () => {
                       <td className="px-6 py-4"><div className="h-10 w-40 bg-slate-200 dark:bg-slate-800 rounded-lg"></div></td>
                       <td className="px-6 py-4"><div className="h-6 w-24 bg-slate-200 dark:bg-slate-800 rounded"></div></td>
                       <td className="px-6 py-4 hidden md:table-cell"><div className="h-6 w-32 bg-slate-200 dark:bg-slate-800 rounded"></div></td>
+                      <td className="px-6 py-4"><div className="h-6 w-20 bg-slate-200 dark:bg-slate-800 rounded-full"></div></td>
                       <td className="px-6 py-4"><div className="h-6 w-20 bg-slate-200 dark:bg-slate-800 rounded-full"></div></td>
                       <td className="px-6 py-4 hidden lg:table-cell"><div className="h-6 w-24 bg-slate-200 dark:bg-slate-800 rounded"></div></td>
                       <td className="px-6 py-4 text-right"><div className="h-8 w-20 bg-slate-200 dark:bg-slate-800 rounded ml-auto"></div></td>
@@ -674,6 +711,9 @@ const AdminStudentsPage = () => {
                       <td className="px-6 py-4 whitespace-nowrap">
                         <StatusBadge status={student.status} />
                       </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <PaymentBadge payment_status={student.payment_status} payment_proof_path={student.payment_proof_path} />
+                      </td>
                       <td className="px-6 py-4 whitespace-nowrap text-xs text-slate-500 dark:text-slate-400 hidden lg:table-cell">
                         {new Date(student.created_at).toLocaleDateString('id-ID', {
                           day: 'numeric',
@@ -713,7 +753,7 @@ const AdminStudentsPage = () => {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan="6" className="px-6 py-20 text-center">
+                    <td colSpan="7" className="px-6 py-20 text-center">
                       <div className="flex flex-col items-center justify-center">
                         <div className="h-20 w-20 rounded-full bg-slate-50 dark:bg-slate-900/50 flex items-center justify-center mb-4 border border-slate-100 dark:border-slate-800">
                           <Search size={32} className="text-slate-300 dark:text-slate-600" />
