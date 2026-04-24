@@ -89,7 +89,7 @@ const ErrMsg = ({ msg }) =>
 const RegisterPage = () => {
   const [step, setStep] = useState(1);
   const { showAlert } = useAlert();
-  const { register, control, watch, trigger, getValues, setError, clearErrors, formState: { errors } } = useForm({
+  const { register, control, watch, trigger, getValues, setError, clearErrors, reset, formState: { errors } } = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
       education: [
@@ -294,6 +294,30 @@ const RegisterPage = () => {
     
     // Lanjutkan ke pengiriman meskipun validasi frontend belum 100% sempurna
     await onSubmit(getValues());
+  };
+
+  const handleNewRegistration = () => {
+    try {
+      reset();
+      clearErrors();
+      setStep(1);
+      setRegistrationNumber('');
+      setRegistrationName('');
+      setShowCard(false);
+      setPaymentProofUploaded(false);
+      setIsUploadingPaymentProof(false);
+      setIsDownloadingCard(false);
+      setIsSubmitting(false);
+      requestAnimationFrame(() => {
+        try {
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        } catch {
+          return;
+        }
+      });
+    } catch {
+      return;
+    }
   };
 
   const handleDownloadRegistrationCard = async () => {
@@ -846,6 +870,11 @@ const RegisterPage = () => {
         }
         .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(5,150,105,0.45); }
         .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+        .btn-submit.btn-new {
+          background: linear-gradient(135deg, #2563EB, #1D4ED8);
+          box-shadow: 0 8px 24px rgba(37,99,235,0.35);
+        }
+        .btn-submit.btn-new:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(37,99,235,0.45); }
 
         .btn-label { display: flex; flex-direction: column; align-items: flex-start; }
         .btn-sub { font-family: 'Noto Sans JP', sans-serif; font-size: 9px; opacity: 0.65; margin-top: 1px; }
@@ -1694,7 +1723,7 @@ const RegisterPage = () => {
 
                 {/* ══ NAV FOOTER ══ */}
                 <div className="nav-footer">
-                  {step > 1 ? (
+                  {step > 1 && !registrationNumber ? (
                     <button type="button" onClick={prevStep} className="btn-back">
                       <ChevronLeft size={18} />
                       <span className="btn-label">
@@ -1713,6 +1742,18 @@ const RegisterPage = () => {
                       <ChevronRight size={18} />
                     </button>
                   ) : (
+                    registrationNumber ? (
+                      <button
+                        type="button"
+                        onClick={handleNewRegistration}
+                        className="btn-submit btn-new"
+                      >
+                        <span className="btn-label" style={{ alignItems: 'flex-end' }}>
+                          <span>Buat Pendaftaran Baru</span>
+                          <span className="btn-sub" style={{ color: 'rgba(255,255,255,0.7)' }}>新規登録</span>
+                        </span>
+                      </button>
+                    ) : (
                     <button
                       type="button"
                       disabled={isSubmitting}
@@ -1724,6 +1765,7 @@ const RegisterPage = () => {
                         <span className="btn-sub" style={{ color: 'rgba(255,255,255,0.65)' }}>申請を送信</span>
                       </span>
                     </button>
+                    )
                   )}
                 </div>
 
