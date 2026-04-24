@@ -109,6 +109,12 @@ const RegisterPage = () => {
   const [showCard, setShowCard] = useState(false);
   const [isDownloadingCard, setIsDownloadingCard] = useState(false);
   const cardRef = useRef(null);
+  const waGroupLink = String(import.meta.env.VITE_WA_GROUP_LINK || '').trim();
+  const waAdminNumber = '817084182215';
+  const waFallbackMessage = 'Halo Admin SKYBRIDGE Nusantara, saya sudah berhasil daftar. Mohon link Grup WA untuk peserta.';
+  const waFallbackUrl = `https://wa.me/${waAdminNumber}?text=${encodeURIComponent(waFallbackMessage)}`;
+  const waJoinUrl = waGroupLink || waFallbackUrl;
+  const waJoinLabel = waGroupLink ? 'Gabung Grup WA' : 'Minta Link Grup WA';
 
   const photoWatch = watch('photo');
 
@@ -121,25 +127,6 @@ const RegisterPage = () => {
       setPhotoPreview(null);
     }
   }, [photoWatch]);
-
-  const getMissingDocs = () => {
-    const missingDocs = [];
-    const photoFiles   = watch('photo');
-    const diplomaFiles = watch('diploma');
-    const ktpFiles     = watch('ktp');
-    const healthFiles  = watch('health_certificate');
-    const consentFiles = watch('consent_letter');
-    const familyFiles  = watch('family_card');
-    const birthFiles   = watch('birth_certificate');
-    if (!photoFiles   || photoFiles.length   === 0) missingDocs.push('Pas foto ukuran 3x4 cm hitam putih (2 lembar) - di langkah A');
-    if (!diplomaFiles || diplomaFiles.length === 0) missingDocs.push('Fotocopy ijazah terakhir yang dilegalisir - di langkah D');
-    if (!ktpFiles     || ktpFiles.length     === 0) missingDocs.push('Fotocopy KTP/SIM - di langkah D');
-    if (!healthFiles  || healthFiles.length  === 0) missingDocs.push('Kartu keterangan sehat - di langkah D');
-    if (!consentFiles || consentFiles.length === 0) missingDocs.push('Surat pernyataan kesediaan - di langkah D');
-    if (!familyFiles  || familyFiles.length  === 0) missingDocs.push('Fotocopy kartu keluarga - di langkah D');
-    if (!birthFiles   || birthFiles.length   === 0) missingDocs.push('Fotocopy akta kelahiran - di langkah D');
-    return missingDocs;
-  };
 
   const compressImage = async (file) => {
     if (!file || file.type === 'application/pdf') return file;
@@ -212,7 +199,7 @@ const RegisterPage = () => {
       setRegistrationNumber(regNumber);
       setRegistrationName(String(data.full_name || '').trim());
       setShowCard(true);
-      showAlert(['Pendaftaran Berhasil!', `Nomor Registrasi Anda: ${regNumber}`, '', 'Mohon simpan dan catat nomor pendaftaran ini.', 'Nomor ini digunakan untuk memantau status pendaftaran Anda yang akan diproses oleh admin.', '', 'Tekan tombol di bawah untuk menyalin nomor pendaftaran ke clipboard Anda.'].join('\n'), 'success', 'Pendaftaran Sukses', async () => { try { if (navigator?.clipboard?.writeText) await navigator.clipboard.writeText(regNumber); } catch { return; } });
+      showAlert(['Pendaftaran Berhasil!', `Nomor Registrasi Anda: ${regNumber}`, '', 'Mohon simpan dan catat nomor pendaftaran ini.', 'Nomor ini digunakan untuk memantau status pendaftaran Anda yang akan diproses oleh admin.', '', 'Grup WhatsApp (silakan bergabung):', waJoinUrl, '', 'Tekan tombol di bawah untuk menyalin nomor pendaftaran ke clipboard Anda.'].join('\n'), 'success', 'Pendaftaran Sukses', async () => { try { if (navigator?.clipboard?.writeText) await navigator.clipboard.writeText(regNumber); } catch { return; } });
       requestAnimationFrame(() => {
         try {
           const el = document.getElementById('registration-card-preview');
@@ -334,8 +321,6 @@ const RegisterPage = () => {
       return true;
     }
     if (step === 4) {
-      const missingDocs = getMissingDocs();
-      if (missingDocs.length > 0) { showAlert(['Dokumen berikut belum diupload:', ...missingDocs.map((d, i) => `${i + 1}. ${d}`), '', 'Silakan lengkapi semua dokumen pada langkah A (Foto 3x4) dan langkah D (dokumen persyaratan), lalu klik kembali "Lanjut".'].join('\n'), 'warning', 'Dokumen Belum Lengkap'); return false; }
       return true;
     }
     return true;
@@ -1412,7 +1397,7 @@ const RegisterPage = () => {
                       <div className="section-letter">D</div>
                       <div className="section-title-wrap">
                         <div className="section-title">Syarat & Dokumen Lampiran</div>
-                        <div className="section-kanji">必要書類 · Upload semua dokumen persyaratan</div>
+                        <div className="section-kanji">必要書類 · Upload dokumen persyaratan (opsional)</div>
                       </div>
                     </div>
 
@@ -1422,14 +1407,16 @@ const RegisterPage = () => {
                         <strong>Catatan Penting:</strong>
                         <ul style={{ listStyle: 'disc', marginLeft: 16, marginTop: 4 }}>
                           <li>Silakan upload hasil scan dari <strong>fotokopi dokumen asli</strong>.</li>
+                          <li>Dokumen pada langkah D ini <strong>opsional</strong> dan boleh dilengkapi belakangan.</li>
+                          <li><strong>Ijazah</strong> boleh diganti <strong>Surat Keterangan Lulus (SKL)</strong> jika ijazah belum ada.</li>
                           <li>Setelah selesai upload, klik tombol <strong>"Lanjut"</strong> untuk mengisi <strong>Data Fisik (Tes Fisik)</strong> pada langkah berikutnya.</li>
-                          <li>Pendaftaran baru akan dikirim setelah Anda melengkapi Data Fisik.</li>
+                          <li>Pendaftaran akan dikirim setelah Anda melengkapi Data Fisik.</li>
                         </ul>
                       </div>
                     </div>
 
                     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
-                      <DocumentUpload label="Fotocopy ijazah terakhir yang dilegalisir" name="diploma" register={register} watch={watch} quantity="1 Lembar" />
+                      <DocumentUpload label="Fotocopy ijazah terakhir yang dilegalisir / SKL" name="diploma" register={register} watch={watch} quantity="1 Lembar" />
                       <DocumentUpload label="Fotocopy KTP/SIM" name="ktp" register={register} watch={watch} quantity="1 Lembar" />
                       <DocumentUpload label="Kartu keterangan sehat" name="health_certificate" register={register} watch={watch} quantity="1 Lembar" />
                       <DocumentUpload label="Surat pernyataan kesediaan" name="consent_letter" register={register} watch={watch} quantity="1 Lembar" />
@@ -1512,6 +1499,21 @@ const RegisterPage = () => {
                           <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, marginTop: 10, padding: '6px 14px', background: 'white', borderRadius: 10, border: '1.5px solid #6EE7B7' }}>
                             <span style={{ fontSize: 12, color: '#6B7280' }}>No. Pendaftaran:</span>
                             <span style={{ fontFamily: 'monospace', fontWeight: 800, color: '#065F46', fontSize: 14 }}>{registrationNumber}</span>
+                          </div>
+                          <div style={{ marginTop: 10 }}>
+                            <a
+                              href={waJoinUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '10px 16px', borderRadius: 999, background: '#25D366', color: 'white', fontWeight: 800, fontSize: 12, textDecoration: 'none', boxShadow: '0 6px 18px rgba(37,211,102,0.35)' }}
+                            >
+                              {waJoinLabel}
+                            </a>
+                            {waGroupLink ? (
+                              <p style={{ fontSize: 11, color: '#047857', marginTop: 6 }}>Gabung grup WA untuk info lanjutan.</p>
+                            ) : (
+                              <p style={{ fontSize: 11, color: '#047857', marginTop: 6 }}>Klik untuk chat admin dan minta link grup WA.</p>
+                            )}
                           </div>
                         </div>
                         <button
