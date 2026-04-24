@@ -1,9 +1,37 @@
 const db = require('../config/db');
 const bcrypt = require('bcryptjs');
 
+const userColumnCache = new Map();
+
+const hasUserColumn = async (columnName) => {
+    const key = String(columnName || '').trim();
+    if (!key) return false;
+    if (userColumnCache.has(key)) return userColumnCache.get(key);
+    try {
+        const [rows] = await db.query('SHOW COLUMNS FROM users LIKE ?', [key]);
+        const exists = Array.isArray(rows) && rows.length > 0;
+        userColumnCache.set(key, exists);
+        return exists;
+    } catch (_e) {
+        userColumnCache.set(key, false);
+        return false;
+    }
+};
+
+const getSelectableUserFields = async () => {
+    const fields = ['id', 'username'];
+    if (await hasUserColumn('email')) fields.push('email');
+    if (await hasUserColumn('full_name')) fields.push('full_name');
+    if (await hasUserColumn('role')) fields.push('role');
+    if (await hasUserColumn('status')) fields.push('status');
+    if (await hasUserColumn('created_at')) fields.push('created_at');
+    return fields.join(', ');
+};
+
 exports.getAllUsers = async (req, res) => {
     try {
-        const [users] = await db.query('SELECT id, username, email, full_name, role, status, created_at FROM users ORDER BY created_at DESC');
+        const fields = await getSelectableUserFields();
+        const [users] = await db.query(`SELECT ${fields} FROM users ORDER BY created_at DESC`);
         res.json(users);
     } catch (error) {
         console.error(error);
@@ -14,8 +42,9 @@ exports.getAllUsers = async (req, res) => {
 exports.getProfile = async (req, res) => {
     try {
         const userId = req.user.id;
+        const fields = await getSelectableUserFields();
         const [rows] = await db.query(
-            'SELECT id, username, email, full_name, role, status, created_at FROM users WHERE id = ?',
+            `SELECT ${fields} FROM users WHERE id = ?`,
             [userId]
         );
         if (rows.length === 0) {
@@ -34,7 +63,7 @@ exports.updateProfile = async (req, res) => {
 
     try {
         // Ensure unique username/email if provided
-        if (email) {
+        if (email && await hasUserColumn('email')) {
             const [emailUsers] = await db.query('SELECT id FROM users WHERE email = ? AND id <> ?', [email, userId]);
             if (emailUsers.length > 0) {
                 return res.status(400).json({ message: 'Email already in use' });
@@ -51,11 +80,11 @@ exports.updateProfile = async (req, res) => {
         const params = [];
         const sets = [];
 
-        if (email !== undefined) {
+        if (email !== undefined && await hasUserColumn('email')) {
             sets.push('email = ?');
             params.push(email);
         }
-        if (full_name !== undefined) {
+        if (full_name !== undefined && await hasUserColumn('full_name')) {
             sets.push('full_name = ?');
             params.push(full_name);
         }
@@ -80,8 +109,9 @@ exports.updateProfile = async (req, res) => {
         await db.query(query, params);
 
         // Return updated profile
+        const fields = await getSelectableUserFields();
         const [rows] = await db.query(
-            'SELECT id, username, email, full_name, role, status, created_at FROM users WHERE id = ?',
+            `SELECT ${fields} FROM users WHERE id = ?`,
             [userId]
         );
 
@@ -103,7 +133,14 @@ exports.createUser = async (req, res) => {
 
     try {
         // Check if username or email exists
-        const [existing] = await db.query('SELECT * FROM users WHERE username = ? OR email = ?', [username, email]);
+        let existing = [];
+        if (await hasUserColumn('email')) {
+            const [rows] = await db.query('SELECT id FROM users WHERE username = ? OR email = ?', [username, email]);
+            existing = rows;
+        } else {
+            const [rows] = await db.query('SELECT id FROM users WHERE username = ?', [username]);
+            existing = rows;
+        }
         if (existing.length > 0) {
             return res.status(400).json({ message: 'Username or email already exists' });
         }
@@ -111,14 +148,36 @@ exports.createUser = async (req, res) => {
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
 
-        await db.query(
-            'INSERT INTO users (username, email, password, full_name, role, status) VALUES (?, ?, ?, ?, ?, ?)',
-            [username, email, hashedPassword, full_name, role, status || 'Active']
-        );
+        const insertCols = ['username', 'password'];
+        const insertVals = [username, hashedPassword];
+
+        if (await hasUserColumn('email')) {
+            insertCols.push('email');
+            insertVals.push(email ?? null);
+        }
+        if (await hasUserColumn('full_name')) {
+            insertCols.push('full_name');
+            insertVals.push(full_name ?? null);
+        }
+        if (await hasUserColumn('role')) {
+            insertCols.push('role');
+            insertVals.push(role);
+        }
+        if (await hasUserColumn('status')) {
+            insertCols.push('status');
+            insertVals.push(status || 'Active');
+        }
+
+        const placeholders = insertCols.map(() => '?').join(', ');
+        await db.query(`INSERT INTO users (${insertCols.join(', ')}) VALUES (${placeholders})`, insertVals);
 
         res.status(201).json({ message: 'User created successfully' });
     } catch (error) {
         console.error(error);
+        const msg = String(error?.message || '');
+        if (msg.includes("Unknown column 'email'") || msg.includes("Unknown column 'full_name'") || msg.includes("Unknown column 'status'")) {
+            return res.status(500).json({ message: 'Struktur tabel users di database belum lengkap. Jalankan migration kolom users.email/users.full_name/users.status.' });
+        }
         res.status(500).json({ message: 'Server error' });
     }
 };
@@ -134,17 +193,38 @@ exports.updateUser = async (req, res) => {
             return res.status(404).json({ message: 'User not found' });
         }
 
-        let query = 'UPDATE users SET email = ?, full_name = ?, role = ?, status = ?';
-        let params = [email, full_name, role, status];
+        const sets = [];
+        const params = [];
+
+        if (await hasUserColumn('email')) {
+            sets.push('email = ?');
+            params.push(email ?? null);
+        }
+        if (await hasUserColumn('full_name')) {
+            sets.push('full_name = ?');
+            params.push(full_name ?? null);
+        }
+        if (await hasUserColumn('role')) {
+            sets.push('role = ?');
+            params.push(role);
+        }
+        if (await hasUserColumn('status')) {
+            sets.push('status = ?');
+            params.push(status);
+        }
 
         if (password) {
             const salt = await bcrypt.genSalt(10);
             const hashedPassword = await bcrypt.hash(password, salt);
-            query += ', password = ?';
+            sets.push('password = ?');
             params.push(hashedPassword);
         }
 
-        query += ' WHERE id = ?';
+        if (sets.length === 0) {
+            return res.json({ message: 'Nothing to update' });
+        }
+
+        const query = `UPDATE users SET ${sets.join(', ')} WHERE id = ?`;
         params.push(id);
 
         await db.query(query, params);

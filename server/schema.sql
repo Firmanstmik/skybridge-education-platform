@@ -6,8 +6,11 @@ USE doryouku_db;
 CREATE TABLE IF NOT EXISTS users (
     id INT AUTO_INCREMENT PRIMARY KEY,
     username VARCHAR(50) NOT NULL UNIQUE,
+    email VARCHAR(100) UNIQUE,
     password VARCHAR(255) NOT NULL,
-    role ENUM('admin', 'superadmin') DEFAULT 'admin',
+    full_name VARCHAR(100),
+    role ENUM('SUPER_ADMIN', 'STAFF', 'KEPALA_LPK', 'admin', 'superadmin') DEFAULT 'admin',
+    status ENUM('Active', 'Inactive') DEFAULT 'Active',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
