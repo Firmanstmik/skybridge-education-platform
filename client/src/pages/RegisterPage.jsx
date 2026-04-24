@@ -237,7 +237,29 @@ const RegisterPage = () => {
       setRegistrationNumber(regNumber);
       setRegistrationName(String(data.full_name || '').trim());
       setShowCard(true);
-      showAlert(['Pendaftaran Berhasil!', `Nomor Registrasi Anda: ${regNumber}`, '', 'Mohon simpan dan catat nomor pendaftaran ini.', 'Nomor ini digunakan untuk memantau status pendaftaran Anda yang akan diproses oleh admin.', '', 'Selanjutnya, upload bukti pembayaran biaya pendaftaran Rp 100.000 untuk mendapatkan link Grup WhatsApp.', '', 'Tekan tombol di bawah untuk menyalin nomor pendaftaran ke clipboard Anda.'].join('\n'), 'success', 'Pendaftaran Sukses', async () => { try { if (navigator?.clipboard?.writeText) await navigator.clipboard.writeText(regNumber); } catch { return; } });
+      showAlert(
+        [
+          'Pendaftaran Berhasil!',
+          `Nomor Registrasi Anda: ${regNumber}`,
+          '',
+          'Biaya pendaftaran: GRATIS (Rp 0).',
+          'Mohon simpan dan catat nomor registrasi ini untuk memantau status pendaftaran Anda.',
+          '',
+          'Langkah selanjutnya: upload bukti pembayaran BIAYA PENDIDIKAN agar proses Anda diprioritaskan dan jadwal/kelas bisa segera ditentukan.',
+          'Setelah upload berhasil, tombol untuk gabung Grup WhatsApp akan muncul untuk info lanjutan.',
+          '',
+          'Tekan tombol di bawah untuk menyalin nomor registrasi ke clipboard Anda.',
+        ].join('\n'),
+        'success',
+        'Pendaftaran Sukses',
+        async () => {
+          try {
+            if (navigator?.clipboard?.writeText) await navigator.clipboard.writeText(regNumber);
+          } catch {
+            return;
+          }
+        }
+      );
       requestAnimationFrame(() => {
         try {
           const el = document.getElementById('registration-card-preview');
@@ -1532,16 +1554,35 @@ const RegisterPage = () => {
                     {registrationNumber && (
                       <div className="success-reg-box" style={{ marginTop: 20 }}>
                         <div>
-                          <p style={{ fontWeight: 700, color: '#065F46', fontSize: 14 }}>Pendaftaran Anda sudah berhasil dikirim.</p>
-                          <p style={{ fontSize: 12, color: '#047857', marginTop: 4 }}>Simpan nomor pendaftaran ini untuk memantau status pendaftaran Anda yang akan diproses oleh admin.</p>
+                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'center' }}>
+                            <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', padding: '6px 10px', borderRadius: 999, fontSize: 11, fontWeight: 900, letterSpacing: 0.2, color: '#064E3B', background: 'linear-gradient(135deg, rgba(16,185,129,0.18), rgba(52,211,153,0.18))', border: '1px solid rgba(16,185,129,0.35)' }}>
+                              PENDAFTARAN GRATIS
+                            </span>
+                            <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', padding: '6px 10px', borderRadius: 999, fontSize: 11, fontWeight: 800, color: '#065F46', background: 'rgba(255,255,255,0.9)', border: '1px solid rgba(110,231,183,0.9)' }}>
+                              Siap diproses admin
+                            </span>
+                          </div>
+
+                          <p style={{ fontWeight: 900, color: '#064E3B', fontSize: 15, marginTop: 10 }}>
+                            Pendaftaran berhasil. Selamat datang!
+                          </p>
+                          <p style={{ fontSize: 12, color: '#047857', marginTop: 6, lineHeight: 1.5 }}>
+                            Simpan nomor registrasi ini untuk memantau status pendaftaran Anda. Tim kami akan memproses data Anda dan menghubungi Anda untuk tahapan berikutnya.
+                          </p>
                           <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, marginTop: 10, padding: '6px 14px', background: 'white', borderRadius: 10, border: '1.5px solid #6EE7B7' }}>
                             <span style={{ fontSize: 12, color: '#6B7280' }}>No. Pendaftaran:</span>
                             <span style={{ fontFamily: 'monospace', fontWeight: 800, color: '#065F46', fontSize: 14 }}>{registrationNumber}</span>
                           </div>
                           {!paymentProofUploaded ? (
                             <div style={{ marginTop: 10 }}>
-                              <p style={{ fontSize: 12, color: '#047857', marginTop: 6, fontWeight: 700 }}>Upload bukti pembayaran biaya pendaftaran Rp 100.000</p>
-                              <p style={{ fontSize: 11, color: '#065F46', marginTop: 4 }}>Setelah bukti pembayaran berhasil diupload, tombol untuk gabung Grup WA akan muncul.</p>
+                              <div style={{ marginTop: 10, padding: 12, borderRadius: 14, background: 'linear-gradient(135deg, rgba(5,150,105,0.10), rgba(16,185,129,0.06))', border: '1px solid rgba(16,185,129,0.25)' }}>
+                                <p style={{ fontSize: 12, color: '#065F46', fontWeight: 900, margin: 0 }}>
+                                  Langkah selanjutnya: Pembayaran Biaya Pendidikan
+                                </p>
+                                <p style={{ fontSize: 11, color: '#047857', marginTop: 6, marginBottom: 0, lineHeight: 1.5 }}>
+                                  Silakan upload bukti pembayaran biaya pendidikan agar proses Anda diprioritaskan. Setelah upload berhasil, tombol untuk gabung Grup WA akan muncul untuk info lanjutan dan jadwal.
+                                </p>
+                              </div>
                               <div style={{ marginTop: 10, display: 'flex', gap: 10, flexWrap: 'wrap' }}>
                                 <button
                                   type="button"
