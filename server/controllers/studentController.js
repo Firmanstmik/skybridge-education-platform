@@ -602,6 +602,8 @@ exports.uploadPaymentProof = async (req, res) => {
             [req.file.path, 'Lunas', studentId]
         );
 
+        await db.query("UPDATE students SET status = 'Diterima' WHERE id = ? AND status <> 'Ditolak'", [studentId]);
+
         res.json({ message: 'Bukti pembayaran berhasil diupload', payment_proof_path: req.file.path });
     } catch (error) {
         const msg = String(error?.message || '');
@@ -632,6 +634,13 @@ exports.updatePaymentStatus = async (req, res) => {
         }
 
         await db.query('UPDATE student_documents SET payment_status = ? WHERE student_id = ?', [paymentStatus, id]);
+
+        if (paymentStatus === 'Lunas') {
+            await db.query("UPDATE students SET status = 'Diterima' WHERE id = ? AND status <> 'Ditolak'", [id]);
+        } else if (paymentStatus === 'Belum Lunas') {
+            await db.query("UPDATE students SET status = 'Menunggu Verifikasi' WHERE id = ? AND status = 'Diterima'", [id]);
+        }
+
         res.json({ message: 'Status pembayaran berhasil diperbarui', payment_status: paymentStatus });
     } catch (error) {
         const msg = String(error?.message || '');
@@ -704,6 +713,18 @@ exports.updateStudentStatus = async (req, res) => {
     }
 
     try {
+        if (status === 'Diterima') {
+            const [docRows] = await db.query('SELECT payment_status, payment_proof_path FROM student_documents WHERE student_id = ?', [req.params.id]);
+            const doc = docRows?.[0] || null;
+            const proofPath = doc?.payment_proof_path ? String(doc.payment_proof_path).trim() : '';
+            const paymentStatus = doc?.payment_status ? String(doc.payment_status).trim() : '';
+            const isPaid = paymentStatus === 'Lunas' || Boolean(proofPath);
+
+            if (!isPaid) {
+                return res.status(400).json({ message: 'Tidak bisa Diterima sebelum upload bukti pembayaran (status pembayaran masih Belum Lunas).' });
+            }
+        }
+
         await db.query('UPDATE students SET status = ?, admin_notes = ? WHERE id = ?', [status, admin_notes, req.params.id]);
         res.json({ message: 'Status updated' });
     } catch (error) {
