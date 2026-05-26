@@ -1,5 +1,4 @@
 const db = require('../config/db');
-const fs = require('fs');
 const path = require('path');
 const QRCode = require('qrcode');
 const { PDFDocument, rgb, StandardFonts } = require('pdf-lib');
@@ -665,7 +664,9 @@ exports.getAllStudents = async (req, res) => {
         res.json(students);
     } catch (error) {
         const msg = String(error?.message || '');
-        if (msg.includes("Unknown column 'payment_proof_path'") || msg.includes("Unknown column 'payment_status'")) {
+        const hasMissingPaymentColumn = error?.code === 'ER_BAD_FIELD_ERROR'
+            && (msg.includes('payment_proof_path') || msg.includes('payment_status'));
+        if (hasMissingPaymentColumn) {
             const [students] = await db.query(`
                 SELECT 
                     s.*,

@@ -8,6 +8,7 @@ const navLinks = [
   { path: '/kursus-bahasa-jepang-online', label: 'Kursus', icon: BookOpen },
   { path: '/pelatihan-kerja-ke-jepang', label: 'Pelatihan', icon: ClipboardCheck },
   { path: '/magang-ke-jepang', label: 'Magang', icon: UserPlus },
+  { path: '/blog', label: 'Blog', icon: BookOpen },
   { path: '/student/check-status', label: 'Cek Status', icon: ClipboardCheck },
 ];
 

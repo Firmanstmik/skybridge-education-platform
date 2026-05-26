@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import Navbar from './Navbar';
 import { Link, useLocation } from 'react-router-dom';
 import { ArrowLeft, Calendar, User, Tag } from 'lucide-react';
+import FooterSection from './landing/FooterSection';
 
 const SITE_URL = 'https://www.skybridgenisantara.com';
 
@@ -167,6 +168,7 @@ const BlogArticle = ({
           </div>
         </div>
       </article>
+      <FooterSection />
     </div>
   );
 };

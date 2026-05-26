@@ -334,7 +334,7 @@ const AdminLayout = ({ children }) => {
   };
 
   return (
-    <div className="min-h-[100dvh] flex font-sans bg-gradient-to-br from-slate-50 via-slate-100 to-slate-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 text-slate-900 dark:text-slate-100">
+    <div className="min-h-[100dvh] md:min-h-screen flex font-sans bg-gradient-to-br from-slate-50 via-slate-100 to-slate-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 text-slate-900 dark:text-slate-100">
       <div 
         className={`fixed inset-0 z-40 bg-black/60 backdrop-blur-md md:hidden transition-opacity duration-300 ${isSidebarOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
         onClick={() => setIsSidebarOpen(false)}
@@ -346,7 +346,7 @@ const AdminLayout = ({ children }) => {
         }`}
       >
         <div
-          className={`h-full hidden md:flex flex-col backdrop-blur-xl bg-white/90 dark:bg-slate-950/80 border-r border-slate-200/80 dark:border-slate-800 shadow-[0_20px_60px_rgba(15,23,42,0.18)] transition-all duration-500 ${
+          className={`hidden md:flex md:min-h-screen flex-col backdrop-blur-xl bg-white/90 dark:bg-slate-950/80 border-r border-slate-200/80 dark:border-slate-800 shadow-[0_20px_60px_rgba(15,23,42,0.18)] transition-all duration-500 ${
             isSidebarCollapsed ? 'w-20' : 'w-72'
           }`}
         >
@@ -376,7 +376,7 @@ const AdminLayout = ({ children }) => {
             </button>
           </div>
 
-          <nav className="flex-1 overflow-y-auto px-3 py-5 space-y-6">
+          <nav className="flex-1 px-3 py-5 space-y-6">
             <div>
               {!isSidebarCollapsed && (
                 <p className="px-2 mb-2 text-[11px] font-semibold tracking-[0.22em] text-slate-400 uppercase">
@@ -488,6 +488,19 @@ const AdminLayout = ({ children }) => {
               )}
               <div className="space-y-1.5">
                 <SidebarItem icon={Users} label="Manajemen User" to="/admin/users" />
+              </div>
+            </div>
+            )}
+
+            {(userRole === 'SUPER_ADMIN' || userRole === 'superadmin') && (
+            <div>
+              {!isSidebarCollapsed && (
+                <p className="px-2 mb-2 text-[11px] font-semibold tracking-[0.22em] text-slate-400 uppercase">
+                  Website
+                </p>
+              )}
+              <div className="space-y-1.5">
+                <SidebarItem icon={BookOpen} label="CMS Website" to="/admin/content" />
               </div>
             </div>
             )}
@@ -605,6 +618,9 @@ const AdminLayout = ({ children }) => {
             {(userRole === 'SUPER_ADMIN' || userRole === 'superadmin') && (
                 <SidebarItem icon={Users} label="Manajemen User" to="/admin/users" />
             )}
+            {(userRole === 'SUPER_ADMIN' || userRole === 'superadmin') && (
+                <SidebarItem icon={BookOpen} label="CMS Website" to="/admin/content" />
+            )}
 
             {(userRole === 'KEPALA_LPK' || userRole === 'SUPER_ADMIN' || userRole === 'superadmin') && (
             <div className="pt-2 border-t border-slate-200 dark:border-slate-800">
@@ -634,7 +650,7 @@ const AdminLayout = ({ children }) => {
         </div>
       </aside>
 
-      <div className="flex-1 flex flex-col min-w-0 h-[100dvh]">
+      <div className="flex-1 flex flex-col min-w-0">
         {isProfileModalOpen && (
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
                 <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl w-full max-w-md overflow-hidden">
@@ -729,6 +745,7 @@ const AdminLayout = ({ children }) => {
                   {location.pathname.endsWith('/scan') && 'Scan QR Code'}
                   {location.pathname.endsWith('/students') && 'Data Pendaftar'}
                   {location.pathname.endsWith('/users') && 'Manajemen User'}
+                  {location.pathname.endsWith('/content') && 'CMS Website'}
                   {location.pathname.includes('/student/') && 'Detail Pendaftar'}
                 </h2>
               </div>
@@ -801,7 +818,7 @@ const AdminLayout = ({ children }) => {
           </div>
         </header>
 
-        <main className="flex-1 overflow-y-auto px-4 md:px-6 py-4 md:py-6 pb-[calc(96px+var(--vv-bottom,0px)+max(env(safe-area-inset-bottom,0px),28px))] md:pb-8">
+        <main className="px-4 md:px-6 py-4 md:py-6 pb-[calc(96px+var(--vv-bottom,0px)+max(env(safe-area-inset-bottom,0px),28px))] md:pb-8">
           {children}
         </main>
 

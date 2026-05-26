@@ -15,12 +15,13 @@ const AdminStudentsPage = lazy(() => import('./pages/AdminStudentsPage'));
 const AdminStudentDetail = lazy(() => import('./pages/AdminStudentDetail'));
 const AdminScanQr = lazy(() => import('./pages/AdminScanQr'));
 const AdminUserManagement = lazy(() => import('./pages/AdminUserManagement'));
+const AdminContentManagement = lazy(() => import('./pages/AdminContentManagement'));
 const StaffInputData = lazy(() => import('./pages/StaffInputData'));
 const CheckStatusPage = lazy(() => import('./pages/CheckStatusPage'));
 const StudentDashboard = lazy(() => import('./pages/StudentDashboard'));
-const KursusBahasaJepang = lazy(() => import('./pages/KursusBahasaJepang'));
-const PelatihanKerjaJepang = lazy(() => import('./pages/PelatihanKerjaJepang'));
-const MagangKeJepang = lazy(() => import('./pages/MagangKeJepang'));
+const ProgramCmsPage = lazy(() => import('./pages/ProgramCmsPage'));
+const BlogListPage = lazy(() => import('./pages/BlogListPage'));
+const DynamicBlogPage = lazy(() => import('./pages/DynamicBlogPage'));
 const BelajarBahasaJepangDariNol = lazy(() => import('./pages/BelajarBahasaJepangDariNol'));
 const KerjaJepangTanpaPengalaman = lazy(() => import('./pages/blog/KerjaJepangTanpaPengalaman'));
 const BiayaKursusJepang = lazy(() => import('./pages/blog/BiayaKursusJepang'));
@@ -64,10 +65,12 @@ function App() {
                 <Route path="/student/check-status" element={<CheckStatusPage />} />
                 <Route path="/student/dashboard" element={<StudentDashboard />} />
                 
-                <Route path="/kursus-bahasa-jepang-online" element={<KursusBahasaJepang />} />
-                <Route path="/pelatihan-kerja-ke-jepang" element={<PelatihanKerjaJepang />} />
-                <Route path="/magang-ke-jepang" element={<MagangKeJepang />} />
+                <Route path="/kursus-bahasa-jepang-online" element={<ProgramCmsPage pageKey="kursus" />} />
+                <Route path="/pelatihan-kerja-ke-jepang" element={<ProgramCmsPage pageKey="pelatihan" />} />
+                <Route path="/magang-ke-jepang" element={<ProgramCmsPage pageKey="magang" />} />
                 <Route path="/belajar-bahasa-jepang-dari-nol" element={<BelajarBahasaJepangDariNol />} />
+                <Route path="/blog" element={<BlogListPage />} />
+                <Route path="/blog/:slug" element={<DynamicBlogPage />} />
 
                 <Route path="/blog/kerja-jepang-tanpa-pengalaman" element={<KerjaJepangTanpaPengalaman />} />
                 <Route path="/blog/biaya-kursus-bahasa-jepang" element={<BiayaKursusJepang />} />
@@ -88,6 +91,7 @@ function App() {
                 <Route path="/admin/students" element={<PrivateRoute allowedRoles={['SUPER_ADMIN', 'superadmin']}><AdminStudentsPage /></PrivateRoute>} />
                 <Route path="/admin/student/:id" element={<PrivateRoute allowedRoles={['SUPER_ADMIN', 'superadmin']}><AdminStudentDetail /></PrivateRoute>} />
                 <Route path="/admin/users" element={<PrivateRoute allowedRoles={['SUPER_ADMIN', 'superadmin']}><AdminUserManagement /></PrivateRoute>} />
+                <Route path="/admin/content" element={<PrivateRoute allowedRoles={['SUPER_ADMIN', 'superadmin']}><AdminContentManagement /></PrivateRoute>} />
                 <Route path="/admin/scan" element={<PrivateRoute allowedRoles={['SUPER_ADMIN', 'superadmin']}><AdminScanQr /></PrivateRoute>} />
                 <Route path="/admin/input-student" element={<PrivateRoute allowedRoles={['SUPER_ADMIN', 'superadmin']}><StaffInputData /></PrivateRoute>} />
                 <Route path="/admin/input-student/:id" element={<PrivateRoute allowedRoles={['SUPER_ADMIN', 'superadmin']}><StaffInputData /></PrivateRoute>} />

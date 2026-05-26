@@ -1,0 +1,204 @@
+{
+  "pages": {
+    "kursus": {
+      "key": "kursus",
+      "route": "/kursus-bahasa-jepang-online",
+      "navLabel": "Kursus",
+      "heroBadge": "KURSUS BAHASA JEPANG / NIHONGO COURSE",
+      "heroTitle": "Kursus Bahasa Jepang Online",
+      "heroDescription": "Belajar bahasa Jepang dari nol hingga siap kerja bersama SKYBRIDGE Nusantara International School. Materi terstruktur, kelas interaktif, dan bimbingan langsung dari mentor berpengalaman.",
+      "sectionTitle": "Kenapa Memilih Kursus Bahasa Jepang Online SKYBRIDGE?",
+      "sectionDescription": "Program ini dirancang untuk pemula sampai level menengah yang ingin menguasai bahasa Jepang untuk kerja, studi, maupun persiapan JLPT. Fokus kami bukan hanya hafalan, tetapi kemampuan yang benar-benar bisa dipakai.",
+      "sectionImage": "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&q=80&w=1200",
+      "sectionCards": [
+        {
+          "title": "Belajar Dari Nol",
+          "description": "Cocok untuk peserta yang belum memiliki dasar bahasa Jepang sama sekali."
+        },
+        {
+          "title": "Kelas Fleksibel",
+          "description": "Bisa belajar dari mana saja dengan sistem online yang mudah diikuti."
+        },
+        {
+          "title": "Persiapan JLPT",
+          "description": "Materi disusun untuk membantu peserta siap menuju level N5 dan N4."
+        }
+      ],
+      "detailTitle": "Materi Belajar Komprehensif",
+      "detailDescription": "Setiap pertemuan dibangun agar peserta mampu memahami kosakata, percakapan, tata bahasa, dan budaya kerja Jepang secara seimbang.",
+      "detailBullets": [
+        "Hiragana, Katakana, dan Kanji dasar",
+        "Tata bahasa JLPT N5 dan N4",
+        "Latihan percakapan untuk situasi kerja",
+        "Listening dan pemahaman instruksi",
+        "Budaya dan etika kerja Jepang"
+      ],
+      "detailQuote": "Belajar bahasa Jepang akan terasa lebih cepat jika materi, latihan, dan targetnya jelas. Di sinilah SKYBRIDGE membantu peserta belajar dengan arah yang terukur.",
+      "faq": [
+        {
+          "question": "Apakah kursus ini cocok untuk pemula?",
+          "answer": "Ya, program ini memang disiapkan untuk peserta yang mulai dari nol."
+        },
+        {
+          "question": "Berapa lama durasi belajarnya?",
+          "answer": "Durasi bisa disesuaikan, tetapi umumnya 3 sampai 6 bulan untuk target dasar sampai menengah."
+        },
+        {
+          "question": "Apakah ada pendampingan ke jalur kerja atau magang?",
+          "answer": "Ya, lulusan program bisa melanjutkan ke jalur pelatihan kerja atau magang sesuai kesiapan masing-masing."
+        }
+      ],
+      "ctaTitle": "Siap Mulai Belajar Bahasa Jepang?",
+      "ctaDescription": "Bangun pondasi bahasa Jepang Anda sekarang dan siapkan diri untuk peluang karir maupun studi ke Jepang.",
+      "whatsappText": "Halo Admin SKYBRIDGE, saya ingin konsultasi mengenai Kursus Bahasa Jepang Online."
+    },
+    "pelatihan": {
+      "key": "pelatihan",
+      "route": "/pelatihan-kerja-ke-jepang",
+      "navLabel": "Pelatihan",
+      "heroBadge": "PELATIHAN KERJA / JOB TRAINING",
+      "heroTitle": "Pelatihan Kerja Jepang Terpadu",
+      "heroDescription": "Program pelatihan kerja yang mempersiapkan peserta dari tahap seleksi, pelatihan bahasa, pembentukan sikap kerja, sampai proses penempatan ke Jepang.",
+      "sectionTitle": "Alur Pelatihan dan Penempatan Kerja",
+      "sectionDescription": "Kami mendampingi peserta melalui tahapan yang terstruktur agar lebih siap menghadapi dunia kerja di Jepang secara resmi dan profesional.",
+      "sectionImage": "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&q=80&w=1200",
+      "sectionCards": [
+        {
+          "title": "Pendaftaran dan Seleksi",
+          "description": "Peserta melalui proses administrasi, wawancara, dan pemetaan kesiapan awal."
+        },
+        {
+          "title": "Pelatihan Bahasa dan Budaya",
+          "description": "Peserta dibekali bahasa Jepang, etika kerja, dan kebiasaan profesional."
+        },
+        {
+          "title": "Interview Mitra Jepang",
+          "description": "Peserta diarahkan ke proses seleksi dengan mitra perusahaan atau lembaga terkait."
+        },
+        {
+          "title": "Pengurusan Dokumen",
+          "description": "Tim membantu proses dokumen penting seperti visa dan berkas penempatan."
+        },
+        {
+          "title": "Keberangkatan dan Pendampingan",
+          "description": "Peserta diberangkatkan dengan arahan yang jelas dan pendampingan lanjutan."
+        }
+      ],
+      "detailTitle": "Keunggulan Program Pelatihan",
+      "detailDescription": "Program ini tidak hanya fokus pada teori, tetapi juga kesiapan mental, disiplin, dan adaptasi kerja agar peserta benar-benar siap saat ditempatkan.",
+      "detailBullets": [
+        "Didampingi mentor berpengalaman",
+        "Terhubung dengan mitra resmi",
+        "Materi bahasa dan budaya kerja terintegrasi",
+        "Pendampingan dokumen dan administrasi",
+        "Pembinaan etos kerja dan kedisiplinan"
+      ],
+      "detailQuote": "Target kami bukan hanya memberangkatkan peserta, tetapi memastikan mereka berangkat dengan persiapan yang matang dan realistis.",
+      "faq": [
+        {
+          "question": "Apakah program ini cocok untuk pemula?",
+          "answer": "Cocok, selama peserta siap mengikuti tahapan pembinaan yang telah disusun."
+        },
+        {
+          "question": "Apakah ada pelatihan bahasa Jepang?",
+          "answer": "Ya, bahasa Jepang menjadi bagian inti dari program ini."
+        },
+        {
+          "question": "Apakah prosesnya resmi?",
+          "answer": "Ya, proses dijalankan secara resmi dan transparan sesuai jalur yang berlaku."
+        }
+      ],
+      "ctaTitle": "Mulai Persiapan Karir ke Jepang",
+      "ctaDescription": "Konsultasikan target kerja Anda dan mulai langkah yang lebih terarah bersama SKYBRIDGE.",
+      "whatsappText": "Halo Admin SKYBRIDGE, saya ingin konsultasi mengenai Pelatihan Kerja Jepang."
+    },
+    "magang": {
+      "key": "magang",
+      "route": "/magang-ke-jepang",
+      "navLabel": "Magang",
+      "heroBadge": "MAGANG KE JEPANG / TECHNICAL INTERN",
+      "heroTitle": "Program Magang ke Jepang Resmi",
+      "heroDescription": "Program magang ke Jepang yang membantu peserta dari pelatihan bahasa sampai penempatan resmi melalui proses yang terarah dan transparan.",
+      "sectionTitle": "Kenapa Memilih Program Magang di SKYBRIDGE?",
+      "sectionDescription": "Program magang memberi kesempatan untuk belajar budaya kerja Jepang, membangun pengalaman internasional, dan berkembang secara profesional.",
+      "sectionImage": "https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&q=80&w=1200",
+      "sectionCards": [
+        {
+          "title": "Pemberangkatan Terjadwal",
+          "description": "Proses administrasi dibangun rapi agar keberangkatan lebih terencana."
+        },
+        {
+          "title": "Pendampingan Adaptasi",
+          "description": "Peserta dibekali agar lebih siap menghadapi kehidupan dan pekerjaan di Jepang."
+        },
+        {
+          "title": "Fokus Keamanan Peserta",
+          "description": "Kesiapan dokumen, kesehatan, dan pemahaman proses menjadi prioritas."
+        }
+      ],
+      "detailTitle": "Persyaratan dan Kesiapan Peserta",
+      "detailDescription": "Sebelum diberangkatkan, peserta perlu melalui proses pembinaan dan memenuhi kesiapan dasar agar mampu beradaptasi dengan baik di Jepang.",
+      "detailBullets": [
+        "Usia produktif dan siap mengikuti seleksi",
+        "Sehat jasmani dan rohani",
+        "Memiliki motivasi belajar yang kuat",
+        "Siap mengikuti pembinaan bahasa dan budaya",
+        "Mampu bekerja disiplin dan mengikuti aturan"
+      ],
+      "detailQuote": "Magang ke Jepang bukan hanya soal berangkat, tetapi soal kesiapan untuk tumbuh melalui pengalaman kerja yang nyata dan disiplin.",
+      "faq": [
+        {
+          "question": "Apakah peserta harus bisa bahasa Jepang sejak awal?",
+          "answer": "Tidak harus, karena peserta akan dibina terlebih dahulu sebelum proses lanjut."
+        },
+        {
+          "question": "Berapa lama masa program magang?",
+          "answer": "Durasi bergantung pada skema penempatan, tetapi umumnya berlangsung beberapa tahun sesuai kontrak."
+        },
+        {
+          "question": "Apakah ada pendampingan selama proses persiapan?",
+          "answer": "Ya, peserta akan didampingi sejak tahap awal sampai siap menjalani proses berikutnya."
+        }
+      ],
+      "ctaTitle": "Mulai Perjalanan Magang Anda ke Jepang",
+      "ctaDescription": "Konsultasikan peluang magang resmi dan temukan jalur yang paling sesuai dengan kesiapan Anda.",
+      "whatsappText": "Halo Admin SKYBRIDGE, saya ingin konsultasi mengenai Program Magang ke Jepang."
+    }
+  },
+  "blogs": [
+    {
+      "id": "blog-kerja-jepang-pemula",
+      "slug": "cara-kerja-ke-jepang-untuk-pemula",
+      "title": "Cara Kerja ke Jepang untuk Pemula",
+      "excerpt": "Panduan ringkas untuk pemula yang ingin mulai menyiapkan jalur kerja ke Jepang secara lebih terarah.",
+      "category": "Tips Karir",
+      "author": "Tim SKYBRIDGE",
+      "date": "2026-05-10",
+      "coverImage": "https://images.unsplash.com/photo-1526481280693-3bfa756150f1?auto=format&fit=crop&q=80&w=1200",
+      "metaTitle": "Cara Kerja ke Jepang untuk Pemula",
+      "metaDescription": "Pelajari langkah awal, persiapan bahasa, dan strategi dasar bagi pemula yang ingin kerja ke Jepang.",
+      "metaKeywords": "kerja ke jepang, pemula, bahasa jepang, magang jepang, pelatihan kerja jepang",
+      "contentMarkdown": "## Langkah Awal yang Perlu Disiapkan\nMemulai rencana kerja ke Jepang sebaiknya diawali dengan target yang jelas. Tentukan apakah Anda ingin fokus ke jalur magang, pelatihan kerja, atau jalur lain yang sesuai.\n\n## Bekal yang Paling Penting\n- Bahasa Jepang dasar\n- Dokumen pribadi yang rapi\n- Kesiapan fisik dan mental\n- Informasi jalur yang resmi\n\n## Penutup\nDengan persiapan yang benar, proses menuju Jepang akan terasa lebih terarah dan realistis.",
+      "published": true,
+      "createdAt": "2026-05-10T08:00:00.000Z",
+      "updatedAt": "2026-05-10T08:00:00.000Z"
+    },
+    {
+      "id": "blog-tips-belajar-jepang",
+      "slug": "tips-belajar-bahasa-jepang-lebih-konsisten",
+      "title": "Tips Belajar Bahasa Jepang Lebih Konsisten",
+      "excerpt": "Cara sederhana agar proses belajar bahasa Jepang tetap jalan dan tidak berhenti di tengah jalan.",
+      "category": "Belajar",
+      "author": "Tim SKYBRIDGE",
+      "date": "2026-05-14",
+      "coverImage": "https://images.unsplash.com/photo-1513258496099-48168024aec0?auto=format&fit=crop&q=80&w=1200",
+      "metaTitle": "Tips Belajar Bahasa Jepang Lebih Konsisten",
+      "metaDescription": "Belajar bahasa Jepang akan lebih efektif jika dilakukan konsisten dengan metode yang sederhana dan terukur.",
+      "metaKeywords": "belajar bahasa jepang, tips jlpt, kursus bahasa jepang, belajar konsisten",
+      "contentMarkdown": "## Mulai Dari Target yang Masuk Akal\nBanyak orang gagal konsisten karena targetnya terlalu besar di awal. Mulailah dari target harian yang ringan tapi rutin.\n\n## Fokus ke Materi yang Kepakai\n- Kosakata dasar\n- Kalimat sehari-hari\n- Listening instruksi\n- Latihan membaca huruf dasar\n\n## Bangun Rutinitas\nBelajar 20 sampai 30 menit setiap hari jauh lebih efektif dibanding belajar lama tapi tidak konsisten.",
+      "published": true,
+      "createdAt": "2026-05-14T08:00:00.000Z",
+      "updatedAt": "2026-05-14T08:00:00.000Z"
+    }
+  ]
+}
