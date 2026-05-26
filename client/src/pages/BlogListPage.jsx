@@ -55,8 +55,10 @@ const BlogListPage = () => {
           <span className="inline-flex rounded-full border border-white/10 bg-white/5 px-4 py-2 text-[11px] font-bold uppercase tracking-[0.25em] text-indigo-300">
             Blog SKYBRIDGE
           </span>
-          <h1 className="mt-5 text-4xl md:text-5xl font-black tracking-tight">Artikel, Tips, dan Insight Seputar Jepang</h1>
-          <p className="mt-4 max-w-3xl text-slate-300 leading-7">
+          <h1 className="mt-5 text-4xl md:text-5xl font-black tracking-tight text-white drop-shadow-[0_8px_24px_rgba(0,0,0,0.45)]">
+            Artikel, Tips, dan Insight Seputar Jepang
+          </h1>
+          <p className="mt-4 max-w-3xl text-slate-100/95 leading-7 drop-shadow-[0_6px_18px_rgba(0,0,0,0.35)]">
             Kumpulan artikel yang bisa membantu calon peserta memahami jalur belajar, pelatihan, magang, dan persiapan menuju Jepang.
           </p>
         </div>
