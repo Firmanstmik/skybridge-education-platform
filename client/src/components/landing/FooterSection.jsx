@@ -1,9 +1,11 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { MapPin, Phone, Mail, Instagram, Facebook, Youtube, ArrowUpRight } from 'lucide-react';
+import usePublicBlogs from '../../hooks/usePublicBlogs';
 
 const FooterSection = () => {
   const year = new Date().getFullYear();
+  const blogLinks = usePublicBlogs(5);
 
   return (
     <footer className="relative bg-[#060914] text-white overflow-hidden">
@@ -124,21 +126,15 @@ const FooterSection = () => {
               <span className="absolute -bottom-2 left-0 w-full h-px bg-gradient-to-r from-indigo-500/60 to-transparent" />
             </h4>
             <ul className="space-y-3.5">
-              {[
-                { label: 'Kerja Jepang Tanpa Pengalaman', to: '/blog/kerja-jepang-tanpa-pengalaman' },
-                { label: 'Berapa Biaya Kursus Jepang?', to: '/blog/biaya-kursus-bahasa-jepang' },
-                { label: 'Tips Lolos Magang Jepang', to: '/blog/tips-lolos-magang-ke-jepang' },
-                { label: 'Magang Jepang vs SSW', to: '/blog/magang-jepang-itu-apa-bedanya-ssw' },
-                { label: 'Gaji Kerja di Jepang', to: '/blog/gaji-kerja-di-jepang-per-bulan' },
-              ].map(({ label, to }) => (
-                <li key={to}>
+              {blogLinks.map((blog) => (
+                <li key={blog.slug}>
                   <Link
-                    to={to}
+                    to={`/blog/${blog.slug}`}
                     style={{ textDecoration: 'none' }}
                     className="group/link flex items-center gap-2 text-slate-500 text-[13.5px] hover:text-white transition-all duration-200 hover:translate-x-1"
                   >
                     <span className="w-1 h-1 rounded-full bg-slate-700 group-hover/link:bg-indigo-400 transition-colors" />
-                    {label}
+                    {blog.title}
                   </Link>
                 </li>
               ))}

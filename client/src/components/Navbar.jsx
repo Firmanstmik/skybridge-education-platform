@@ -1,14 +1,14 @@
 import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, Home, UserPlus, ClipboardCheck, BookOpen, ChevronRight } from 'lucide-react';
+import { Menu, X, Home, UserPlus, ClipboardCheck, BookOpen, ChevronRight, ChevronDown } from 'lucide-react';
 import Logo from '../assets/img/SKYBRIDGE_LOGO.webp';
+import usePublicBlogs from '../hooks/usePublicBlogs';
 
-const navLinks = [
+const mainNavLinks = [
   { path: '/', label: 'Beranda', icon: Home },
   { path: '/kursus-bahasa-jepang-online', label: 'Kursus', icon: BookOpen },
   { path: '/pelatihan-kerja-ke-jepang', label: 'Pelatihan', icon: ClipboardCheck },
   { path: '/magang-ke-jepang', label: 'Magang', icon: UserPlus },
-  { path: '/blog', label: 'Blog', icon: BookOpen },
   { path: '/student/check-status', label: 'Cek Status', icon: ClipboardCheck },
 ];
 
@@ -17,10 +17,34 @@ const DARK_HERO_PATHS = ['/'];
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [mobileBlogOpen, setMobileBlogOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
+  const publicBlogs = usePublicBlogs(5);
 
-  const isActive = (path) => location.pathname === path;
+  const navLinks = [
+    ...mainNavLinks.slice(0, 4),
+    {
+      path: '/blog',
+      label: 'Blog',
+      icon: BookOpen,
+      children: publicBlogs.map((blog) => ({
+        to: `/blog/${blog.slug}`,
+        label: blog.title,
+      })),
+    },
+    ...mainNavLinks.slice(4),
+  ];
+
+  const isActive = (path) => {
+    if (path === '/blog') {
+      return location.pathname === '/blog' || location.pathname.startsWith('/blog/');
+    }
+
+    return location.pathname === path;
+  };
+
+  const isChildActive = (path) => location.pathname === path;
   const isDarkHeroPage = DARK_HERO_PATHS.includes(location.pathname);
 
   useEffect(() => {
@@ -35,6 +59,10 @@ const Navbar = () => {
     document.body.style.overflow = isOpen ? 'hidden' : '';
     return () => { document.body.style.overflow = ''; };
   }, [isOpen]);
+
+  useEffect(() => {
+    setMobileBlogOpen(isActive('/blog'));
+  }, [location.pathname]);
 
   /* ─── derived states ─── */
   // On dark-hero pages: start transparent, blur on scroll
@@ -146,17 +174,68 @@ const Navbar = () => {
 
             {/* ── Desktop Links ── */}
             <div className="hidden md:flex items-center gap-0.5 flex-1 justify-center">
-              {navLinks.map(({ path, label }) => (
-                <Link
-                  key={path}
-                  to={path}
-                  style={{ textDecoration: 'none', fontFamily: "'Plus Jakarta Sans', sans-serif" }}
-                  className={`nav-link-hover ${isActive(path) ? 'active' : ''} px-4 py-2 rounded-xl text-[13.5px] font-semibold tracking-wide transition-colors duration-200 ${
-                    isActive(path) ? 'text-white' : 'text-slate-400 hover:text-white'
-                  }`}
-                >
-                  {label}
-                </Link>
+              {navLinks.map(({ path, label, children }) => (
+                children ? (
+                  <div key={path} className="relative group">
+                    <Link
+                      to={path}
+                      style={{ textDecoration: 'none', fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+                      className={`nav-link-hover ${isActive(path) ? 'active' : ''} inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-[13.5px] font-semibold tracking-wide transition-colors duration-200 ${
+                        isActive(path) ? 'text-white' : 'text-slate-400 hover:text-white'
+                      }`}
+                    >
+                      {label}
+                      <ChevronDown size={14} className="opacity-80 transition-transform duration-200 group-hover:rotate-180" />
+                    </Link>
+
+                    <div className="absolute left-1/2 top-full z-50 w-80 -translate-x-1/2 pt-4 opacity-0 invisible translate-y-2 group-hover:opacity-100 group-hover:visible group-hover:translate-y-0 transition-all duration-200">
+                      <div className="rounded-2xl border border-white/10 bg-slate-950/95 backdrop-blur-2xl shadow-2xl shadow-black/40 p-3">
+                        <Link
+                          to={path}
+                          style={{ textDecoration: 'none', fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+                          className={`flex items-center justify-between rounded-xl px-3 py-2.5 text-[13px] font-semibold transition-colors duration-200 ${
+                            isActive(path) && location.pathname === '/blog'
+                              ? 'bg-white/10 text-white'
+                              : 'text-slate-300 hover:bg-white/6 hover:text-white'
+                          }`}
+                        >
+                          Semua Artikel
+                          <ChevronRight size={14} />
+                        </Link>
+
+                        <div className="my-2 h-px bg-white/8" />
+
+                        <div className="space-y-1">
+                          {children.map(({ to, label: childLabel }) => (
+                            <Link
+                              key={to}
+                              to={to}
+                              style={{ textDecoration: 'none', fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+                              className={`block rounded-xl px-3 py-2.5 text-[12.5px] leading-relaxed transition-colors duration-200 ${
+                                isChildActive(to)
+                                  ? 'bg-white/10 text-white'
+                                  : 'text-slate-400 hover:bg-white/6 hover:text-white'
+                              }`}
+                            >
+                              {childLabel}
+                            </Link>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <Link
+                    key={path}
+                    to={path}
+                    style={{ textDecoration: 'none', fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+                    className={`nav-link-hover ${isActive(path) ? 'active' : ''} px-4 py-2 rounded-xl text-[13.5px] font-semibold tracking-wide transition-colors duration-200 ${
+                      isActive(path) ? 'text-white' : 'text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    {label}
+                  </Link>
+                )
               ))}
             </div>
 
@@ -215,26 +294,81 @@ const Navbar = () => {
           {/* Nav links */}
           <div className="flex-1 overflow-y-auto px-4 py-5 space-y-1.5">
             {[...navLinks, { path: '/register', label: 'Pendaftaran', icon: ChevronRight, isCta: true }].map(
-              ({ path, label, icon: Icon, isCta }) => (
-                <Link
-                  key={path}
-                  to={path}
-                  style={{ textDecoration: 'none', fontFamily: "'Plus Jakarta Sans', sans-serif" }}
-                  onClick={() => setIsOpen(false)}
-                  className={`flex items-center gap-3 px-4 py-3.5 rounded-2xl text-[13px] font-semibold transition-all duration-200 ${
-                    isCta
-                      ? 'mt-3 bg-gradient-to-r from-indigo-600 to-blue-500 text-white shadow-lg shadow-indigo-500/25'
-                      : isActive(path)
-                      ? 'bg-white/10 text-white border border-white/12'
-                      : 'text-slate-400 hover:bg-white/8 hover:text-white'
-                  }`}
-                >
-                  <span className={`w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 ${isCta ? 'bg-white/20' : 'bg-white/8'}`}>
-                    <Icon size={15} />
-                  </span>
-                  {label}
-                  {!isCta && <ChevronRight size={14} className="ml-auto text-slate-600" />}
-                </Link>
+              ({ path, label, icon: Icon, isCta, children }) => (
+                children ? (
+                  <div key={path} className="space-y-1.5">
+                    <button
+                      type="button"
+                      onClick={() => setMobileBlogOpen((prev) => !prev)}
+                      className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl text-[13px] font-semibold transition-all duration-200 ${
+                        isActive(path)
+                          ? 'bg-white/10 text-white border border-white/12'
+                          : 'text-slate-400 hover:bg-white/8 hover:text-white'
+                      }`}
+                      style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+                    >
+                      <span className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 bg-white/8">
+                        <Icon size={15} />
+                      </span>
+                      {label}
+                      <ChevronDown size={15} className={`ml-auto transition-transform duration-200 ${mobileBlogOpen ? 'rotate-180 text-white' : 'text-slate-600'}`} />
+                    </button>
+
+                    {mobileBlogOpen && (
+                      <div className="ml-4 space-y-1 rounded-2xl border border-white/8 bg-white/[0.03] p-2">
+                        <Link
+                          to={path}
+                          style={{ textDecoration: 'none', fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+                          onClick={() => setIsOpen(false)}
+                          className={`flex items-center justify-between rounded-xl px-3 py-2.5 text-[12.5px] font-medium transition-colors duration-200 ${
+                            location.pathname === '/blog'
+                              ? 'bg-white/10 text-white'
+                              : 'text-slate-300 hover:bg-white/6 hover:text-white'
+                          }`}
+                        >
+                          Semua Artikel
+                          <ChevronRight size={14} />
+                        </Link>
+
+                        {children.map(({ to, label: childLabel }) => (
+                          <Link
+                            key={to}
+                            to={to}
+                            style={{ textDecoration: 'none', fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+                            onClick={() => setIsOpen(false)}
+                            className={`block rounded-xl px-3 py-2.5 text-[12.5px] leading-relaxed transition-colors duration-200 ${
+                              isChildActive(to)
+                                ? 'bg-white/10 text-white'
+                                : 'text-slate-400 hover:bg-white/6 hover:text-white'
+                            }`}
+                          >
+                            {childLabel}
+                          </Link>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <Link
+                    key={path}
+                    to={path}
+                    style={{ textDecoration: 'none', fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+                    onClick={() => setIsOpen(false)}
+                    className={`flex items-center gap-3 px-4 py-3.5 rounded-2xl text-[13px] font-semibold transition-all duration-200 ${
+                      isCta
+                        ? 'mt-3 bg-gradient-to-r from-indigo-600 to-blue-500 text-white shadow-lg shadow-indigo-500/25'
+                        : isActive(path)
+                        ? 'bg-white/10 text-white border border-white/12'
+                        : 'text-slate-400 hover:bg-white/8 hover:text-white'
+                    }`}
+                  >
+                    <span className={`w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 ${isCta ? 'bg-white/20' : 'bg-white/8'}`}>
+                      <Icon size={15} />
+                    </span>
+                    {label}
+                    {!isCta && <ChevronRight size={14} className="ml-auto text-slate-600" />}
+                  </Link>
+                )
               )
             )}
           </div>

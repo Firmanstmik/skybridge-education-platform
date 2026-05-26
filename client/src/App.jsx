@@ -23,15 +23,10 @@ const ProgramCmsPage = lazy(() => import('./pages/ProgramCmsPage'));
 const BlogListPage = lazy(() => import('./pages/BlogListPage'));
 const DynamicBlogPage = lazy(() => import('./pages/DynamicBlogPage'));
 const BelajarBahasaJepangDariNol = lazy(() => import('./pages/BelajarBahasaJepangDariNol'));
-const KerjaJepangTanpaPengalaman = lazy(() => import('./pages/blog/KerjaJepangTanpaPengalaman'));
-const BiayaKursusJepang = lazy(() => import('./pages/blog/BiayaKursusJepang'));
-const TipsLolosMagang = lazy(() => import('./pages/blog/TipsLolosMagang'));
-const MagangJepangVsSSW = lazy(() => import('./pages/blog/MagangJepangVsSSW'));
 const SyaratMagangJepangTerbaru = lazy(() => import('./pages/blog/SyaratMagangJepangTerbaru'));
 const TahapanSeleksiMagangJepang = lazy(() => import('./pages/blog/TahapanSeleksiMagangJepang'));
 const GajiMagangJepangBersih = lazy(() => import('./pages/blog/GajiMagangJepangBersih'));
 const TokuteiGinouSSWItuApa = lazy(() => import('./pages/blog/TokuteiGinouSSWItuApa'));
-const GajiKerjaDiJepangPerBulan = lazy(() => import('./pages/blog/GajiKerjaDiJepangPerBulan'));
 const KurikulumBelajarJepangUntukKerja3Bulan = lazy(() => import('./pages/blog/KurikulumBelajarJepangUntukKerja3Bulan'));
 const DataKelas = lazy(() => import('./pages/akademik/DataKelas'));
 const DataSiswa = lazy(() => import('./pages/akademik/DataSiswa'));
@@ -72,15 +67,10 @@ function App() {
                 <Route path="/blog" element={<BlogListPage />} />
                 <Route path="/blog/:slug" element={<DynamicBlogPage />} />
 
-                <Route path="/blog/kerja-jepang-tanpa-pengalaman" element={<KerjaJepangTanpaPengalaman />} />
-                <Route path="/blog/biaya-kursus-bahasa-jepang" element={<BiayaKursusJepang />} />
-                <Route path="/blog/tips-lolos-magang-ke-jepang" element={<TipsLolosMagang />} />
-                <Route path="/blog/magang-jepang-itu-apa-bedanya-ssw" element={<MagangJepangVsSSW />} />
                 <Route path="/blog/syarat-magang-jepang-terbaru" element={<SyaratMagangJepangTerbaru />} />
                 <Route path="/blog/tahapan-seleksi-magang-jepang" element={<TahapanSeleksiMagangJepang />} />
                 <Route path="/blog/magang-jepang-gaji-berapa-hitungan-bersih" element={<GajiMagangJepangBersih />} />
                 <Route path="/blog/tokutei-ginou-ssw-itu-apa" element={<TokuteiGinouSSWItuApa />} />
-                <Route path="/blog/gaji-kerja-di-jepang-per-bulan" element={<GajiKerjaDiJepangPerBulan />} />
                 <Route path="/blog/kurikulum-belajar-bahasa-jepang-untuk-kerja-3-bulan" element={<KurikulumBelajarJepangUntukKerja3Bulan />} />
 
                 <Route path="/admin/login" element={<AdminLogin />} />

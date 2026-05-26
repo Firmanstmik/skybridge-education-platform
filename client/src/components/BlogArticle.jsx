@@ -3,6 +3,7 @@ import Navbar from './Navbar';
 import { Link, useLocation } from 'react-router-dom';
 import { ArrowLeft, Calendar, User, Tag } from 'lucide-react';
 import FooterSection from './landing/FooterSection';
+import usePublicBlogs from '../hooks/usePublicBlogs';
 
 const SITE_URL = 'https://www.skybridgenisantara.com';
 
@@ -58,6 +59,9 @@ const BlogArticle = ({
   jsonLd,
 }) => {
   const location = useLocation();
+  const relatedBlogs = usePublicBlogs()
+    .filter((blog) => `/blog/${blog.slug}` !== location.pathname)
+    .slice(0, 4);
 
   useEffect(() => {
     const resolvedCanonicalUrl = canonicalUrl || `${SITE_URL}${location.pathname}`;
@@ -152,6 +156,33 @@ const BlogArticle = ({
         <div className="prose prose-lg max-w-none text-gray-700 leading-relaxed space-y-6">
           {content}
         </div>
+
+        <section className="mt-14 rounded-[28px] border border-slate-200 bg-slate-50 p-6 md:p-8">
+          <div className="flex items-start justify-between gap-4 flex-col md:flex-row md:items-center">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-[0.22em] text-indigo-600">Artikel Pilihan</p>
+              <h2 className="mt-3 text-2xl md:text-3xl font-black text-slate-900">Lanjut baca topik populer lainnya</h2>
+              <p className="mt-3 text-slate-500 leading-7">
+                Daftar artikel ini sama seperti yang tampil di footer dan navbar, jadi pengunjung bisa lanjut eksplor topik penting lainnya.
+              </p>
+            </div>
+            <Link to="/blog" className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-bold text-slate-700 hover:border-indigo-200 hover:text-indigo-600 transition-colors">
+              Semua Artikel
+            </Link>
+          </div>
+
+          <div className="mt-6 grid gap-3 md:grid-cols-2">
+            {relatedBlogs.map((blog) => (
+              <Link
+                key={blog.slug}
+                to={`/blog/${blog.slug}`}
+                className="rounded-2xl border border-slate-200 bg-white px-5 py-4 text-sm font-semibold leading-6 text-slate-700 transition-all duration-200 hover:-translate-y-0.5 hover:border-indigo-200 hover:text-indigo-600"
+              >
+                {blog.title}
+              </Link>
+            ))}
+          </div>
+        </section>
 
         <div className="mt-16 p-8 bg-red-50 rounded-3xl border border-red-100 text-center">
           <h3 className="text-2xl font-black text-black mb-4">Ingin Segera Berangkat ke Jepang?</h3>
