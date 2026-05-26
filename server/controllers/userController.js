@@ -184,7 +184,7 @@ exports.createUser = async (req, res) => {
 
 exports.updateUser = async (req, res) => {
     const { id } = req.params;
-    const { email, full_name, role, status, password } = req.body;
+    const { username, email, full_name, role, status, password } = req.body;
 
     try {
         // Check if user exists
@@ -193,9 +193,27 @@ exports.updateUser = async (req, res) => {
             return res.status(404).json({ message: 'User not found' });
         }
 
+        if (username !== undefined) {
+            const [usernameUsers] = await db.query('SELECT id FROM users WHERE username = ? AND id <> ?', [username, id]);
+            if (usernameUsers.length > 0) {
+                return res.status(400).json({ message: 'Username already in use' });
+            }
+        }
+
+        if (email && await hasUserColumn('email')) {
+            const [emailUsers] = await db.query('SELECT id FROM users WHERE email = ? AND id <> ?', [email, id]);
+            if (emailUsers.length > 0) {
+                return res.status(400).json({ message: 'Email already in use' });
+            }
+        }
+
         const sets = [];
         const params = [];
 
+        if (username !== undefined) {
+            sets.push('username = ?');
+            params.push(username);
+        }
         if (await hasUserColumn('email')) {
             sets.push('email = ?');
             params.push(email ?? null);
