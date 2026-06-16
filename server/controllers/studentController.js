@@ -1,4 +1,5 @@
 const db = require('../config/db');
+const { sendRegistrationNotification } = require('../services/emailService');
 const path = require('path');
 const QRCode = require('qrcode');
 const { PDFDocument, rgb, StandardFonts } = require('pdf-lib');
@@ -492,6 +493,18 @@ exports.registerStudent = async (req, res) => {
         await connection.query('UPDATE students SET qr_code_path = ? WHERE id = ?', [qrPath, studentId]);
 
         await connection.commit();
+
+        if (status !== 'Draft') {
+            sendRegistrationNotification({
+                body,
+                files,
+                regNumber,
+                status,
+            }).catch((emailError) => {
+                console.error('Registration email notification failed:', emailError.message);
+            });
+        }
+
         res.status(201).json({ message: 'Registration successful', registration_number: regNumber, qr_code: qrPath });
 
     } catch (error) {
