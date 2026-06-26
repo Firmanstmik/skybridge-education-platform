@@ -123,6 +123,8 @@ const textareaClassName = `${inputClassName} min-h-[120px] resize-y`;
 
 const AdminContentManagement = () => {
   const [activeTab, setActiveTab] = useState('pages');
+  const [settings, setSettings] = useState({ waGroupLink: '' });
+  const [isSavingSettings, setIsSavingSettings] = useState(false);
   const [selectedPageKey, setSelectedPageKey] = useState('kursus');
   const [pages, setPages] = useState({});
   const [blogs, setBlogs] = useState([]);
@@ -146,6 +148,7 @@ const AdminContentManagement = () => {
       const { data } = await axios.get('/api/content/admin/all', authHeaders);
       setPages(data.pages || {});
       setBlogs(Array.isArray(data.blogs) ? data.blogs : []);
+      setSettings(data.settings || { waGroupLink: '' });
     } catch (error) {
       toast.error(error.response?.data?.message || 'Gagal memuat konten');
     } finally {
@@ -169,6 +172,20 @@ const AdminContentManagement = () => {
   const handleBlogInput = (e) => {
     const { name, value, type, checked } = e.target;
     setBlogForm((prev) => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
+  };
+
+  const saveSettings = async (e) => {
+    e.preventDefault();
+    setIsSavingSettings(true);
+    try {
+      const { data } = await axios.put('/api/content/settings', settings, authHeaders);
+      setSettings(data || { waGroupLink: '' });
+      toast.success('Pengaturan berhasil disimpan');
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Gagal menyimpan pengaturan');
+    } finally {
+      setIsSavingSettings(false);
+    }
   };
 
   const savePage = async (e) => {
@@ -308,6 +325,13 @@ const AdminContentManagement = () => {
               >
                 Blog
               </button>
+              <button
+                type="button"
+                onClick={() => setActiveTab('settings')}
+                className={`rounded-2xl px-4 py-2.5 text-sm font-bold transition-all ${activeTab === 'settings' ? 'bg-red-500 text-white shadow-lg shadow-red-500/25' : 'bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-300'}`}
+              >
+                Pengaturan
+              </button>
             </div>
           </div>
         </section>
@@ -316,6 +340,33 @@ const AdminContentManagement = () => {
           <div className="rounded-[32px] border border-slate-200 dark:border-slate-800 bg-white/90 dark:bg-slate-950/70 p-10 text-center text-slate-500">
             Memuat data CMS...
           </div>
+        ) : activeTab === 'settings' ? (
+          <form onSubmit={saveSettings} className="rounded-[32px] border border-slate-200 dark:border-slate-800 bg-white/90 dark:bg-slate-950/70 p-6 md:p-8 space-y-6">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-400">Pengaturan Siswa</p>
+              <h2 className="mt-2 text-xl font-black text-slate-900 dark:text-slate-50">Link Grup WhatsApp Peserta</h2>
+              <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
+                Link ini akan langsung ditampilkan ke siswa setelah pembayaran dikonfirmasi lunas di halaman Cek Status.
+              </p>
+            </div>
+            <Field label="Link Invite Grup WA">
+              <input
+                name="waGroupLink"
+                value={settings.waGroupLink || ''}
+                onChange={(e) => setSettings((prev) => ({ ...prev, waGroupLink: e.target.value }))}
+                placeholder="https://chat.whatsapp.com/..."
+                className={inputClassName}
+              />
+            </Field>
+            <button
+              type="submit"
+              disabled={isSavingSettings}
+              className="inline-flex items-center gap-2 rounded-2xl bg-red-500 px-5 py-3 text-sm font-bold text-white shadow-lg shadow-red-500/25 disabled:opacity-60"
+            >
+              {isSavingSettings ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
+              Simpan Pengaturan
+            </button>
+          </form>
         ) : activeTab === 'pages' ? (
           <div className="grid xl:grid-cols-[280px_1fr] gap-6">
             <aside className="rounded-[32px] border border-slate-200 dark:border-slate-800 bg-white/90 dark:bg-slate-950/70 p-4">

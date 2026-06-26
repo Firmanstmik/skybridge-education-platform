@@ -5,7 +5,9 @@ const {
     getPublicPageByKey,
     getPublicBlogs,
     getPublicBlogBySlug,
+    getPublicSettings,
     getAdminContent,
+    updateSettings,
     updatePageContent,
     createBlog,
     updateBlog,
@@ -19,8 +21,10 @@ router.get('/pages', getPublicPages);
 router.get('/pages/:pageKey', getPublicPageByKey);
 router.get('/blogs', getPublicBlogs);
 router.get('/blogs/:slug', getPublicBlogBySlug);
+router.get('/settings', getPublicSettings);
 
 router.get('/admin/all', protect, admin, getAdminContent);
+router.put('/settings', protect, admin, updateSettings);
 router.put('/pages/:pageKey', protect, admin, updatePageContent);
 router.post('/blogs', protect, admin, createBlog);
 router.put('/blogs/:id', protect, admin, updateBlog);

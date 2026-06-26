@@ -2,6 +2,12 @@ const nodemailer = require('nodemailer');
 
 const ADMIN_EMAIL = process.env.ADMIN_NOTIFICATION_EMAIL || 'ramakatsuyuki7@gmail.com';
 
+const COURSE_PACKAGE_LABELS = {
+  basic: 'Kelas Basic (Rp 150.000 · 1x/minggu · 1 jam)',
+  intensive: 'Kelas Intensif (Rp 1.500.000 · 3x/minggu · 1,5 jam)',
+  premium: 'Kelas Premium (Rp 2.500.000 · 5x/minggu · 1,5 jam)',
+};
+
 let transporter = null;
 
 const getTransporter = () => {
@@ -98,6 +104,7 @@ const buildRegistrationEmail = ({ body, files, regNumber, status }) => {
   const personal = buildSection('A. Keterangan Pribadi', [
     ['Nomor Registrasi', regNumber],
     ['Nama Lengkap', body.full_name],
+    ['Paket Kelas', COURSE_PACKAGE_LABELS[body.course_package] || body.course_package || '-'],
     ['NIK', body.nik],
     ['Jenis Kelamin', body.gender],
     ['Tempat Lahir', body.place_of_birth],

@@ -19,6 +19,7 @@ const AdminContentManagement = lazy(() => import('./pages/AdminContentManagement
 const StaffInputData = lazy(() => import('./pages/StaffInputData'));
 const CheckStatusPage = lazy(() => import('./pages/CheckStatusPage'));
 const StudentDashboard = lazy(() => import('./pages/StudentDashboard'));
+const StudentKursusPage = lazy(() => import('./pages/StudentKursusPage'));
 const ProgramCmsPage = lazy(() => import('./pages/ProgramCmsPage'));
 const BlogListPage = lazy(() => import('./pages/BlogListPage'));
 const DynamicBlogPage = lazy(() => import('./pages/DynamicBlogPage'));
@@ -59,6 +60,7 @@ function App() {
                 <Route path="/register" element={<RegisterPage />} />
                 <Route path="/student/check-status" element={<CheckStatusPage />} />
                 <Route path="/student/dashboard" element={<StudentDashboard />} />
+                <Route path="/student/kursus" element={<StudentKursusPage />} />
                 
                 <Route path="/kursus-bahasa-jepang-online" element={<ProgramCmsPage pageKey="kursus" />} />
                 <Route path="/pelatihan-kerja-ke-jepang" element={<ProgramCmsPage pageKey="pelatihan" />} />

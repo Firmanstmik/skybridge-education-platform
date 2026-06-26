@@ -12,6 +12,19 @@ import { toPng } from 'html-to-image';
 import Logo from '../assets/img/SKYBRIDGE_LOGO.webp';
 import heroBg from '../assets/img/bg-internasional.webp';
 import { motion } from 'framer-motion';
+import CoursePackageSelector from '../components/CoursePackageSelector';
+import RegistrationDeviceHistory from '../components/RegistrationDeviceHistory';
+import RegistrationRestorePanel from '../components/RegistrationRestorePanel';
+import { COURSE_PACKAGES, getPackageById } from '../constants/coursePackages';
+import { Link } from 'react-router-dom';
+import {
+  buildHistoryEntry,
+  getLatestRegistration,
+  resolveStoredRegistrationEntry,
+  saveLastRegistrationCredentials,
+  saveRegistrationHistory,
+  syncHistoryFromStudent,
+} from '../utils/registrationHistory';
 
 const MotionDiv = motion.div;
 
@@ -89,7 +102,7 @@ const ErrMsg = ({ msg }) =>
 const RegisterPage = () => {
   const [step, setStep] = useState(1);
   const { showAlert } = useAlert();
-  const { register, control, watch, trigger, getValues, setError, clearErrors, reset, formState: { errors } } = useForm({
+  const { register, control, watch, trigger, getValues, setError, clearErrors, reset, setValue, formState: { errors } } = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
       education: [
@@ -100,26 +113,127 @@ const RegisterPage = () => {
       ],
       email: '',
       phone_number: '',
+      course_package: '',
     },
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [photoPreview, setPhotoPreview] = useState(null);
   const [registrationNumber, setRegistrationNumber] = useState('');
   const [registrationName, setRegistrationName] = useState('');
+  const [selectedPackageId, setSelectedPackageId] = useState('');
   const [showCard, setShowCard] = useState(false);
   const [isDownloadingCard, setIsDownloadingCard] = useState(false);
   const cardRef = useRef(null);
   const paymentProofInputRef = useRef(null);
   const [isUploadingPaymentProof, setIsUploadingPaymentProof] = useState(false);
   const [paymentProofUploaded, setPaymentProofUploaded] = useState(false);
-  const waGroupLink = String(import.meta.env.VITE_WA_GROUP_LINK || '').trim();
-  const waAdminNumber = '817084182215';
-  const waFallbackMessage = 'Halo Admin SKYBRIDGE Nusantara, saya sudah berhasil daftar. Mohon link Grup WA untuk peserta.';
-  const waFallbackUrl = `https://wa.me/${waAdminNumber}?text=${encodeURIComponent(waFallbackMessage)}`;
-  const waJoinUrl = waGroupLink || waFallbackUrl;
-  const waJoinLabel = waGroupLink ? 'Gabung Grup WA' : 'Minta Link Grup WA';
+  const [deviceHistory, setDeviceHistory] = useState(null);
+  const [historyLoading, setHistoryLoading] = useState(true);
+  const [viewMode, setViewMode] = useState('loading');
+
+  const applyHistoryToForm = (entry) => {
+    if (!entry?.registration_number) return;
+    setRegistrationNumber(entry.registration_number);
+    setRegistrationName(entry.full_name || '');
+    setSelectedPackageId(entry.course_package || '');
+    setShowCard(true);
+    setStep(5);
+    setPaymentProofUploaded(
+      Boolean(
+        entry.payment_proof_uploaded ||
+        entry.payment_status === 'Lunas' ||
+        entry.documents?.payment_proof_path
+      )
+    );
+    setDeviceHistory(entry);
+    setViewMode('active');
+  };
+
+  const refreshHistoryFromServer = async (entry) => {
+    if (!entry?.registration_number || !entry?.nik) return entry;
+    setHistoryLoading(true);
+    try {
+      const response = await axios.post(`${import.meta.env.VITE_API_URL}/students/login`, {
+        registration_number: entry.registration_number,
+        nik: entry.nik,
+      });
+      const synced = syncHistoryFromStudent(response.data.student);
+      const nextEntry = synced || entry;
+      setDeviceHistory(nextEntry);
+      if (viewMode === 'active' || registrationNumber) {
+        applyHistoryToForm(nextEntry);
+      }
+      return nextEntry;
+    } catch {
+      return entry;
+    } finally {
+      setHistoryLoading(false);
+    }
+  };
+
+  const restoreRegistration = async (regNumber, nikValue) => {
+    setHistoryLoading(true);
+    try {
+      const response = await axios.post(`${import.meta.env.VITE_API_URL}/students/login`, {
+        registration_number: regNumber,
+        nik: nikValue,
+      });
+      saveLastRegistrationCredentials({
+        registration_number: regNumber,
+        nik: nikValue,
+      });
+      const synced = syncHistoryFromStudent(response.data.student);
+      const nextEntry = synced || buildHistoryEntry({
+        registration_number: regNumber,
+        nik: nikValue,
+        ...response.data.student,
+      });
+      applyHistoryToForm(nextEntry);
+      return nextEntry;
+    } catch (error) {
+      throw error;
+    } finally {
+      setHistoryLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadDeviceHistory = async () => {
+      setHistoryLoading(true);
+
+      const entry = resolveStoredRegistrationEntry();
+
+      if (!entry) {
+        if (!cancelled) {
+          setViewMode('form');
+          setHistoryLoading(false);
+        }
+        return;
+      }
+
+      try {
+        const response = await axios.post(`${import.meta.env.VITE_API_URL}/students/login`, {
+          registration_number: entry.registration_number,
+          nik: entry.nik,
+        });
+        if (cancelled) return;
+        const synced = syncHistoryFromStudent(response.data.student);
+        applyHistoryToForm(synced || entry);
+      } catch {
+        if (!cancelled) applyHistoryToForm(entry);
+      } finally {
+        if (!cancelled) setHistoryLoading(false);
+      }
+    };
+
+    loadDeviceHistory();
+    return () => { cancelled = true; };
+  }, []);
 
   const photoWatch = watch('photo');
+  const coursePackageWatch = watch('course_package');
 
   useEffect(() => {
     if (photoWatch && photoWatch.length > 0) {
@@ -178,7 +292,16 @@ const RegisterPage = () => {
       });
 
       setPaymentProofUploaded(true);
-      showAlert('Bukti pembayaran berhasil diupload. Silakan gabung Grup WA di tombol yang muncul.', 'success', 'Upload Berhasil');
+      const latest = getLatestRegistration();
+      if (latest) {
+        const updated = saveRegistrationHistory({
+          ...latest,
+          payment_proof_uploaded: true,
+          payment_status: 'Belum Lunas',
+        });
+        setDeviceHistory(updated);
+      }
+      showAlert('Bukti pembayaran berhasil diupload. Admin akan memverifikasi pembayaran Anda. Setelah dikonfirmasi, buka Cek Status untuk Grup WA dan halaman kelas.', 'success', 'Upload Berhasil');
     } catch (error) {
       let message = 'Gagal upload bukti pembayaran.';
       if (error.code === 'ECONNABORTED') message = 'Waktu tunggu server habis. Silakan coba lagi.';
@@ -236,20 +359,43 @@ const RegisterPage = () => {
       const regNumber = response.data.registration_number;
       setRegistrationNumber(regNumber);
       setRegistrationName(String(data.full_name || '').trim());
+      setSelectedPackageId(String(data.course_package || ''));
       setShowCard(true);
+      saveRegistrationHistory(
+        buildHistoryEntry(
+          {
+            registration_number: regNumber,
+            nik: data.nik,
+            full_name: data.full_name,
+            email: data.email,
+            phone_number: data.phone_number,
+            course_package: data.course_package,
+            status: 'Menunggu Verifikasi',
+            documents: { payment_status: 'Belum Lunas' },
+          },
+          { payment_proof_uploaded: false }
+        )
+      );
+      setDeviceHistory(getLatestRegistration());
+      setViewMode('active');
+      const pkg = getPackageById(data.course_package);
       showAlert(
         [
           'Pendaftaran Berhasil!',
           `Nomor Registrasi Anda: ${regNumber}`,
           '',
+          pkg ? `Paket Kursus: ${pkg.name} (${pkg.priceLabel})` : '',
+          pkg ? `Jadwal: ${pkg.schedule}` : '',
+          '',
           'Biaya pendaftaran: GRATIS (Rp 0).',
+          pkg ? `Biaya pendidikan/kursus: ${pkg.priceLabel} per bulan.` : '',
           'Mohon simpan dan catat nomor registrasi ini untuk memantau status pendaftaran Anda.',
           '',
-          'Langkah selanjutnya: upload bukti pembayaran BIAYA PENDIDIKAN agar proses Anda diprioritaskan dan jadwal/kelas bisa segera ditentukan.',
+          'Langkah selanjutnya: upload bukti pembayaran biaya pendidikan sesuai paket yang dipilih agar proses Anda diprioritaskan.',
           'Setelah upload berhasil, tombol untuk gabung Grup WhatsApp akan muncul untuk info lanjutan.',
           '',
           'Tekan tombol di bawah untuk menyalin nomor registrasi ke clipboard Anda.',
-        ].join('\n'),
+        ].filter(Boolean).join('\n'),
         'success',
         'Pendaftaran Sukses',
         async () => {
@@ -303,11 +449,13 @@ const RegisterPage = () => {
       setStep(1);
       setRegistrationNumber('');
       setRegistrationName('');
+      setSelectedPackageId('');
       setShowCard(false);
       setPaymentProofUploaded(false);
       setIsUploadingPaymentProof(false);
       setIsDownloadingCard(false);
       setIsSubmitting(false);
+      setViewMode('form');
       requestAnimationFrame(() => {
         try {
           window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -358,7 +506,7 @@ const RegisterPage = () => {
 
   const validateStep = async () => {
     if (step === 1) {
-      const requiredLabels = { full_name: 'Nama Lengkap', nik: 'Nomor KTP (NIK)', gender: 'Jenis Kelamin', date_of_birth: 'Tanggal Lahir', phone_number: 'Nomor Handphone (WA)', email: 'Alamat Email', place_of_birth: 'Tempat Lahir', religion: 'Agama', marital_status: 'Status Pernikahan', address: 'Alamat Lengkap', photo: 'Foto 3x4 (Latar Merah/Biru)' };
+      const requiredLabels = { course_package: 'Paket Kelas Kursus', full_name: 'Nama Lengkap', nik: 'Nomor KTP (NIK)', gender: 'Jenis Kelamin', date_of_birth: 'Tanggal Lahir', phone_number: 'Nomor Handphone (WA)', email: 'Alamat Email', place_of_birth: 'Tempat Lahir', religion: 'Agama', marital_status: 'Status Pernikahan', address: 'Alamat Lengkap', photo: 'Foto 3x4 (Latar Merah/Biru)' };
       clearErrors(Object.keys(requiredLabels));
       const values = watch();
       const missing = [];
@@ -1128,6 +1276,8 @@ const RegisterPage = () => {
           <div style={{ maxWidth: '100%', margin: '0 auto' }}>
 
             {/* Step Nav */}
+            {!registrationNumber && (
+            <>
             <div className="step-nav">
               {STEPS.map((s, idx) => {
                 const isDone   = step > s.num;
@@ -1153,16 +1303,55 @@ const RegisterPage = () => {
             <div className="progress-bar-wrap">
               <div className="progress-bar-fill" style={{ width: `${progress}%` }} />
             </div>
+            </>
+            )}
 
             {/* Form Body */}
             <div className="form-body">
+              {historyLoading && viewMode === 'loading' && (
+                <div style={{ marginBottom: 20, padding: 16, borderRadius: 16, background: '#F8FAFC', textAlign: 'center', color: '#64748B', fontSize: 13, fontWeight: 600 }}>
+                  Memuat riwayat pendaftaran di perangkat ini...
+                </div>
+              )}
+
+              {deviceHistory && viewMode !== 'form' && (
+                <RegistrationDeviceHistory
+                  entry={deviceHistory}
+                  loading={historyLoading}
+                  onRefresh={() => refreshHistoryFromServer(deviceHistory)}
+                  onContinue={() => applyHistoryToForm(deviceHistory)}
+                  onNewRegistration={handleNewRegistration}
+                />
+              )}
+
+              {viewMode === 'form' && !deviceHistory && !historyLoading && (
+                <RegistrationRestorePanel
+                  loading={historyLoading}
+                  onRestore={restoreRegistration}
+                />
+              )}
+
+              {viewMode === 'form' && !registrationNumber && (
+                <div style={{ marginBottom: 28, padding: '20px 18px', borderRadius: 20, border: '1px solid #E5E7EB', background: 'linear-gradient(180deg, #fff, #F9FAFB)' }}>
+                  <CoursePackageSelector
+                    value={coursePackageWatch}
+                    onChange={(id) => {
+                      setValue('course_package', id, { shouldValidate: true, shouldDirty: true });
+                      clearErrors('course_package');
+                    }}
+                    error={errors.course_package?.message}
+                  />
+                  <input type="hidden" {...register('course_package', { required: 'Paket kelas wajib dipilih' })} />
+                </div>
+              )}
+
               <form
                 onSubmit={(e) => e.preventDefault()}
                 onKeyDown={async (e) => { if (e.key === 'Enter' && step < 5) { e.preventDefault(); await nextStep(); } }}
               >
 
                 {/* ══ STEP 1 ══ */}
-                {step === 1 && (
+                {viewMode === 'form' && !registrationNumber && step === 1 && (
                   <div>
                     <div className="section-header">
                       <div className="section-letter">A</div>
@@ -1317,7 +1506,7 @@ const RegisterPage = () => {
                 )}
 
                 {/* ══ STEP 2 ══ */}
-                {step === 2 && (
+                {viewMode === 'form' && !registrationNumber && step === 2 && (
                   <div>
                     <div className="section-header">
                       <div className="section-letter">B</div>
@@ -1390,7 +1579,7 @@ const RegisterPage = () => {
                 )}
 
                 {/* ══ STEP 3 ══ */}
-                {step === 3 && (
+                {viewMode === 'form' && !registrationNumber && step === 3 && (
                   <div>
                     <div className="section-header">
                       <div className="section-letter">C</div>
@@ -1480,7 +1669,7 @@ const RegisterPage = () => {
                 )}
 
                 {/* ══ STEP 4 ══ */}
-                {step === 4 && (
+                {viewMode === 'form' && !registrationNumber && step === 4 && (
                   <div>
                     <div className="section-header">
                       <div className="section-letter">D</div>
@@ -1539,8 +1728,10 @@ const RegisterPage = () => {
                 )}
 
                 {/* ══ STEP 5 ══ */}
-                {step === 5 && (
+                {(step === 5 || registrationNumber) && (
                   <div>
+                    {!registrationNumber && (
+                    <>
                     <div className="section-header">
                       <div className="section-letter">E</div>
                       <div className="section-title-wrap">
@@ -1579,6 +1770,8 @@ const RegisterPage = () => {
                         <ErrMsg msg={errors.weight?.message} />
                       </div>
                     </div>
+                    </>
+                    )}
 
                     {registrationNumber && (
                       <div className="success-reg-box" style={{ marginTop: 20 }}>
@@ -1598,6 +1791,24 @@ const RegisterPage = () => {
                           <p style={{ fontSize: 12, color: '#047857', marginTop: 6, lineHeight: 1.5 }}>
                             Simpan nomor registrasi ini untuk memantau status pendaftaran Anda. Tim kami akan memproses data Anda dan menghubungi Anda untuk tahapan berikutnya.
                           </p>
+                          {selectedPackageId && getPackageById(selectedPackageId) && (
+                            <div style={{ marginTop: 12, padding: 12, borderRadius: 14, background: 'white', border: '1px solid #6EE7B7' }}>
+                              <p style={{ fontSize: 11, fontWeight: 900, color: '#065F46', margin: 0 }}>Paket Kursus Dipilih</p>
+                              <p style={{ fontSize: 13, fontWeight: 800, color: '#064E3B', marginTop: 6, marginBottom: 0 }}>
+                                {getPackageById(selectedPackageId).name} · {getPackageById(selectedPackageId).priceLabel}
+                              </p>
+                              <p style={{ fontSize: 11, color: '#047857', marginTop: 4, marginBottom: 0 }}>
+                                {getPackageById(selectedPackageId).schedule}
+                              </p>
+                              <div style={{ marginTop: 10, display: 'grid', gap: 6 }}>
+                                {COURSE_PACKAGES.map((pkg) => (
+                                  <div key={pkg.id} style={{ fontSize: 10, color: pkg.id === selectedPackageId ? '#065F46' : '#6B7280', fontWeight: pkg.id === selectedPackageId ? 800 : 500 }}>
+                                    {pkg.id === selectedPackageId ? '✓ ' : '• '}{pkg.name}: {pkg.priceLabel} ({pkg.schedule})
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
                           <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, marginTop: 10, padding: '6px 14px', background: 'white', borderRadius: 10, border: '1.5px solid #6EE7B7' }}>
                             <span style={{ fontSize: 12, color: '#6B7280' }}>No. Pendaftaran:</span>
                             <span style={{ fontFamily: 'monospace', fontWeight: 800, color: '#065F46', fontSize: 14 }}>{registrationNumber}</span>
@@ -1609,7 +1820,7 @@ const RegisterPage = () => {
                                   Langkah selanjutnya: Pembayaran Biaya Pendidikan
                                 </p>
                                 <p style={{ fontSize: 11, color: '#047857', marginTop: 6, marginBottom: 0, lineHeight: 1.5 }}>
-                                  Silakan upload bukti pembayaran biaya pendidikan agar proses Anda diprioritaskan. Setelah upload berhasil, tombol untuk gabung Grup WA akan muncul untuk info lanjutan dan jadwal.
+                                  Silakan upload bukti pembayaran biaya pendidikan sesuai paket yang Anda pilih. Setelah admin mengonfirmasi lunas, buka halaman Cek Status untuk gabung Grup WA dan masuk halaman kelas.
                                 </p>
                               </div>
                               <div style={{ marginTop: 10, display: 'flex', gap: 10, flexWrap: 'wrap' }}>
@@ -1640,19 +1851,20 @@ const RegisterPage = () => {
                             </div>
                           ) : (
                             <div style={{ marginTop: 10 }}>
-                              <a
-                                href={waJoinUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '10px 16px', borderRadius: 999, background: '#25D366', color: 'white', fontWeight: 800, fontSize: 12, textDecoration: 'none', boxShadow: '0 6px 18px rgba(37,211,102,0.35)' }}
+                              <div style={{ marginTop: 10, padding: 12, borderRadius: 14, background: 'rgba(255,255,255,0.9)', border: '1px solid rgba(16,185,129,0.35)' }}>
+                                <p style={{ fontSize: 12, color: '#065F46', fontWeight: 900, margin: 0 }}>
+                                  Bukti pembayaran berhasil diupload
+                                </p>
+                                <p style={{ fontSize: 11, color: '#047857', marginTop: 6, marginBottom: 0, lineHeight: 1.5 }}>
+                                  Menunggu konfirmasi admin. Setelah pembayaran dikonfirmasi lunas, buka halaman Cek Status untuk tombol Grup WA dan masuk halaman kelas.
+                                </p>
+                              </div>
+                              <Link
+                                to="/student/check-status"
+                                style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8, marginTop: 10, padding: '10px 16px', borderRadius: 999, background: '#003B73', color: 'white', fontWeight: 800, fontSize: 12, textDecoration: 'none' }}
                               >
-                                {waJoinLabel}
-                              </a>
-                              {waGroupLink ? (
-                                <p style={{ fontSize: 11, color: '#047857', marginTop: 6 }}>Gabung grup WA untuk info lanjutan.</p>
-                              ) : (
-                                <p style={{ fontSize: 11, color: '#047857', marginTop: 6 }}>Link grup WA belum diset, klik untuk chat admin.</p>
-                              )}
+                                Buka Halaman Cek Status
+                              </Link>
                             </div>
                           )}
                         </div>

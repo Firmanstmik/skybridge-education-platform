@@ -20,7 +20,8 @@ const readContentStore = () => {
     const parsed = JSON.parse(raw || '{}');
     return {
         pages: parsed.pages || {},
-        blogs: Array.isArray(parsed.blogs) ? parsed.blogs : []
+        blogs: Array.isArray(parsed.blogs) ? parsed.blogs : [],
+        settings: parsed.settings || {}
     };
 };
 
@@ -164,12 +165,32 @@ exports.getPublicBlogBySlug = async (req, res) => {
     res.json(blog);
 };
 
+exports.getPublicSettings = async (_req, res) => {
+    const store = readContentStore();
+    const envLink = asText(process.env.WA_GROUP_LINK);
+    const fileLink = asText(store.settings?.waGroupLink);
+    res.json({
+        waGroupLink: envLink || fileLink
+    });
+};
+
 exports.getAdminContent = async (_req, res) => {
     const store = readContentStore();
     res.json({
         pages: store.pages,
-        blogs: sortBlogs(store.blogs)
+        blogs: sortBlogs(store.blogs),
+        settings: store.settings || {}
     });
+};
+
+exports.updateSettings = async (req, res) => {
+    const store = readContentStore();
+    store.settings = {
+        ...(store.settings || {}),
+        waGroupLink: asText(req.body.waGroupLink, store.settings?.waGroupLink || '')
+    };
+    writeContentStore(store);
+    res.json(store.settings);
 };
 
 exports.updatePageContent = async (req, res) => {

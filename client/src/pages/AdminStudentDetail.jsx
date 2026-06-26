@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import axios from 'axios';
 import { useParams, Link, useLocation } from 'react-router-dom';
 import AdminLayout from '../components/AdminLayout';
+import { getPackageLabel } from '../constants/coursePackages';
 import { 
     Download, 
     User, 
@@ -18,7 +19,8 @@ import {
     Shield,
     Edit3,
     X,
-    Eye
+    Eye,
+    BookOpen
 } from 'lucide-react';
 import { useAlert } from '../context/AlertContext';
 import { PDFViewer } from '@react-pdf/renderer';
@@ -73,8 +75,7 @@ const AdminStudentDetail = () => {
       setStudent(data);
       setAdminNotes(data.admin_notes || '');
       setPaymentStatusDraft(
-        data?.documents?.payment_status ||
-          (data?.documents?.payment_proof_path ? 'Lunas' : 'Belum Lunas')
+        data?.documents?.payment_status || 'Belum Lunas'
       );
     } catch (error) {
       console.error(error);
@@ -257,7 +258,7 @@ const AdminStudentDetail = () => {
   const isAccepted = String(student?.status || '').toLowerCase() === 'diterima';
   const roleUpper = String(userRole || '').toUpperCase();
   const canEditFullData = roleUpper === 'SUPER_ADMIN' || roleUpper === 'SUPERADMIN' || roleUpper === 'KEPALA_LPK';
-  const canEditPayment = roleUpper === 'SUPER_ADMIN' || roleUpper === 'SUPERADMIN' || roleUpper === 'KEPALA_LPK';
+  const canEditPayment = roleUpper === 'SUPER_ADMIN' || roleUpper === 'SUPERADMIN' || roleUpper === 'KEPALA_LPK' || roleUpper === 'STAFF';
   const cardSerial = student?.registration_number || '-';
   const registrationDateText = student?.created_at
     ? new Date(student.created_at).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })
@@ -654,10 +655,12 @@ const AdminStudentDetail = () => {
                                     <div className="flex items-start justify-between gap-3">
                                         <div className="min-w-0">
                                             <div className="text-sm font-extrabold text-slate-900 dark:text-white">
-                                                {docs?.payment_status || (docs?.payment_proof_path ? 'Lunas' : 'Belum Lunas')}
+                                                {docs?.payment_status || 'Belum Lunas'}
                                             </div>
                                             <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                                                {docs?.payment_proof_path ? 'Bukti pembayaran sudah diupload.' : 'Bukti pembayaran belum diupload.'}
+                                                {docs?.payment_proof_path
+                                                  ? 'Bukti pembayaran sudah diupload. Menunggu konfirmasi admin.'
+                                                  : 'Bukti pembayaran belum diupload.'}
                                             </div>
                                         </div>
 
@@ -722,6 +725,7 @@ const AdminStudentDetail = () => {
                         <InfoItem label="Jenis Kelamin" value={student.gender} icon={User} />
                         <InfoItem label="Agama" value={student.religion} icon={User} />
                         <InfoItem label="Email" value={student.email} icon={Mail} />
+                        <InfoItem label="Paket Kursus" value={getPackageLabel(student.course_package)} icon={BookOpen} />
                         <InfoItem label="Nomor Handphone" value={student.phone_number} icon={Phone} />
                         <div className="md:col-span-2">
                             <InfoItem label="Alamat Lengkap" value={student.address} icon={MapPin} />
@@ -892,7 +896,7 @@ const AdminStudentDetail = () => {
                               Pembayaran Pendaftaran (100rb)
                             </div>
                             <div className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-                              Status: {docs?.payment_status || (docs?.payment_proof_path ? 'Lunas' : 'Belum Lunas')}
+                              Status: {docs?.payment_status || 'Belum Lunas'}
                             </div>
                             <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">
                               Bukti upload: {docs?.payment_proof_path ? 'Ada' : 'Belum ada'}

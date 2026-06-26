@@ -75,6 +75,22 @@ const mapGender = (val) => {
     return 'Laki-laki';
 };
 
+const VALID_COURSE_PACKAGES = ['basic', 'intensive', 'premium'];
+const COURSE_PACKAGE_LABELS = {
+    basic: 'Kelas Basic (Rp 150.000 · 1x/minggu · 1 jam)',
+    intensive: 'Kelas Intensif (Rp 1.500.000 · 3x/minggu · 1,5 jam)',
+    premium: 'Kelas Premium (Rp 2.500.000 · 5x/minggu · 1,5 jam)',
+};
+
+let studentColumnCache = null;
+const getStudentColumns = async (connection) => {
+    if (studentColumnCache) return studentColumnCache;
+    const conn = connection || db;
+    const [rows] = await conn.query('SHOW COLUMNS FROM students');
+    studentColumnCache = rows.map((r) => r.Field);
+    return studentColumnCache;
+};
+
 exports.getStudentStats = async (req, res) => {
     try {
         const connection = await db.getConnection();
@@ -389,22 +405,47 @@ exports.registerStudent = async (req, res) => {
             return res.status(400).json({ message: 'NIK sudah terdaftar. NIK tidak boleh sama.' });
         }
 
+        const studentColumns = await getStudentColumns(connection);
+        const hasCoursePackage = studentColumns.includes('course_package');
+        const coursePackage = body.course_package ? String(body.course_package).trim() : null;
+        if (!isPrivilegedRole(role)) {
+            if (!hasCoursePackage) {
+                await connection.rollback();
+                return res.status(500).json({ message: 'Database belum diupdate untuk paket kelas. Jalankan migrate_academic.js.' });
+            }
+            if (!VALID_COURSE_PACKAGES.includes(coursePackage)) {
+                await connection.rollback();
+                return res.status(400).json({ message: 'Paket kelas wajib dipilih' });
+            }
+        } else if (coursePackage && !VALID_COURSE_PACKAGES.includes(coursePackage)) {
+            await connection.rollback();
+            return res.status(400).json({ message: 'Paket kelas tidak valid' });
+        }
+
+        const insertCols = [
+            'registration_number', 'nik', 'full_name', 'gender', 'place_of_birth', 'date_of_birth',
+            'blood_type', 'religion', 'address', 'marital_status', 'phone_number', 'email',
+            'photo_path', 'has_tattoo', 'has_piercing', 'height', 'weight', 'status'
+        ];
+        const insertVals = [
+            regNumber, body.nik, body.full_name, mapGender(body.gender), body.place_of_birth || null, (body.date_of_birth === '' ? null : body.date_of_birth),
+            body.blood_type, body.religion, body.address, body.marital_status, body.phone_number, body.email,
+            files['photo'] ? files['photo'][0].path : null,
+            body.has_tattoo === 'true', body.has_piercing === 'true',
+            body.height === '' ? null : body.height,
+            body.weight === '' ? null : body.weight,
+            status,
+        ];
+        if (hasCoursePackage) {
+            insertCols.push('course_package');
+            insertVals.push(coursePackage || null);
+        }
+        insertCols.push('created_at');
+        insertVals.push(createdAtOverride ? createdAtOverride : new Date());
+
         const [studentResult] = await connection.query(
-            `INSERT INTO students (
-                registration_number, nik, full_name, gender, place_of_birth, date_of_birth, 
-                blood_type, religion, address, marital_status, phone_number, email, 
-                photo_path, has_tattoo, has_piercing, height, weight, status, created_at
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-            [
-                regNumber, body.nik, body.full_name, mapGender(body.gender), body.place_of_birth || null, (body.date_of_birth === '' ? null : body.date_of_birth),
-                body.blood_type, body.religion, body.address, body.marital_status, body.phone_number, body.email,
-                files['photo'] ? files['photo'][0].path : null, 
-                body.has_tattoo === 'true', body.has_piercing === 'true', 
-                body.height === '' ? null : body.height, 
-                body.weight === '' ? null : body.weight,
-                status,
-                createdAtOverride ? createdAtOverride : new Date()
-            ]
+            `INSERT INTO students (${insertCols.join(', ')}) VALUES (${insertCols.map(() => '?').join(', ')})`,
+            insertVals
         );
         
         const studentId = studentResult.insertId;
@@ -611,12 +652,14 @@ exports.uploadPaymentProof = async (req, res) => {
 
         await db.query(
             'UPDATE student_documents SET payment_proof_path = ?, payment_status = ? WHERE student_id = ?',
-            [req.file.path, 'Lunas', studentId]
+            [req.file.path, 'Belum Lunas', studentId]
         );
 
-        await db.query("UPDATE students SET status = 'Diterima' WHERE id = ? AND status <> 'Ditolak'", [studentId]);
-
-        res.json({ message: 'Bukti pembayaran berhasil diupload', payment_proof_path: req.file.path });
+        res.json({
+            message: 'Bukti pembayaran berhasil diupload. Tim admin akan memverifikasi pembayaran Anda.',
+            payment_proof_path: req.file.path,
+            payment_status: 'Belum Lunas',
+        });
     } catch (error) {
         const msg = String(error?.message || '');
         if (msg.includes("Unknown column 'payment_proof_path'") || msg.includes("Unknown column 'payment_status'")) {
@@ -629,7 +672,7 @@ exports.uploadPaymentProof = async (req, res) => {
 exports.updatePaymentStatus = async (req, res) => {
     try {
         const roleUpper = String(req.user?.role || '').toUpperCase();
-        const canEdit = roleUpper === 'SUPER_ADMIN' || roleUpper === 'SUPERADMIN' || roleUpper === 'KEPALA_LPK';
+        const canEdit = roleUpper === 'SUPER_ADMIN' || roleUpper === 'SUPERADMIN' || roleUpper === 'KEPALA_LPK' || roleUpper === 'STAFF';
         if (!canEdit) return res.status(403).json({ message: 'Tidak punya akses untuk mengubah status pembayaran' });
 
         const { id } = req.params;

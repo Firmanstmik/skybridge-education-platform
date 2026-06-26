@@ -25,6 +25,7 @@ app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/students', require('./routes/studentRoutes'));
 app.use('/api/users', require('./routes/userRoutes'));
 app.use('/api/content', require('./routes/contentRoutes'));
+app.use('/api/academic', require('./routes/academicRoutes'));
 
 app.use((err, req, res, next) => {
   if (!err) return next();

@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { useForm, useFieldArray, Controller } from 'react-hook-form';
 import Navbar from '../components/Navbar';
 import axios from 'axios';
-import { Plus, Trash, Calendar, Save, LogOut, Bell, CheckCircle2, XCircle, Clock, ChevronRight, User, BookOpen, Users, FileText, Activity, Download, X } from 'lucide-react';
+import { Plus, Trash, Calendar, Save, LogOut, Bell, CheckCircle2, XCircle, Clock, ChevronRight, User, BookOpen, Users, FileText, Activity, Download, X, MessageCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { DocumentUpload, CustomDatePicker, JapaneseDateGroup } from '../components/FormComponents';
 import { useAlert } from '../context/AlertContext';
@@ -12,6 +12,8 @@ import { toPng } from 'html-to-image';
 import QRCode from 'qrcode';
 import heroBg from '../assets/img/hero-lpk-doryouku.png';
 import Logo from '../assets/img/SKYBRIDGE_LOGO.webp';
+import { isStudentFullyApproved, getPaymentStatus } from '../utils/studentAccess';
+import { useWaGroupLink } from '../hooks/useWaGroupLink';
 
 /* ─── Status helpers ─── */
 const statusMeta = (status = '') => {
@@ -73,6 +75,7 @@ const saveNotifs = (data, notifs) => {
 const StudentDashboard = () => {
     const navigate  = useNavigate();
     const { showAlert } = useAlert();
+    const { waGroupLink } = useWaGroupLink();
 
     const [student,       setStudent]       = useState(() => {
         try {
@@ -156,8 +159,15 @@ const StudentDashboard = () => {
             const prevNotes  = String(currentStudent.admin_notes || '');
             const nextNotes  = String(freshData.admin_notes || '');
 
+            const prevPayment = getPaymentStatus(currentStudent);
+            const nextPayment = getPaymentStatus(freshData);
+
             let updatedNotifs = [...existingNotifs];
             let hasNewNotif   = false;
+
+            if (prevPayment && nextPayment && prevPayment !== nextPayment && nextPayment === 'Lunas') {
+                showAlert('Pembayaran dikonfirmasi lunas! Buka Cek Status untuk gabung Grup WA dan masuk halaman kelas.', 'success', 'Pembayaran Lunas');
+            }
 
             if (prevStatus && nextStatus && prevStatus !== nextStatus) {
                 const newNotif = {
@@ -172,6 +182,16 @@ const StudentDashboard = () => {
                 updatedNotifs  = [newNotif, ...updatedNotifs];
                 hasNewNotif    = true;
                 showAlert(`Status kamu berubah: ${prevStatus} → ${nextStatus}`, 'success', 'Update Status');
+                if (isStudentFullyApproved({ ...currentStudent, ...freshData })) {
+                    const merged = { ...currentStudent, ...freshData };
+                    localStorage.setItem('studentData', JSON.stringify(merged));
+                    setStudent(merged);
+                    showAlert('Pembayaran dikonfirmasi lunas! Anda bisa gabung Grup WA dan masuk halaman kelas.', 'success', 'Akses Aktif');
+                } else if (nextStatus === 'Diterima') {
+                    const merged = { ...currentStudent, ...freshData };
+                    localStorage.setItem('studentData', JSON.stringify(merged));
+                    setStudent(merged);
+                }
             }
 
             if (nextNotes && prevNotes !== nextNotes) {
@@ -401,6 +421,7 @@ const StudentDashboard = () => {
     const unreadCount = notifications.filter(n => !n.read).length;
     const statusInfo  = statusMeta(student?.status);
     const StatusIcon  = statusInfo.icon;
+    const fullyApproved = isStudentFullyApproved(student);
     const cardSerial = student?.registration_number || '-';
     const registrationDateText = student?.created_at
         ? new Date(student.created_at).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })
@@ -939,10 +960,20 @@ const StudentDashboard = () => {
                         </div>
                     </div>
                     <div className="hero-actions">
-                        {String(student?.status || '').toLowerCase() === 'diterima' && (
+                        {fullyApproved && (
+                            <>
+                            {waGroupLink && (
+                            <a href={waGroupLink} target="_blank" rel="noopener noreferrer" className="btn-notif" style={{ textDecoration: 'none' }}>
+                                <MessageCircle size={15} /> Gabung Grup WA
+                            </a>
+                            )}
+                            <button type="button" className="btn-notif" onClick={() => navigate('/student/kursus')}>
+                                <BookOpen size={15} /> Portal Kursus
+                            </button>
                             <button type="button" className="btn-notif" onClick={handleDownloadCard}>
                                 <Download size={15} /> Kartu Peserta
                             </button>
+                            </>
                         )}
                         {/* ─── Tombol Notifikasi ─── */}
                         <button type="button" className="btn-notif" onClick={() => setIsNotifOpen(true)}>
