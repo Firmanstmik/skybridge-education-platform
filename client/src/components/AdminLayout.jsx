@@ -30,6 +30,12 @@ import {
 import { BsFileEarmarkPdfFill, BsFileEarmarkExcelFill } from 'react-icons/bs';
 import Logo from '../assets/img/SKYBRIDGE_LOGO.webp';
 import axios from 'axios';
+import {
+  clearAuthSession,
+  getAuthHeaders,
+  getLoginPathForRole,
+  getTokenPayload,
+} from '../utils/adminAuth';
 
 const AdminLayout = ({ children }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -44,28 +50,11 @@ const AdminLayout = ({ children }) => {
   const [currentTime, setCurrentTime] = useState(() => new Date());
   const [userRole, setUserRole] = useState(() => {
     if (typeof window === 'undefined') return null;
-    const token = localStorage.getItem('token');
-    if (token) {
-        try {
-            const payload = JSON.parse(atob(token.split('.')[1]));
-            return payload.role;
-        } catch (e) {
-            console.error('Failed to parse token', e);
-        }
-    }
-    return null;
+    return getTokenPayload(window.location.pathname)?.role || null;
   });
   const [userInfo, setUserInfo] = useState(() => {
     if (typeof window === 'undefined') return null;
-    const token = localStorage.getItem('token');
-    if (token) {
-        try {
-            return JSON.parse(atob(token.split('.')[1]));
-        } catch (e) {
-            console.error('Failed to parse token info', e);
-        }
-    }
-    return null;
+    return getTokenPayload(window.location.pathname);
   });
   const navigate = useNavigate();
   const location = useLocation();
@@ -146,11 +135,9 @@ const AdminLayout = ({ children }) => {
   // Fetch profile from API to ensure correct data per role
   const fetchProfile = async () => {
     try {
-      const token = localStorage.getItem('token');
-      if (!token) return;
-      const { data } = await axios.get('/api/users/me', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const headers = getAuthHeaders(location.pathname);
+      if (!headers.Authorization) return;
+      const { data } = await axios.get('/api/users/me', { headers });
       setUserInfo(data);
     } catch (err) {
       console.error('Failed to fetch profile', err);
@@ -170,14 +157,12 @@ const AdminLayout = ({ children }) => {
       }
 
       try {
-          const token = localStorage.getItem('token');
+          const headers = getAuthHeaders(location.pathname);
           await axios.put('/api/users/me', {
               full_name: profileData.full_name,
               username: profileData.username,
               password: profileData.newPassword
-          }, {
-              headers: { Authorization: `Bearer ${token}` }
-          });
+          }, { headers });
           
           alert('Profil berhasil diperbarui! Silakan login ulang untuk melihat perubahan.');
           setIsProfileModalOpen(false);
@@ -245,21 +230,15 @@ const AdminLayout = ({ children }) => {
   }, [isDark]);
 
   const handleLogout = () => {
-      localStorage.removeItem('token');
-      if (userRole === 'STAFF') {
-        navigate('/staff/login');
-      } else if (userRole === 'KEPALA_LPK') {
-        navigate('/kepalalpk/login');
-      } else {
-        navigate('/admin/login');
-      }
+      clearAuthSession(location.pathname);
+      navigate(getLoginPathForRole(userRole));
   };
 
   const exportExcel = async () => {
-      const token = localStorage.getItem('token');
+      const headers = getAuthHeaders(location.pathname);
       try {
           const response = await axios.get('/api/students/export/excel', {
-              headers: { Authorization: `Bearer ${token}` },
+              headers,
               responseType: 'blob',
           });
           const url = window.URL.createObjectURL(new Blob([response.data]));
@@ -275,11 +254,9 @@ const AdminLayout = ({ children }) => {
   };
 
   const exportPdf = async () => {
-      const token = localStorage.getItem('token');
+      const headers = getAuthHeaders(location.pathname);
       try {
-          const response = await axios.get('/api/students/export/json', {
-              headers: { Authorization: `Bearer ${token}` }
-          });
+          const response = await axios.get('/api/students/export/json', { headers });
           
           if (!response.data || response.data.length === 0) {
               alert('Tidak ada data untuk diexport');

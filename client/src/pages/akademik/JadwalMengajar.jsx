@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
+import { useLocation } from 'react-router-dom';
+import { getAuthHeaders } from '../../utils/adminAuth';
 import AdminLayout from '../../components/AdminLayout';
 import PageHeader from '../../components/PageHeader';
 import { Plus, Pencil, Trash2 } from 'lucide-react';
@@ -18,6 +20,7 @@ const emptySchedule = {
 };
 
 const JadwalMengajar = () => {
+  const location = useLocation();
   const [classes, setClasses] = useState([]);
   const [schedules, setSchedules] = useState([]);
   const [selectedClassId, setSelectedClassId] = useState('');
@@ -26,8 +29,7 @@ const JadwalMengajar = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  const token = localStorage.getItem('token');
-  const headers = { Authorization: `Bearer ${token}` };
+  const headers = getAuthHeaders(location.pathname);
 
   const loadClasses = async () => {
     try {

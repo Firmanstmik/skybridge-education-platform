@@ -4,6 +4,11 @@ import AdminLayout from '../components/AdminLayout';
 import SuperAdminDashboard from '../components/dashboard/SuperAdminDashboard';
 import StaffDashboard from '../components/dashboard/StaffDashboard';
 import KepalaLpkDashboard from '../components/dashboard/KepalaLpkDashboard';
+import {
+  clearAuthSession,
+  getLoginPath,
+  getTokenPayload,
+} from '../utils/adminAuth';
 
 const AdminDashboard = () => {
   const [userRole, setUserRole] = useState(null);
@@ -11,22 +16,19 @@ const AdminDashboard = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (!token) {
-        // Simple redirect to admin login if no token, 
-        // but ideally should detect desired path. 
-        // For now, let PrivateRoute handle the protection.
-        navigate('/admin/login');
+    const pathname = window.location.pathname;
+    const payload = getTokenPayload(pathname);
+    if (!payload) {
+        navigate(getLoginPath(pathname));
         return;
     }
-    
+
     try {
-        const payload = JSON.parse(atob(token.split('.')[1]));
         setUserRole(payload.role);
     } catch (e) {
         console.error('Failed to parse token', e);
-        localStorage.removeItem('token');
-        navigate('/admin/login');
+        clearAuthSession(pathname);
+        navigate(getLoginPath(pathname));
     } finally {
         setLoading(false);
     }

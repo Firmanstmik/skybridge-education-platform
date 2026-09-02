@@ -270,6 +270,20 @@
     }
   ],
   "settings": {
-    "waGroupLink": ""
+    "waGroupLink": "",
+    "payment": {
+      "enabled": true,
+      "title": "Informasi Transfer Pembayaran",
+      "description": "Silakan transfer ke rekening berikut sesuai nominal biaya pendaftaran atau biaya pendidikan yang berlaku.",
+      "registrationFee": "",
+      "bankName": "Bank Mandiri",
+      "accountNumber": "1610034437777",
+      "accountHolder": "BALI TOSHA LOMBOK KO",
+      "paymentInstructions": "Transfer sesuai nominal yang diinformasikan admin. Cantumkan nama lengkap pendaftar pada berita transfer.",
+      "confirmationWhatsapp": "",
+      "confirmationInstructions": "Setelah transfer, upload bukti pembayaran di halaman pendaftaran atau hubungi admin SKYBRIDGE untuk konfirmasi.",
+      "qrisImage": "",
+      "showQris": false
+    }
   }
 }

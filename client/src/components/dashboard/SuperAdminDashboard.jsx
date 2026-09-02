@@ -2,6 +2,11 @@ import { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
+import {
+  clearAuthSession,
+  getAuthHeaders,
+  getLoginPath,
+} from '../../utils/adminAuth';
 import { 
     Users, 
     CheckCircle, 
@@ -126,9 +131,9 @@ const SuperAdminDashboard = () => {
   }, [students, filterStatus, searchTerm]);
 
   const fetchStudents = useCallback(async () => {
-    const token = localStorage.getItem('token');
-    if (!token) {
-        navigate('/admin/login');
+    const headers = getAuthHeaders('/admin');
+    if (!headers.Authorization) {
+        navigate(getLoginPath('/admin'));
         return;
     }
 
@@ -164,9 +169,7 @@ const SuperAdminDashboard = () => {
       setLoading(true);
       setFromCache();
 
-      const { data } = await axios.get('/api/students', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const { data } = await axios.get('/api/students', { headers });
 
       setStudents(data);
       setFilteredStudents(data.slice(0, 6));
@@ -190,8 +193,8 @@ const SuperAdminDashboard = () => {
     } catch (error) {
       console.error(error);
       if (error.response && error.response.status === 401) {
-        localStorage.removeItem('token');
-        navigate('/admin/login');
+        clearAuthSession('/admin');
+        navigate(getLoginPath('/admin'));
       }
     } finally {
       setLoading(false);

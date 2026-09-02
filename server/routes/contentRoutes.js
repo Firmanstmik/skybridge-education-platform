@@ -6,8 +6,10 @@ const {
     getPublicBlogs,
     getPublicBlogBySlug,
     getPublicSettings,
+    getPublicPaymentSettings,
     getAdminContent,
     updateSettings,
+    updatePaymentSettings,
     updatePageContent,
     createBlog,
     updateBlog,
@@ -22,9 +24,11 @@ router.get('/pages/:pageKey', getPublicPageByKey);
 router.get('/blogs', getPublicBlogs);
 router.get('/blogs/:slug', getPublicBlogBySlug);
 router.get('/settings', getPublicSettings);
+router.get('/settings/payment', getPublicPaymentSettings);
 
 router.get('/admin/all', protect, admin, getAdminContent);
 router.put('/settings', protect, admin, updateSettings);
+router.put('/settings/payment', protect, admin, updatePaymentSettings);
 router.put('/pages/:pageKey', protect, admin, updatePageContent);
 router.post('/blogs', protect, admin, createBlog);
 router.put('/blogs/:id', protect, admin, updateBlog);

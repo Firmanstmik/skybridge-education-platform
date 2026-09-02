@@ -28,6 +28,9 @@ import StudentPDF from '../components/StudentPDF';
 import { toPng } from 'html-to-image';
 import QRCode from 'qrcode';
 import Logo from '../assets/img/SKYBRIDGE_LOGO.webp';
+import { getAuthHeaders, getTokenPayload } from '../utils/adminAuth';
+import { usePaymentSettings } from '../hooks/usePaymentSettings';
+import { getPaymentRegistrationLabel } from '../utils/paymentSettings';
 
 const AdminStudentDetail = () => {
   const { id } = useParams();
@@ -39,6 +42,8 @@ const AdminStudentDetail = () => {
   const [showFullData, setShowFullData] = useState(false);
   const [fullDataTab, setFullDataTab] = useState('personal');
   const { showAlert } = useAlert();
+  const { payment } = usePaymentSettings();
+  const paymentRegistrationLabel = getPaymentRegistrationLabel(payment);
   const [isUpdating, setIsUpdating] = useState(false);
   const [isUpdatingPayment, setIsUpdatingPayment] = useState(false);
   const [userRole, setUserRole] = useState(null);
@@ -55,23 +60,16 @@ const AdminStudentDetail = () => {
   }, [location.pathname]);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (token) {
-        try {
-            const payload = JSON.parse(atob(token.split('.')[1]));
-            setUserRole(payload.role);
-        } catch (e) {
-            console.error('Failed to parse token', e);
-        }
+    const payload = getTokenPayload(location.pathname);
+    if (payload?.role) {
+      setUserRole(payload.role);
     }
-  }, []);
+  }, [location.pathname]);
 
   const fetchStudent = async () => {
-    const token = localStorage.getItem('token');
+    const headers = getAuthHeaders(location.pathname);
     try {
-      const { data } = await axios.get(`${import.meta.env.VITE_API_URL}/students/${id}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const { data } = await axios.get(`${import.meta.env.VITE_API_URL}/students/${id}`, { headers });
       setStudent(data);
       setAdminNotes(data.admin_notes || '');
       setPaymentStatusDraft(
@@ -88,11 +86,11 @@ const AdminStudentDetail = () => {
 
   const updateStatus = async (status) => {
     setIsUpdating(true);
-    const token = localStorage.getItem('token');
+    const headers = getAuthHeaders(location.pathname);
     try {
       await axios.put(`/api/students/${id}/status`, 
         { status, admin_notes: adminNotes },
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers }
       );
       await fetchStudent();
       showAlert(`Status berhasil diperbarui menjadi ${status}`, 'success', 'Update Status');
@@ -106,11 +104,11 @@ const AdminStudentDetail = () => {
 
   const saveNotes = async () => {
     setIsUpdating(true);
-    const token = localStorage.getItem('token');
+    const headers = getAuthHeaders(location.pathname);
     try {
       await axios.put(`/api/students/${id}/status`, 
         { status: student.status, admin_notes: adminNotes },
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers }
       );
       showAlert('Catatan admin berhasil disimpan', 'success', 'Simpan Catatan');
     } catch (error) {
@@ -123,12 +121,12 @@ const AdminStudentDetail = () => {
 
   const updatePaymentStatus = async () => {
     setIsUpdatingPayment(true);
-    const token = localStorage.getItem('token');
+    const headers = getAuthHeaders(location.pathname);
     try {
       await axios.put(
         `/api/students/${id}/payment-status`,
         { payment_status: paymentStatusDraft },
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers }
       );
       await fetchStudent();
       showAlert('Status pembayaran berhasil diperbarui', 'success', 'Pembayaran');
@@ -893,7 +891,7 @@ const AdminStudentDetail = () => {
                         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
                           <div>
                             <div className="text-[10px] md:text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1">
-                              Pembayaran Pendaftaran (100rb)
+                              {paymentRegistrationLabel}
                             </div>
                             <div className="text-sm font-semibold text-slate-900 dark:text-slate-100">
                               Status: {docs?.payment_status || 'Belum Lunas'}

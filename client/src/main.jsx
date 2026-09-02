@@ -2,6 +2,11 @@ import React, { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.jsx'
+import { migrateLegacyToken } from './utils/adminAuth'
+
+if (typeof window !== 'undefined') {
+  migrateLegacyToken();
+}
 
 if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
   navigator.serviceWorker.getRegistrations().then((registrations) => {

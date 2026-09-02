@@ -12,7 +12,9 @@ import {
 import { getPackageLabel } from '../constants/coursePackages';
 import { syncHistoryFromStudent, saveLastRegistrationCredentials } from '../utils/registrationHistory';
 import { useWaGroupLink } from '../hooks/useWaGroupLink';
+import { usePaymentSettings } from '../hooks/usePaymentSettings';
 import WaGroupLinkBlock from '../components/WaGroupLinkBlock';
+import PaymentInfoBlock from '../components/PaymentInfoBlock';
 
 const MotionDiv = motion.div;
 
@@ -31,6 +33,7 @@ const CheckStatusPage = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { waGroupLink } = useWaGroupLink();
+  const { payment, loading: paymentLoading } = usePaymentSettings();
 
   const refreshStudent = async (registration_number, nikValue) => {
     const response = await axios.post(`${import.meta.env.VITE_API_URL}/students/login`, {
@@ -232,6 +235,11 @@ const CheckStatusPage = () => {
                         ? 'Bukti pembayaran sudah diupload. Menunggu konfirmasi admin. Setelah status pembayaran menjadi Lunas, tombol Grup WA dan Halaman Kelas akan muncul di halaman ini.'
                         : 'Silakan upload bukti pembayaran saat pendaftaran atau hubungi admin. Setelah pembayaran dikonfirmasi lunas, Anda bisa gabung Grup WA dan masuk halaman kelas dari halaman ini.'}
                     </div>
+                    <PaymentInfoBlock
+                      payment={payment}
+                      loading={paymentLoading}
+                      whatsappMessage={`Konfirmasi pembayaran SKYBRIDGE - No. Registrasi: ${checkedStudent.registration_number || regNumber}`}
+                    />
                     <button
                       type="button"
                       onClick={() => navigate('/student/dashboard')}

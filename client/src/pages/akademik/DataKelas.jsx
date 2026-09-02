@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
+import { useLocation } from 'react-router-dom';
+import { getAuthHeaders } from '../../utils/adminAuth';
 import AdminLayout from '../../components/AdminLayout';
 import PageHeader from '../../components/PageHeader';
 import { COURSE_PACKAGES } from '../../constants/coursePackages';
@@ -16,14 +18,14 @@ const emptyForm = {
 };
 
 const DataKelas = () => {
+  const location = useLocation();
   const [classes, setClasses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [form, setForm] = useState(emptyForm);
   const [editingId, setEditingId] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const token = localStorage.getItem('token');
-  const headers = { Authorization: `Bearer ${token}` };
+  const headers = getAuthHeaders(location.pathname);
 
   const loadClasses = async () => {
     setLoading(true);

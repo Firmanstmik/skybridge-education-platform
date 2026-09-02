@@ -19,6 +19,7 @@ import { BsFileEarmarkPdfFill } from 'react-icons/bs';
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
 import AdminLayout from '../components/AdminLayout';
+import { getAuthHeaders, getTokenPayload } from '../utils/adminAuth';
 
 const SmartAnswerCard = ({ answer }) => {
   if (!answer) return null;
@@ -202,16 +203,11 @@ const AdminStudentsPage = () => {
   }, [location.pathname]);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (token) {
-        try {
-            const payload = JSON.parse(atob(token.split('.')[1]));
-            setUserRole(payload.role);
-        } catch (_e) {
-            console.error('Failed to parse token', _e);
-        }
+    const payload = getTokenPayload(location.pathname);
+    if (payload?.role) {
+      setUserRole(payload.role);
     }
-  }, []);
+  }, [location.pathname]);
 
   // Stats calculation
   const stats = useMemo(() => {
@@ -245,12 +241,10 @@ const AdminStudentsPage = () => {
     };
 
     try {
-      const token = localStorage.getItem('token');
+      const headers = getAuthHeaders(location.pathname);
       setIsLoading(true);
       setFromCache();
-      const response = await axios.get('/api/students', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const response = await axios.get('/api/students', { headers });
       setStudents(response.data);
       setFiltered(response.data);
       setIsLoading(false);
@@ -396,9 +390,9 @@ const AdminStudentsPage = () => {
 
   const downloadStudentPdf = async (studentId, regNumber) => {
     try {
-      const token = localStorage.getItem('token');
+      const headers = getAuthHeaders(location.pathname);
       const response = await axios.get(`${import.meta.env.VITE_API_URL}/students/${studentId}/pdf-form`, {
-        headers: { Authorization: `Bearer ${token}` },
+        headers,
         responseType: 'blob'
       });
       
@@ -417,9 +411,9 @@ const AdminStudentsPage = () => {
 
   const exportSummaryPdf = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const headers = getAuthHeaders(location.pathname);
       const response = await axios.get('/api/students/export/pdf-summary', {
-        headers: { Authorization: `Bearer ${token}` },
+        headers,
         responseType: 'blob'
       });
       
@@ -442,10 +436,8 @@ const AdminStudentsPage = () => {
     }
 
     try {
-        const token = localStorage.getItem('token');
-        await axios.delete(`/api/students/${studentId}`, {
-            headers: { Authorization: `Bearer ${token}` }
-        });
+        const headers = getAuthHeaders(location.pathname);
+        await axios.delete(`/api/students/${studentId}`, { headers });
         toast.success('Data siswa berhasil dihapus');
         fetchStudents(); // Refresh data
     } catch (error) {

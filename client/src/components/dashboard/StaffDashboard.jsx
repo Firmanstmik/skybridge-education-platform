@@ -12,6 +12,7 @@ import {
     Filter
 } from 'lucide-react';
 import KpiCard from './KpiCard';
+import { getAuthHeaders } from '../../utils/adminAuth';
 
 const StaffDashboard = () => {
   const [students, setStudents] = useState([]);
@@ -25,12 +26,10 @@ const StaffDashboard = () => {
   }, []);
 
   const fetchStudents = async () => {
-    const token = localStorage.getItem('token');
+    const headers = getAuthHeaders('/staff');
     try {
       setLoading(true);
-      const { data } = await axios.get('/api/students', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const { data } = await axios.get('/api/students', { headers });
       setStudents(data);
       
       // Filter for "Recent Pending" tasks

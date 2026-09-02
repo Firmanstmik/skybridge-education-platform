@@ -23,6 +23,7 @@ import {
 import AdminLayout from '../components/AdminLayout';
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
+import { getAuthHeaders } from '../utils/adminAuth';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const _MOTION = motion;
@@ -51,10 +52,8 @@ const AdminUserManagement = () => {
     const fetchUsers = async () => {
         setIsLoading(true);
         try {
-            const token = localStorage.getItem('token');
-            const response = await axios.get('/api/users', {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            const headers = getAuthHeaders('/admin');
+            const response = await axios.get('/api/users', { headers });
             setUsers(response.data);
         } catch (error) {
             console.error('Failed to fetch users:', error);
@@ -117,17 +116,13 @@ const AdminUserManagement = () => {
 
         setIsSubmitting(true);
         try {
-            const token = localStorage.getItem('token');
+            const headers = getAuthHeaders('/admin');
             
             if (editingId) {
-                await axios.put(`/api/users/${editingId}`, formData, {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
+                await axios.put(`/api/users/${editingId}`, formData, { headers });
                 toast.success('User berhasil diperbarui');
             } else {
-                await axios.post('/api/users', formData, {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
+                await axios.post('/api/users', formData, { headers });
                 toast.success('User berhasil ditambahkan');
             }
             
@@ -146,10 +141,8 @@ const AdminUserManagement = () => {
         if (!window.confirm('Apakah Anda yakin ingin menghapus user ini?')) return;
 
         try {
-            const token = localStorage.getItem('token');
-            await axios.delete(`/api/users/${id}`, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            const headers = getAuthHeaders('/admin');
+            await axios.delete(`/api/users/${id}`, { headers });
             toast.success('User berhasil dihapus');
             fetchUsers();
         } catch (error) {

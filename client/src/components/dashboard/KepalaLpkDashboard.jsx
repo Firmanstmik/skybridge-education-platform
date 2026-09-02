@@ -11,6 +11,7 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, 
   AreaChart, Area, PieChart as RechartsPieChart, Pie, Cell, Legend, LabelList 
 } from 'recharts';
+import { getAuthHeaders } from '../../utils/adminAuth';
 
 const KepalaLpkDashboard = () => {
   const [students, setStudents] = useState([]);
@@ -87,13 +88,11 @@ const KepalaLpkDashboard = () => {
   }, []);
 
   const fetchData = async () => {
-    const token = localStorage.getItem('token');
+    const headers = getAuthHeaders('/kepalalpk');
     try {
       setLoading(true);
       // Fetch stats from server
-      const { data: statsData } = await axios.get('/api/students/stats', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const { data: statsData } = await axios.get('/api/students/stats', { headers });
       
       // Map server response to state
       const trendData = statsData.trends.map(t => ({

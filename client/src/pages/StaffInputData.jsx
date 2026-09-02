@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import { 
   User, FileText, Upload, Save, X, Check, AlertCircle, 
@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import AdminLayout from '../components/AdminLayout';
+import { getAuthHeaders } from '../utils/adminAuth';
 import { DocumentUpload, CustomDatePicker, JapaneseDateGroup } from '../components/FormComponents';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -99,6 +100,7 @@ const formSchema = z.object({
 
 const StaffInputData = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { id } = useParams();
   const [mode, setMode] = useState('manual'); // 'manual' | 'scan' | 'split-view'
   const [dragActive, setDragActive] = useState(false);
@@ -212,10 +214,8 @@ const StaffInputData = () => {
 
     const fetchStudent = async () => {
       try {
-        const token = localStorage.getItem('token');
-        const { data } = await axios.get(`/api/students/${id}`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        const headers = getAuthHeaders(location.pathname);
+        const { data } = await axios.get(`/api/students/${id}`, { headers });
 
         const student =
           data && typeof data === 'object' && 'data' in data && 'success' in data
@@ -357,13 +357,11 @@ const StaffInputData = () => {
     formData.append('document', file);
 
     try {
-      const token = localStorage.getItem('token');
-      const { data } = await axios.post('/api/students/parse-document', formData, {
-        headers: { 
-          'Content-Type': 'multipart/form-data',
-          Authorization: `Bearer ${token}`
-        }
-      });
+      const headers = {
+        ...getAuthHeaders(location.pathname),
+        'Content-Type': 'multipart/form-data',
+      };
+      const { data } = await axios.post('/api/students/parse-document', formData, { headers });
 
       if (data.success) {
         autoFillForm(data.data);
@@ -570,7 +568,10 @@ const StaffInputData = () => {
       // Staff/Admin: longgar — cukup nama wajib. Dokumen boleh kosong.
 
       const toastId = toast.loading(status === 'Draft' ? "Menyimpan Draft..." : "Menyimpan & Verifikasi...");
-      const token = localStorage.getItem('token');
+      const headers = {
+        ...getAuthHeaders(location.pathname),
+        'Content-Type': 'multipart/form-data',
+      };
       
       const formData = new FormData();
       const toDateString = (value) => {
@@ -606,20 +607,10 @@ const StaffInputData = () => {
 
       let regNumber = null;
       if (id) {
-          await axios.put(`/api/students/update/${id}`, formData, {
-            headers: { 
-                'Content-Type': 'multipart/form-data',
-                Authorization: `Bearer ${token}` 
-            }
-          });
+          await axios.put(`/api/students/update/${id}`, formData, { headers });
           toast.success("Data berhasil diperbarui!");
       } else {
-          const resp = await axios.post('/api/students', formData, {
-            headers: { 
-                'Content-Type': 'multipart/form-data',
-                Authorization: `Bearer ${token}` 
-            }
-          });
+          const resp = await axios.post('/api/students', formData, { headers });
           toast.success(status === 'Draft' ? "Draft berhasil disimpan!" : "Data siswa berhasil diverifikasi!");
           regNumber = resp.data?.registration_number || null;
       }

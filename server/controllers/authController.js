@@ -2,6 +2,15 @@ const db = require('../config/db');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
+const hasUserColumn = async (columnName) => {
+    try {
+        const [rows] = await db.query('SHOW COLUMNS FROM users LIKE ?', [columnName]);
+        return Array.isArray(rows) && rows.length > 0;
+    } catch (_error) {
+        return false;
+    }
+};
+
 exports.login = async (req, res) => {
     const { username, password } = req.body;
     
@@ -13,6 +22,10 @@ exports.login = async (req, res) => {
         }
 
         const user = users[0];
+
+        if (await hasUserColumn('status') && user.status === 'Inactive') {
+            return res.status(401).json({ message: 'Account is inactive' });
+        }
         
         const isMatch = await bcrypt.compare(password, user.password);
 
@@ -20,9 +33,15 @@ exports.login = async (req, res) => {
             return res.status(401).json({ message: 'Invalid credentials' });
         }
 
-        const token = jwt.sign({ id: user.id, role: user.role }, process.env.JWT_SECRET, {
-            expiresIn: '1d'
-        });
+        const token = jwt.sign(
+            {
+                id: user.id,
+                role: user.role,
+                username: user.username,
+            },
+            process.env.JWT_SECRET,
+            { expiresIn: '1d' }
+        );
 
         res.json({
             token,

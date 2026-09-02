@@ -5,6 +5,13 @@ import axios from 'axios';
 import { toast } from 'react-hot-toast';
 import AdminLayout from '../components/AdminLayout';
 import { resolveContentImage } from '../utils/content';
+import { getAuthHeaders } from '../utils/adminAuth';
+import {
+  EMPTY_PAYMENT_SETTINGS,
+  normalizePaymentSettings,
+  validatePaymentForm,
+} from '../utils/paymentSettings';
+import { invalidatePaymentSettingsCache } from '../hooks/usePaymentSettings';
 
 const PAGE_OPTIONS = [
   { key: 'kursus', label: 'Halaman Kursus', route: '/kursus-bahasa-jepang-online' },
@@ -124,7 +131,9 @@ const textareaClassName = `${inputClassName} min-h-[120px] resize-y`;
 const AdminContentManagement = () => {
   const [activeTab, setActiveTab] = useState('pages');
   const [settings, setSettings] = useState({ waGroupLink: '' });
+  const [paymentForm, setPaymentForm] = useState(EMPTY_PAYMENT_SETTINGS);
   const [isSavingSettings, setIsSavingSettings] = useState(false);
+  const [isSavingPayment, setIsSavingPayment] = useState(false);
   const [selectedPageKey, setSelectedPageKey] = useState('kursus');
   const [pages, setPages] = useState({});
   const [blogs, setBlogs] = useState([]);
@@ -136,11 +145,7 @@ const AdminContentManagement = () => {
   const [isSavingBlog, setIsSavingBlog] = useState(false);
   const [uploadingField, setUploadingField] = useState('');
 
-  const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
-
-  const authHeaders = useMemo(() => ({
-    headers: { Authorization: `Bearer ${token}` }
-  }), [token]);
+  const authHeaders = useMemo(() => ({ headers: getAuthHeaders('/admin') }), []);
 
   const fetchAdminContent = async () => {
     setIsLoading(true);
@@ -149,6 +154,7 @@ const AdminContentManagement = () => {
       setPages(data.pages || {});
       setBlogs(Array.isArray(data.blogs) ? data.blogs : []);
       setSettings(data.settings || { waGroupLink: '' });
+      setPaymentForm(normalizePaymentSettings(data.settings?.payment));
     } catch (error) {
       toast.error(error.response?.data?.message || 'Gagal memuat konten');
     } finally {
@@ -172,6 +178,36 @@ const AdminContentManagement = () => {
   const handleBlogInput = (e) => {
     const { name, value, type, checked } = e.target;
     setBlogForm((prev) => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
+  };
+
+  const handlePaymentInput = (e) => {
+    const { name, value, type, checked } = e.target;
+    setPaymentForm((prev) => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : value,
+    }));
+  };
+
+  const savePaymentSettings = async (e) => {
+    e.preventDefault();
+    const validationError = validatePaymentForm(paymentForm);
+    if (validationError) {
+      toast.error(validationError);
+      return;
+    }
+
+    setIsSavingPayment(true);
+    try {
+      const { data } = await axios.put('/api/content/settings/payment', paymentForm, authHeaders);
+      const nextPayment = normalizePaymentSettings(data);
+      setPaymentForm(nextPayment);
+      invalidatePaymentSettingsCache();
+      toast.success('Pengaturan pembayaran berhasil diperbarui.');
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Pengaturan pembayaran gagal diperbarui. Silakan coba lagi.');
+    } finally {
+      setIsSavingPayment(false);
+    }
   };
 
   const saveSettings = async (e) => {
@@ -273,12 +309,15 @@ const AdminContentManagement = () => {
       formData.append('image', file);
       const { data } = await axios.post('/api/content/upload-image', formData, {
         headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'multipart/form-data'
-        }
+          ...getAuthHeaders('/admin'),
+          'Content-Type': 'multipart/form-data',
+        },
       });
 
-      if (target.startsWith('page:')) {
+      if (target.startsWith('payment:')) {
+        const field = target.split(':')[1];
+        setPaymentForm((prev) => ({ ...prev, [field]: data.imageUrl }));
+      } else if (target.startsWith('page:')) {
         const field = target.split(':')[1];
         setPageForm((prev) => ({ ...prev, [field]: data.imageUrl }));
       } else {
@@ -327,6 +366,13 @@ const AdminContentManagement = () => {
               </button>
               <button
                 type="button"
+                onClick={() => setActiveTab('payment')}
+                className={`rounded-2xl px-4 py-2.5 text-sm font-bold transition-all ${activeTab === 'payment' ? 'bg-red-500 text-white shadow-lg shadow-red-500/25' : 'bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-300'}`}
+              >
+                Pembayaran
+              </button>
+              <button
+                type="button"
                 onClick={() => setActiveTab('settings')}
                 className={`rounded-2xl px-4 py-2.5 text-sm font-bold transition-all ${activeTab === 'settings' ? 'bg-red-500 text-white shadow-lg shadow-red-500/25' : 'bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-300'}`}
               >
@@ -340,6 +386,127 @@ const AdminContentManagement = () => {
           <div className="rounded-[32px] border border-slate-200 dark:border-slate-800 bg-white/90 dark:bg-slate-950/70 p-10 text-center text-slate-500">
             Memuat data CMS...
           </div>
+        ) : activeTab === 'payment' ? (
+          <form onSubmit={savePaymentSettings} className="rounded-[32px] border border-slate-200 dark:border-slate-800 bg-white/90 dark:bg-slate-950/70 p-6 md:p-8 space-y-6">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-400">CMS Website</p>
+              <h2 className="mt-2 text-xl font-black text-slate-900 dark:text-slate-50">Informasi Pembayaran</h2>
+              <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
+                Kelola rekening tujuan, biaya pendaftaran, instruksi transfer, QRIS, dan WhatsApp konfirmasi pembayaran.
+              </p>
+            </div>
+
+            <label className="flex items-center justify-between gap-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/60 px-4 py-4">
+              <div>
+                <p className="text-sm font-bold text-slate-900 dark:text-slate-100">Aktifkan informasi pembayaran</p>
+                <p className="text-xs text-slate-500 mt-1">Jika nonaktif, section pembayaran tidak ditampilkan di frontend.</p>
+              </div>
+              <input
+                type="checkbox"
+                name="enabled"
+                checked={Boolean(paymentForm.enabled)}
+                onChange={handlePaymentInput}
+                className="h-5 w-5 rounded border-slate-300 text-red-500 focus:ring-red-500"
+              />
+            </label>
+
+            <div className="grid md:grid-cols-2 gap-5">
+              <Field label="Judul Pembayaran">
+                <input name="title" value={paymentForm.title} onChange={handlePaymentInput} className={inputClassName} placeholder="Contoh: Pembayaran Biaya Pendidikan" />
+              </Field>
+              <Field label="Biaya Pendaftaran">
+                <input name="registrationFee" value={paymentForm.registrationFee} onChange={handlePaymentInput} className={inputClassName} placeholder="Contoh: Rp 100.000" />
+              </Field>
+            </div>
+
+            <Field label="Deskripsi">
+              <textarea name="description" value={paymentForm.description} onChange={handlePaymentInput} className={textareaClassName} placeholder="Penjelasan singkat tentang pembayaran." />
+            </Field>
+
+            <div className="grid md:grid-cols-2 gap-5">
+              <Field label="Nama Bank">
+                <input name="bankName" value={paymentForm.bankName} onChange={handlePaymentInput} className={inputClassName} placeholder="Contoh: Bank BCA" />
+              </Field>
+              <Field label="Nomor Rekening" hint="Disimpan sebagai teks agar angka nol di depan tidak hilang.">
+                <input name="accountNumber" value={paymentForm.accountNumber} onChange={handlePaymentInput} className={inputClassName} placeholder="Contoh: 0123456789" inputMode="text" />
+              </Field>
+            </div>
+
+            <Field label="Nama Pemilik Rekening">
+              <input name="accountHolder" value={paymentForm.accountHolder} onChange={handlePaymentInput} className={inputClassName} placeholder="Nama sesuai rekening" />
+            </Field>
+
+            <Field label="Instruksi Pembayaran">
+              <textarea name="paymentInstructions" value={paymentForm.paymentInstructions} onChange={handlePaymentInput} className={textareaClassName} placeholder="Contoh: Transfer sesuai nominal, cantumkan nama pendaftar di berita transfer." />
+            </Field>
+
+            <div className="grid md:grid-cols-2 gap-5">
+              <Field label="Nomor WhatsApp Konfirmasi">
+                <input name="confirmationWhatsapp" value={paymentForm.confirmationWhatsapp} onChange={handlePaymentInput} className={inputClassName} placeholder="Contoh: 08123456789" />
+              </Field>
+              <Field label="Instruksi Konfirmasi">
+                <textarea name="confirmationInstructions" value={paymentForm.confirmationInstructions} onChange={handlePaymentInput} className={textareaClassName} placeholder="Contoh: Kirim bukti transfer ke WhatsApp admin." />
+              </Field>
+            </div>
+
+            <div className="grid md:grid-cols-[1fr_auto] gap-4 items-end">
+              <Field label="QRIS (URL atau upload gambar)">
+                <input name="qrisImage" value={paymentForm.qrisImage} onChange={handlePaymentInput} className={inputClassName} placeholder="/uploads/qris.png" />
+              </Field>
+              <label className="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 dark:border-slate-700 px-4 py-3 text-sm font-bold text-slate-700 dark:text-slate-200 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-900">
+                <ImagePlus size={16} />
+                {uploadingField === 'payment:qrisImage' ? 'Mengupload...' : 'Upload QRIS'}
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    e.target.value = '';
+                    if (file) uploadImage(file, 'payment:qrisImage');
+                  }}
+                />
+              </label>
+            </div>
+
+            {paymentForm.qrisImage && (
+              <div className="rounded-2xl border border-slate-200 dark:border-slate-800 p-4">
+                <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 mb-3">Preview QRIS</p>
+                <img src={resolveContentImage(paymentForm.qrisImage)} alt="Preview QRIS" className="max-w-[220px] rounded-xl border border-slate-200" />
+                <button
+                  type="button"
+                  onClick={() => setPaymentForm((prev) => ({ ...prev, qrisImage: '' }))}
+                  className="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-red-500"
+                >
+                  <Trash2 size={14} />
+                  Hapus QRIS
+                </button>
+              </div>
+            )}
+
+            <label className="flex items-center justify-between gap-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/60 px-4 py-4">
+              <div>
+                <p className="text-sm font-bold text-slate-900 dark:text-slate-100">Tampilkan QRIS</p>
+                <p className="text-xs text-slate-500 mt-1">QRIS hanya ditampilkan jika diaktifkan dan gambar tersedia.</p>
+              </div>
+              <input
+                type="checkbox"
+                name="showQris"
+                checked={Boolean(paymentForm.showQris)}
+                onChange={handlePaymentInput}
+                className="h-5 w-5 rounded border-slate-300 text-red-500 focus:ring-red-500"
+              />
+            </label>
+
+            <button
+              type="submit"
+              disabled={isSavingPayment}
+              className="inline-flex items-center gap-2 rounded-2xl bg-red-500 px-5 py-3 text-sm font-bold text-white shadow-lg shadow-red-500/25 disabled:opacity-60"
+            >
+              {isSavingPayment ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
+              Simpan Perubahan
+            </button>
+          </form>
         ) : activeTab === 'settings' ? (
           <form onSubmit={saveSettings} className="rounded-[32px] border border-slate-200 dark:border-slate-800 bg-white/90 dark:bg-slate-950/70 p-6 md:p-8 space-y-6">
             <div>

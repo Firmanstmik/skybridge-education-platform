@@ -42,6 +42,89 @@ const asBoolean = (value, fallback = false) => {
     return Boolean(value);
 };
 
+const DEFAULT_PAYMENT_SETTINGS = {
+    enabled: false,
+    title: '',
+    description: '',
+    registrationFee: '',
+    bankName: '',
+    accountNumber: '',
+    accountHolder: '',
+    paymentInstructions: '',
+    confirmationWhatsapp: '',
+    confirmationInstructions: '',
+    qrisImage: '',
+    showQris: false,
+};
+
+const normalizePaymentSettings = (payload = {}, existing = {}) => ({
+    enabled: asBoolean(payload.enabled, existing.enabled ?? DEFAULT_PAYMENT_SETTINGS.enabled),
+    title: asText(payload.title, existing.title || ''),
+    description: asText(payload.description, existing.description || ''),
+    registrationFee: asText(payload.registrationFee, existing.registrationFee || ''),
+    bankName: asText(payload.bankName, existing.bankName || ''),
+    accountNumber: payload.accountNumber !== undefined && payload.accountNumber !== null
+        ? String(payload.accountNumber).trim()
+        : asText(existing.accountNumber, ''),
+    accountHolder: asText(payload.accountHolder, existing.accountHolder || ''),
+    paymentInstructions: asText(payload.paymentInstructions, existing.paymentInstructions || ''),
+    confirmationWhatsapp: asText(payload.confirmationWhatsapp, existing.confirmationWhatsapp || ''),
+    confirmationInstructions: asText(payload.confirmationInstructions, existing.confirmationInstructions || ''),
+    qrisImage: asText(payload.qrisImage, existing.qrisImage || ''),
+    showQris: asBoolean(payload.showQris, existing.showQris ?? DEFAULT_PAYMENT_SETTINGS.showQris),
+});
+
+const isValidWhatsappNumber = (value) => {
+    const digits = asText(value).replace(/\D/g, '');
+    return digits.length >= 9 && digits.length <= 15;
+};
+
+const validatePaymentSettings = (payment) => {
+    if (!payment.enabled) return null;
+
+    const hasTransferDetails = Boolean(payment.bankName || payment.accountNumber);
+    if (hasTransferDetails) {
+        if (!payment.accountHolder) {
+            return 'Nama pemilik rekening wajib diisi jika informasi transfer diaktifkan.';
+        }
+        if (payment.accountNumber && !payment.bankName) {
+            return 'Nama bank wajib diisi jika nomor rekening diisi.';
+        }
+    }
+
+    if (payment.confirmationWhatsapp && !isValidWhatsappNumber(payment.confirmationWhatsapp)) {
+        return 'Format nomor WhatsApp konfirmasi tidak valid.';
+    }
+
+    if (payment.showQris && !payment.qrisImage) {
+        return 'Upload gambar QRIS terlebih dahulu atau nonaktifkan tampilan QRIS.';
+    }
+
+    return null;
+};
+
+const getPublicPaymentSettings = (payment = {}) => {
+    const normalized = normalizePaymentSettings(payment);
+    if (!normalized.enabled) {
+        return { enabled: false };
+    }
+
+    return {
+        enabled: true,
+        title: normalized.title,
+        description: normalized.description,
+        registrationFee: normalized.registrationFee,
+        bankName: normalized.bankName,
+        accountNumber: normalized.accountNumber,
+        accountHolder: normalized.accountHolder,
+        paymentInstructions: normalized.paymentInstructions,
+        confirmationWhatsapp: normalized.confirmationWhatsapp,
+        confirmationInstructions: normalized.confirmationInstructions,
+        qrisImage: normalized.showQris ? normalized.qrisImage : '',
+        showQris: normalized.showQris,
+    };
+};
+
 const asStringArray = (value) => {
     if (!Array.isArray(value)) return [];
     return value
@@ -170,8 +253,14 @@ exports.getPublicSettings = async (_req, res) => {
     const envLink = asText(process.env.WA_GROUP_LINK);
     const fileLink = asText(store.settings?.waGroupLink);
     res.json({
-        waGroupLink: envLink || fileLink
+        waGroupLink: envLink || fileLink,
+        payment: getPublicPaymentSettings(store.settings?.payment),
     });
+};
+
+exports.getPublicPaymentSettings = async (_req, res) => {
+    const store = readContentStore();
+    res.json(getPublicPaymentSettings(store.settings?.payment));
 };
 
 exports.getAdminContent = async (_req, res) => {
@@ -187,10 +276,28 @@ exports.updateSettings = async (req, res) => {
     const store = readContentStore();
     store.settings = {
         ...(store.settings || {}),
-        waGroupLink: asText(req.body.waGroupLink, store.settings?.waGroupLink || '')
+        waGroupLink: asText(req.body.waGroupLink, store.settings?.waGroupLink || ''),
     };
     writeContentStore(store);
     res.json(store.settings);
+};
+
+exports.updatePaymentSettings = async (req, res) => {
+    const store = readContentStore();
+    const existing = store.settings?.payment || DEFAULT_PAYMENT_SETTINGS;
+    const nextPayment = normalizePaymentSettings(req.body || {}, existing);
+    const validationError = validatePaymentSettings(nextPayment);
+
+    if (validationError) {
+        return res.status(400).json({ message: validationError });
+    }
+
+    store.settings = {
+        ...(store.settings || {}),
+        payment: nextPayment,
+    };
+    writeContentStore(store);
+    res.json(nextPayment);
 };
 
 exports.updatePageContent = async (req, res) => {

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import axios from 'axios';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAlert } from '../context/AlertContext';
+import { setAuthSession } from '../utils/adminAuth';
 import { Shield, LockKeyhole } from 'lucide-react';
 
 const AdminLogin = () => {
@@ -46,7 +47,7 @@ const AdminLogin = () => {
         return;
       }
 
-      localStorage.setItem('token', data.token);
+      setAuthSession(data.token);
       
       // Redirect based on role
       if (role === 'STAFF') {

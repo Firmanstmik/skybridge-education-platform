@@ -17,6 +17,8 @@ import RegistrationDeviceHistory from '../components/RegistrationDeviceHistory';
 import RegistrationRestorePanel from '../components/RegistrationRestorePanel';
 import { COURSE_PACKAGES, getPackageById } from '../constants/coursePackages';
 import { Link } from 'react-router-dom';
+import PaymentInfoBlock from '../components/PaymentInfoBlock';
+import { usePaymentSettings } from '../hooks/usePaymentSettings';
 import {
   buildHistoryEntry,
   getLatestRegistration,
@@ -102,6 +104,7 @@ const ErrMsg = ({ msg }) =>
 const RegisterPage = () => {
   const [step, setStep] = useState(1);
   const { showAlert } = useAlert();
+  const { payment, loading: paymentLoading } = usePaymentSettings();
   const { register, control, watch, trigger, getValues, setError, clearErrors, reset, setValue, formState: { errors } } = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -1822,6 +1825,13 @@ const RegisterPage = () => {
                                 <p style={{ fontSize: 11, color: '#047857', marginTop: 6, marginBottom: 0, lineHeight: 1.5 }}>
                                   Silakan upload bukti pembayaran biaya pendidikan sesuai paket yang Anda pilih. Setelah admin mengonfirmasi lunas, buka halaman Cek Status untuk gabung Grup WA dan masuk halaman kelas.
                                 </p>
+                              </div>
+                              <div style={{ marginTop: 12 }}>
+                                <PaymentInfoBlock
+                                  payment={payment}
+                                  loading={paymentLoading}
+                                  whatsappMessage={`Konfirmasi pembayaran SKYBRIDGE - No. Pendaftaran: ${registrationNumber}`}
+                                />
                               </div>
                               <div style={{ marginTop: 10, display: 'flex', gap: 10, flexWrap: 'wrap' }}>
                                 <button
